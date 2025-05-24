@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import sys
 import time
-import math
 import gc
 import argparse
 import logging
@@ -13,8 +12,8 @@ import sympy as sp
 import optuna
 import tqdm
 
-from kharkan.modelKAN import KharKAN, _clean_expr
-from kharkan.NMR import get_frequenves
+from src.kharkan.modelKAN import KharKAN, _clean_expr
+from src.kharkan.NMR import get_frequenves
 
 # --- Set up logging -----------------------------------------------
 logging.basicConfig(
@@ -121,12 +120,16 @@ def evaluate_architecture(
 
     bad_any = any(exprs[k] is None for k in ['z_0','z_1','z_2'])
     if bad_any:
-        model.cpu(); del model
-        gc.collect(); torch.cuda.empty_cache()
+        model.cpu()
+        del model
+        gc.collect()
+        torch.cuda.empty_cache()
         return float('inf'), float('inf'), None, None, None
 
-    model.cpu(); del model, optimizer, criterion, preds, inputs, labels
-    gc.collect(); torch.cuda.empty_cache()
+    model.cpu()
+    del model, optimizer, criterion, preds, inputs, labels
+    gc.collect()
+    torch.cuda.empty_cache()
 
     total_duration = time.time() - t_start
     logger.info(f"Total evaluate_architecture duration: {total_duration:.2f}s")
@@ -217,7 +220,8 @@ def main():
         trial.set_user_attr('expr0', e0)
         trial.set_user_attr('expr1', e1)
         trial.set_user_attr('expr2', e2)
-        gc.collect(); torch.cuda.empty_cache()
+        gc.collect()
+        torch.cuda.empty_cache()
         return mse, comp
 
     try:

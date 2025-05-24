@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import seaborn as sns
-from datagen.data_generator import ham_reduced_symmetric, compute_transition_frequency, ham_reduced_antisymmetric, HMatrixIdealized
+from src.datagen.data_generator import ham_reduced_symmetric, compute_transition_frequency, ham_reduced_antisymmetric, HMatrixIdealized
 from scipy.linalg import eigh
 
 def get_ham_simple(Jintra, deltaJ):
