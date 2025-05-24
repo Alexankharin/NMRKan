@@ -3,18 +3,26 @@ import torch.nn as nn
 import sympy as sp
 import numpy as np
 from typing import List, Optional, Callable, Dict
-
+import math
 Tensor = torch.Tensor
 
 
 def _clean_expr(expr: sp.Expr, eps: float = 1e-3) -> sp.Expr:
     """
-    Replace numerical atoms in the expression that are smaller than eps with zero.
+    Zero-out any numeric atom whose absolute value < eps,
+    and skip NaNs to avoid invalid Sympy comparisons.
     """
-    def replacer(val):
-        return val if abs(val) >= eps else 0
-
-    nums = {n: replacer(n) for n in expr.atoms(sp.Number)}
+    nums = {}
+    for n in expr.atoms(sp.Number):
+        try:
+            val = float(n)
+        except (TypeError, ValueError):
+            # not a plain float-convertible number → leave it alone
+            continue
+        if math.isnan(val):
+            # skip NaNs
+            continue
+        nums[n] = val if abs(val) >= eps else 0
     return expr.xreplace(nums)
 
 
@@ -31,6 +39,8 @@ def _fix_powers(expr: sp.Expr) -> sp.Expr:
     Convert float exponents that are integer values (e.g., 2.0) into actual integer exponents.
     """
     # Replace Pow(base, Float) where the float is integral
+    if not isinstance(expr, sp.Expr):
+        return expr
     return expr.replace(
         lambda e: isinstance(e, sp.Pow) and isinstance(e.exp, sp.Float) and float(e.exp).is_integer(),
         lambda e: sp.Pow(e.base, int(e.exp))
