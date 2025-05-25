@@ -94,7 +94,7 @@ class DenseKanLayer(nn.Module):
         return self.linear(v)
 
     def L1_reg(self) -> Tensor:
-        return torch.sum(torch.abs(self.act_logits))
+        return torch.sum(torch.softmax(self.act_logits, dim=1) ** 0.5)
 
     def anneal(self, rate: float = 0.1) -> None:
         with torch.no_grad():
@@ -169,6 +169,7 @@ class KharKAN(nn.Module):
         return x
 
     def L1_loss(self) -> Tensor:
+        # Replaced with L05_loss for clarity
         return sum(layer.L1_reg() for layer in self.layers)
 
     def anneal(self, rate: float = 0.1) -> None:

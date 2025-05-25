@@ -1,6 +1,5 @@
 import torch
 import sympy as sp
-import numpy as np
 from typing import List, Dict, Optional, Callable, Tuple
 
 Tensor = torch.Tensor
@@ -83,7 +82,10 @@ class DenseKanLayer(torch.nn.Module):
 
         return self.regression_layer(activated).squeeze(-1)
 
-    def L1_reg(self) -> Tensor:
+    def L05_reg(self) -> Tensor:
+        """
+        Compute the L0.5 regularization term (sum of absolute values of weights) for this layer.
+        """
         return torch.sum(self.regression_layer.weight.abs())
 
     def simplify(self, threshold: float = 1e-2) -> None:
@@ -214,8 +216,11 @@ class KharKAN(torch.nn.Module):
     def symbolic_formula_latex(self, **kwargs) -> Dict[str, str]:
         return {k: sp.latex(v) for k, v in self.symbolic_formula(**kwargs).items()}
 
-    def L1_loss(self) -> Tensor:
-        return sum(layer.L1_reg() for layer in self.layers)
+    def L05_loss(self) -> Tensor:
+        """
+        Compute the total L0.5 regularization loss for the network (sum over all layers).
+        """
+        return sum(layer.L05_reg() for layer in self.layers)
 
     def anneal(self, anneal_rate: float = 1e-1) -> None:
         for layer in self.layers:

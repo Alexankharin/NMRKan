@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import sys
 import time
 import gc
 import argparse
@@ -25,6 +24,10 @@ logger = logging.getLogger(__name__)
 
 # --- Symbolic utilities ---------------------------------------------
 def fix_powers(expr: sp.Expr) -> sp.Expr:
+    """
+    Convert float exponents that are integer values (e.g., 2.0) into actual integer exponents.
+    This helps to clean up symbolic expressions for better readability.
+    """
     if not isinstance(expr, sp.Expr):
         return expr
     return expr.replace(
@@ -33,14 +36,25 @@ def fix_powers(expr: sp.Expr) -> sp.Expr:
     )
 
 def round_expr(expr: sp.Expr, digits: int = 5) -> sp.Expr:
+    """
+    Round all numerical atoms in the expression to the specified number of digits.
+    """
     nums = {n: round(float(n), digits) for n in expr.atoms(sp.Number)}
     return expr.xreplace(nums)
 
 # --- Data & target -------------------------------------------------
 def f2(x: np.ndarray) -> np.ndarray:
+    """
+    Compute simulated NMR frequencies for a given input array x.
+    """
     return np.array(get_frequenves(x[:, 0], x[:, 1]))
 
 def make_dataset(num_samples: int):
+    """
+    Generate a dataset for training the symbolic regressor.
+    The dataset consists of random samples with constraints to avoid extreme values.
+    Returns a dict with 'train_input' and 'train_label' as torch tensors.
+    """
     xsez = -np.abs(np.random.randn(num_samples))
     ysez = -np.abs(np.random.randn(num_samples) / 10)
     ratioX = xsez / ysez
@@ -67,9 +81,13 @@ def evaluate_architecture(
     epochs: int,
     lr: float,
     device: str,
-    lambda_l1: float,
-    clip_norm: float
+    lambda_l05: float,
+    clip_norm: float,
 ):
+    """
+    Train a KharKAN model with the given architecture and hyperparameters.
+    Returns final MSE, total symbolic complexity, and symbolic expressions for each output.
+    """
     logger.info(f"Evaluating shape={shape}, epochs={epochs}, lr={lr}")
     t_start = time.time()
 
@@ -79,25 +97,25 @@ def evaluate_architecture(
     inputs = data['train_input'].to(device)
     labels = data['train_label'].to(device)
 
-    # training loop
+    # Training loop
     loop_start = time.time()
     for _ in tqdm.tqdm(range(epochs), desc="Epochs"):
         optimizer.zero_grad()
         preds = model(inputs)
         mse = criterion(preds, labels)
-        l1_penalty = model.L1_loss()
-        loss = mse + lambda_l1 * l1_penalty
+        l05_penalty = model.L05_loss()  # L0.5 regularization
+        loss = mse + lambda_l05 * l05_penalty
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=clip_norm)
         optimizer.step()
     loop_duration = time.time() - loop_start
     logger.info(f"Training loop duration: {loop_duration:.2f}s")
 
-    # final MSE
+    # Compute final MSE
     with torch.no_grad():
         final_mse = criterion(model(inputs), labels).item()
 
-    # symbolic extraction
+    # Symbolic extraction
     sym_start = time.time()
     formulas = model.symbolic_formula(clean=True, round_digits=5)
     sym_duration = time.time() - sym_start
@@ -110,6 +128,7 @@ def evaluate_architecture(
         raw = formulas.get(key, None)
         expr_key = None
         if raw is not None and isinstance(raw, sp.Expr):
+            # Substitute ratio features for interpretability
             e = raw.subs({x2: x0/x1, x3: x1/x0}).expand()
             e = fix_powers(e)
             e = round_expr(e, 3)
@@ -118,6 +137,7 @@ def evaluate_architecture(
             complexities[key] = sp.count_ops(e)
         exprs[key] = expr_key
 
+    # If any output is missing, return inf to penalize this architecture
     bad_any = any(exprs[k] is None for k in ['z_0','z_1','z_2'])
     if bad_any:
         model.cpu()
@@ -144,6 +164,10 @@ def evaluate_architecture(
 
 # --- Main & CLI ----------------------------------------------------
 def main():
+    """
+    Main entrypoint for running symbolic regression architecture search.
+    Uses Optuna for hyperparameter optimization.
+    """
     parser = argparse.ArgumentParser(
         description="Search KharKAN architectures with Optuna"
     )
@@ -160,8 +184,10 @@ def main():
         help="Learning rate"
     )
     parser.add_argument(
-        "--lambda-l1", type=float, default=1e-3,
-        help="L1 regularization weight"
+        "--lambda-l05",
+        type=float,
+        default=1e-3,
+        help="L0.5 regularization weight (sum of absolute values of weights)",
     )
     parser.add_argument(
         "--clip-norm", type=float, default=1.0,
@@ -188,14 +214,20 @@ def main():
     device = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
     logger.info(f"Using device: {device}")
 
+    # Generate training data
     dataset = make_dataset(args.num_samples)
 
+    # Set up Optuna study for multi-objective optimization
     study = optuna.create_study(
         directions=['minimize','minimize'],
         study_name=args.study_name
     )
 
     def objective_wrapper(trial):
+        """
+        Objective function for Optuna trial. Samples architecture and trains model.
+        Returns MSE and symbolic complexity.
+        """
         trial_start = time.time()
         nl = trial.suggest_int('num_layers', 1, 2)
         units = [
@@ -206,11 +238,13 @@ def main():
         logger.info(f"Trial {trial.number}: layers={nl}, units={units}")
 
         mse, comp, e0, e1, e2 = evaluate_architecture(
-            shape, dataset,
-            epochs=args.epochs, lr=args.lr,
+            shape,
+            dataset,
+            epochs=args.epochs,
+            lr=args.lr,
             device=device,
-            lambda_l1=args.lambda_l1,
-            clip_norm=args.clip_norm
+            lambda_l05=args.lambda_l05,
+            clip_norm=args.clip_norm,
         )
         dur = time.time() - trial_start
         logger.info(f"Trial {trial.number} duration: {dur:.2f}s")
@@ -229,6 +263,7 @@ def main():
     except KeyboardInterrupt:
         logger.warning("Optimization interrupted with Ctrl+C — saving partial results...")
 
+    # Collect and save best results
     records = []
     for t in study.best_trials:
         records.append({
