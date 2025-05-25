@@ -202,8 +202,10 @@ def main():
         help="Optuna study name"
     )
     parser.add_argument(
-        "--output-prefix", type=str, default="pareto_trials",
-        help="Prefix for saved CSV/pickle"
+        "--output-prefix",
+        type=str,
+        default="outputs/pareto_trials",
+        help="Prefix for saved CSV/pickle",
     )
     parser.add_argument(
         "--device", choices=["cpu", "cuda"], default=None,
