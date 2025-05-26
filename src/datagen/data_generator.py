@@ -69,6 +69,53 @@ def HMatrixIdealized(Jintra, deltaJ):
         dJAX=0.0
     )
 
+def CalcFreqsIdealized(Jintra, DeltaJ):
+    """
+    Calculate characteristic frequencies from the Hamiltonian matrix
+    constructed using Jintra and DeltaJ.
+
+    Parameters:
+    Jintra (float): Intra-coupling constant.
+    DeltaJ (float): Coupling asymmetry or perturbation.
+
+    Returns:
+    list: Frequencies [f1, f2, f3] computed from energy differences.
+    """
+
+    # Replace this with the actual function to get your 4x4 matrix
+    TM = HMatrixIdealized(Jintra, DeltaJ)
+
+    # Compute eigenvalues and eigenvectors
+    evals, evecs = np.linalg.eigh(TM)
+
+    # Define reference states
+    state1 = 0.5 * np.array([1, np.sqrt(2), 1, 0])
+    state2 = 0.5 * np.array([np.sqrt(2), 0, -np.sqrt(2), 0])
+    state3 = 0.5 * np.array([1, -np.sqrt(2), 1, 0])
+
+    # Compute scalar products with each eigenvector
+    SP1 = np.array([np.dot(state1, evecs[:, i]) for i in range(4)])
+    SP2 = np.array([np.dot(state2, evecs[:, i]) for i in range(4)])
+    SP3 = np.array([np.dot(state3, evecs[:, i]) for i in range(4)])
+
+    # Find indices of maximum overlap
+    N1 = np.argmax(np.abs(SP1))
+    N2 = np.argmax(np.abs(SP2))
+    N3 = np.argmax(np.abs(SP3))
+
+    # Get corresponding energies
+    En1 = evals[N1]
+    En2 = evals[N2]
+    En3 = evals[N3]
+
+    # Compute frequencies
+    f1 = abs(En2 - En3)
+    f2 = abs(En1 - En2)
+    f3 = abs(En1 - En3)
+
+    freqlist = [f1, f2, f3]
+
+    return freqlist
 
 def compute_transition_frequency(eigvals: np.ndarray) -> float:
     """
@@ -88,47 +135,3 @@ def compute_transition_frequency(eigvals: np.ndarray) -> float:
     # ignore any zero gaps (degeneracies) and take the first positive
     freqs = diffs[diffs > 1e-8]
     return freqs[0] if len(freqs) else 0.0
-
-# ———————— user-specified constants ————————
-JAA       = 14.0
-dJAM      =   6.06
-dJMX      =   6.06
-dJAX      =   0.0
-
-# ranges for the “swept” parameters
-dJMM_min, dJMM_max, ddJMM = -0.1, +0.1, 0.005
-dJXX_min, dJXX_max, ddJXX = -0.1, +0.1, 0.005
-
-dJMM_vals = np.arange(dJMM_min, dJMM_max + ddJMM/2, ddJMM)
-dJXX_vals = np.arange(dJXX_min, dJXX_max + ddJXX/2, ddJXX)
-
-# preallocate lists
-records: List[Dict[str, Any]] = []
-
-for dJMM in dJMM_vals:
-    for dJXX in dJXX_vals:
-        # build Hamiltonians
-        H_sym  = ham_reduced_symmetric(JAA, dJMM, dJXX, dJAM, dJMX, dJAX)
-        H_anti = ham_reduced_antisymmetric(JAA, dJMM, dJXX, dJAM, dJMX, dJAX)
-
-        # eigenvalues
-        w_sym, _  = eigh(H_sym)
-        w_anti, _ = eigh(H_anti)
-
-        # extract the first nonzero transition frequency
-        f_sym  = compute_transition_frequency(w_sym)
-        f_anti = compute_transition_frequency(w_anti)
-
-        # store one row
-        records.append({
-            "dJMM":      dJMM,
-            "dJXX":      dJXX,
-            "FreqSym":   f_sym,
-            "FreqAnti":  f_anti
-        })
-
-# build a DataFrame and write out
-df = pd.DataFrame.from_records(records)
-df.to_csv("KAN_dataset_reduced.csv", index=False)
-
-print(f"Saved {len(df)} samples to KAN_dataset_reduced.csv")

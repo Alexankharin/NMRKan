@@ -12,7 +12,7 @@ import optuna
 import tqdm
 
 from src.kharkan.modelKAN import KharKAN, _clean_expr
-from src.kharkan.NMR import get_frequenves
+from src.kharkan.NMR import get_frequences, get_frequences_ordered
 
 # --- Set up logging -----------------------------------------------
 logging.basicConfig(
@@ -47,7 +47,7 @@ def f2(x: np.ndarray) -> np.ndarray:
     """
     Compute simulated NMR frequencies for a given input array x.
     """
-    return np.array(get_frequenves(x[:, 0], x[:, 1]))
+    return np.array(get_frequences_ordered(x[:, 0], x[:, 1]))
 
 def make_dataset(num_samples: int):
     """
@@ -55,15 +55,17 @@ def make_dataset(num_samples: int):
     The dataset consists of random samples with constraints to avoid extreme values.
     Returns a dict with 'train_input' and 'train_label' as torch tensors.
     """
-    xsez = -np.abs(np.random.randn(num_samples))
-    ysez = -np.abs(np.random.randn(num_samples) / 10)
+    # xsez from -32 to -5
+    # ysez from -15 to -0.1
+    xsez = -np.abs(np.random.rand(num_samples) * 27 + 5)  # from -32 to -5
+    ysez = -np.abs(np.random.rand(num_samples) * 14.9 + 0.1)  # from -15 to -0.1
     ratioX = xsez / ysez
     ratioY = ysez / xsez
     mask = (
-        (np.abs(ratioX) < 10) &
-        (np.abs(ratioY) < 10) &
-        (np.abs(xsez) < 10) &
-        (np.abs(ysez) < 10)
+        (np.abs(ratioX) < 30)
+        & (np.abs(ratioY) < 30)
+        & (np.abs(xsez) < 30)
+        & (np.abs(ysez) < 30)
     )
     xsez, ysez, ratioX, ratioY = xsez[mask], ysez[mask], ratioX[mask], ratioY[mask]
     answers = f2(np.stack([xsez, ysez], axis=1))
@@ -131,7 +133,7 @@ def evaluate_architecture(
             # Substitute ratio features for interpretability
             e = raw.subs({x2: x0/x1, x3: x1/x0}).expand()
             e = fix_powers(e)
-            e = round_expr(e, 3)
+            e = round_expr(e, 5)
             e = _clean_expr(e, eps=1e-3)
             expr_key = e
             complexities[key] = sp.count_ops(e)
@@ -194,8 +196,7 @@ def main():
         help="Gradient clipping norm"
     )
     parser.add_argument(
-        "--n-trials", type=int, default=50,
-        help="Number of Optuna trials"
+        "--n-trials", type=int, default=10, help="Number of Optuna trials"
     )
     parser.add_argument(
         "--study-name", type=str, default="kan_multiobj_per_layer",
