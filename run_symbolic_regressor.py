@@ -54,21 +54,40 @@ def make_dataset(num_samples: int):
     Generate a dataset for training the symbolic regressor.
     The dataset consists of random samples with constraints to avoid extreme values.
     Returns a dict with 'train_input' and 'train_label' as torch tensors.
+    Ensures that the final dataset contains at least num_samples after masking.
     """
-    # xsez from -32 to -5
-    # ysez from -15 to -0.1
-    xsez = -np.abs(np.random.rand(num_samples) * 27 + 5)  # from -32 to -5
-    ysez = -np.abs(np.random.rand(num_samples) * 14.9 + 0.1)  # from -15 to -0.1
-    ratioX = xsez / ysez
-    ratioY = ysez / xsez
-    mask = (
-        (np.abs(ratioX) < 30)
-        & (np.abs(ratioY) < 30)
-        & (np.abs(xsez) < 30)
-        & (np.abs(ysez) < 30)
-    )
-    xsez, ysez, ratioX, ratioY = xsez[mask], ysez[mask], ratioX[mask], ratioY[mask]
+    samples_collected = 0
+    xsez_list, ysez_list, ratioX_list, ratioY_list = [], [], [], []
+    while samples_collected < num_samples:
+        # Generate more than needed to increase chance of enough after masking
+        batch_size = int((num_samples - samples_collected) * 1.5) + 10
+        xsez = -np.abs(np.random.rand(batch_size) * 27 + 5)  # from -32 to -5
+        ysez = -np.abs(np.random.rand(batch_size) * 14.9 + 0.1)  # from -15 to -0.1
+        ratioX = xsez / ysez
+        ratioY = ysez / xsez
+        TH = 10
+        mask = (
+            (np.abs(ratioX) < TH)
+            & (np.abs(ratioY) < TH)
+            & (np.abs(xsez) < TH)
+            & (np.abs(ysez) < TH)
+        )
+        xsez, ysez, ratioX, ratioY = xsez[mask], ysez[mask], ratioX[mask], ratioY[mask]
+        xsez_list.append(xsez)
+        ysez_list.append(ysez)
+        ratioX_list.append(ratioX)
+        ratioY_list.append(ratioY)
+        samples_collected += len(xsez)
+    # Concatenate and trim to exactly num_samples
+    xsez = np.concatenate(xsez_list)[:num_samples]
+    ysez = np.concatenate(ysez_list)[:num_samples]
+    ratioX = np.concatenate(ratioX_list)[:num_samples]
+    ratioY = np.concatenate(ratioY_list)[:num_samples]
     answers = f2(np.stack([xsez, ysez], axis=1))
+    logger.info(f"Generated {len(xsez)} samples with shape {xsez.shape}")
+    logger.info(
+        f"Labels stats: min={answers.min()}, max={answers.max()}, mean={answers.mean()}"
+    )
     return {
         'train_input': torch.tensor(
             np.stack([xsez, ysez, ratioX, ratioY], axis=1)
@@ -101,15 +120,30 @@ def evaluate_architecture(
 
     # Training loop
     loop_start = time.time()
-    for _ in tqdm.tqdm(range(epochs), desc="Epochs"):
+    pbar = tqdm.tqdm(range(epochs), desc="Epochs")
+    for i in pbar:
         optimizer.zero_grad()
         preds = model(inputs)
+        # do relative error instead of MSE
         mse = criterion(preds, labels)
         l05_penalty = model.L05_loss()  # L0.5 regularization
         loss = mse + lambda_l05 * l05_penalty
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=clip_norm)
         optimizer.step()
+        if i % 100 == 0 or i == epochs - 1:
+            pbar.set_postfix(
+                {
+                    "mse": mse.item(),
+                    "l05": (lambda_l05 * l05_penalty).item(),
+                    "loss": loss.item(),
+                    "rel_err": (
+                        torch.mean(
+                            torch.abs(preds - labels) / torch.abs(labels + 1e-8)
+                        ).item()
+                    ),
+                }
+            )
     loop_duration = time.time() - loop_start
     logger.info(f"Training loop duration: {loop_duration:.2f}s")
 
@@ -134,21 +168,20 @@ def evaluate_architecture(
             e = raw.subs({x2: x0/x1, x3: x1/x0}).expand()
             e = fix_powers(e)
             e = round_expr(e, 5)
-            e = _clean_expr(e, eps=1e-3)
+            e = _clean_expr(e, eps=1e-5)
             expr_key = e
             complexities[key] = sp.count_ops(e)
         exprs[key] = expr_key
-
     # If any output is missing, return inf to penalize this architecture
     bad_any = any(exprs[k] is None for k in ['z_0','z_1','z_2'])
     if bad_any:
-        model.cpu()
+        # model.cpu()
         del model
         gc.collect()
         torch.cuda.empty_cache()
         return float('inf'), float('inf'), None, None, None
 
-    model.cpu()
+    # model.cpu()
     del model, optimizer, criterion, preds, inputs, labels
     gc.collect()
     torch.cuda.empty_cache()
@@ -181,10 +214,7 @@ def main():
         "--epochs", type=int, default=100000,
         help="Training epochs per trial"
     )
-    parser.add_argument(
-        "--lr", type=float, default=1e-3,
-        help="Learning rate"
-    )
+    parser.add_argument("--lr", type=float, default=1e-5, help="Learning rate")
     parser.add_argument(
         "--lambda-l05",
         type=float,
