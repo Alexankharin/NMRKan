@@ -5,7 +5,9 @@ __pycache__/
 datagen/__pycache__/
 # C extensions
 *.so
-
+outputs/*
+outputs_second/*
+outputs_first/*
 # Distribution / packaging
 .Python
 build/
