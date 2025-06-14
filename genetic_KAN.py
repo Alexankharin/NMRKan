@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import trange
 
-from src.kharkan.modelKAN import KharKAN
+from nmrkan.models import KharKAN
 
 
 def make_dataset_from_function(
@@ -306,7 +306,7 @@ class GAWeightPerturbation:
 if __name__ == "__main__":
     # === Example usage ===
     import numpy as np
-    from src.kharkan.NMR import get_frequences_ordered
+    from nmrkan.nmr import get_frequences_ordered
 
     def get_perturbation(x, y):
         """Synthetic function: returns three outputs based on x,y."""

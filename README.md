@@ -6,11 +6,13 @@ This repository simulates NMR frequencies by solving eigenvalues of specific mat
 This project provides a framework for generating synthetic NMR (Nuclear Magnetic Resonance) frequency data, training neural-symbolic models to fit the data, and extracting interpretable symbolic formulas. The ultimate goal is to recover or approximate perturbation theory results from simulated data using symbolic regression.
 
 ## Structure
-- `src/` - All source code modules (moved from `kharkan/`, `datagen/`, etc.)
+- `nmrkan/` - Core library with models and physics helpers
 - `data/` - All datasets and raw data files
 - `notebooks/` - Jupyter/VSCode notebooks for experiments and analysis
 - `outputs/` - Figures and result outputs
 - `run_symbolic_regressor.py` - Main entrypoint for running symbolic regression
+- `run_grid_search.py` - Simple grid search experiment
+- `genetic_KAN.py` - Evolutionary weight perturbation demo
 - `requirements.txt` - List of required Python packages
 
 ## Requirements
@@ -23,7 +25,7 @@ This project provides a framework for generating synthetic NMR (Nuclear Magnetic
   - optuna
   - tqdm
   - matplotlib
-  - seaborn
+  - scipy
 
 Install all dependencies with:
 ```bash
@@ -32,11 +34,17 @@ pip install -r requirements.txt
 
 ## Usage
 1. Install dependencies as above.
-2. Run the main script:
+2. Run the symbolic regressor:
    ```bash
    python run_symbolic_regressor.py
    ```
-   This will generate synthetic data, train the model, and perform symbolic regression. Results are saved as CSV and pickle files in the project directory.
+   This generates synthetic data, trains the model, and extracts symbolic expressions. Results are saved as CSV and pickle files in the project directory.
+3. Optionally try the grid search or GA demo:
+   ```bash
+   python run_grid_search.py
+   python genetic_KAN.py
+   ```
+4. Explore and visualize results using the notebooks in the `notebooks/` directory.
 3. Explore and visualize results using the notebooks in the `notebooks/` directory.
 
 ## Data
