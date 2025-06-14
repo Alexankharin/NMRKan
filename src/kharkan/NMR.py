@@ -1,1 +1,0 @@
-from nmrkan.nmr import *

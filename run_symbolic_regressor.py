@@ -7,6 +7,7 @@ import logging
 import numpy as np
 import pandas as pd
 import torch
+from torch.utils.data import DataLoader, TensorDataset
 import sympy as sp
 import optuna
 import tqdm
@@ -104,6 +105,8 @@ def evaluate_architecture(
     device: str,
     lambda_l05: float,
     clip_norm: float,
+    batch_size: int = 512,
+    early_stop: float = 1e-3,
 ):
     """
     Train a KharKAN model with the given architecture and hyperparameters.
@@ -113,37 +116,45 @@ def evaluate_architecture(
     t_start = time.time()
 
     model = KharKAN(shape).to(device)
+    if hasattr(torch, "compile"):
+        model = torch.compile(model)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = torch.nn.MSELoss()
     inputs = data['train_input'].to(device)
     labels = data['train_label'].to(device)
+    dataset = TensorDataset(inputs, labels)
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     # Training loop
     loop_start = time.time()
     pbar = tqdm.tqdm(range(epochs), desc="Epochs")
     for i in pbar:
-        optimizer.zero_grad()
-        preds = model(inputs)
-        # do relative error instead of MSE
-        mse = criterion(preds, labels)
-        l05_penalty = model.L05_loss()  # L0.5 regularization
-        loss = mse + lambda_l05 * l05_penalty
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=clip_norm)
-        optimizer.step()
+        for xb, yb in loader:
+            optimizer.zero_grad()
+            preds = model(xb)
+            mse = criterion(preds, yb)
+            l05_penalty = model.L05_loss()
+            loss = mse + lambda_l05 * l05_penalty
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=clip_norm)
+            optimizer.step()
+        with torch.no_grad():
+            full_preds = model(inputs)
+            rel_err = torch.mean(
+                torch.abs(full_preds - labels) / torch.abs(labels + 1e-8)
+            )
         if i % 100 == 0 or i == epochs - 1:
             pbar.set_postfix(
                 {
                     "mse": mse.item(),
                     "l05": (lambda_l05 * l05_penalty).item(),
                     "loss": loss.item(),
-                    "rel_err": (
-                        torch.mean(
-                            torch.abs(preds - labels) / torch.abs(labels + 1e-8)
-                        ).item()
-                    ),
+                    "rel_err": rel_err.item(),
                 }
             )
+        if rel_err.item() <= early_stop:
+            pbar.update(epochs - i)
+            break
     loop_duration = time.time() - loop_start
     logger.info(f"Training loop duration: {loop_duration:.2f}s")
 
@@ -242,6 +253,13 @@ def main():
         "--device", choices=["cpu", "cuda"], default=None,
         help="Device to use (auto-detect if unset)"
     )
+    parser.add_argument("--batch-size", type=int, default=512)
+    parser.add_argument(
+        "--early-stop",
+        type=float,
+        default=1e-3,
+        help="Stop training when relative error drops below this value",
+    )
     args = parser.parse_args()
 
     device = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
@@ -278,6 +296,8 @@ def main():
             device=device,
             lambda_l05=args.lambda_l05,
             clip_norm=args.clip_norm,
+            batch_size=args.batch_size,
+            early_stop=args.early_stop,
         )
         dur = time.time() - trial_start
         logger.info(f"Trial {trial.number} duration: {dur:.2f}s")

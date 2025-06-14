@@ -63,54 +63,83 @@ def make_dataset(num_samples: int):
     return inputs, targets
 
 # --- Training -----------------------------------------------
-def train_model(shape, data, epochs, lr, lambda_l05, clip_norm, progress_interval):
+def train_model(
+    shape,
+    data,
+    epochs,
+    lr,
+    lambda_l05,
+    clip_norm,
+    progress_interval,
+    batch_size=512,
+    early_stop=1e-3,
+):
+    """Train ``KharKAN`` model using mini-batches.
+
+    Returns the final model, a history :class:`~pandas.DataFrame`, and the final
+    mean squared error.
     """
-    Train KharKAN model with manual loop, recording per-epoch metrics and a single-line progress bar.
-    Returns final model, history DataFrame, and final MSE.
-    """
+
     model = KharKAN(shape)
-    device = data['inputs'].device
+    if hasattr(torch, "compile"):
+        model = torch.compile(model)
+    device = data["inputs"].device
     model.to(device)
+
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    criterion = torch.nn.MSELoss(reduction='none')
+    criterion = torch.nn.MSELoss(reduction="none")
 
-    inputs = data['inputs']
-    targets = data['targets']
+    dataset = TensorDataset(data["inputs"], data["targets"])
+    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
-    history = {'epoch': [], 'train_loss': [], 'train_mse': [], 'train_l05': [], 'train_rel_err': []}
+    history = {
+        "epoch": [],
+        "train_loss": [],
+        "train_mse": [],
+        "train_l05": [],
+        "train_rel_err": [],
+    }
     pbar = tqdm(total=epochs, desc=f"Training {shape}", ncols=0, leave=True)
 
     for epoch in range(1, epochs + 1):
-        optimizer.zero_grad()
-        preds = model(inputs)
-        mse = (criterion(preds, targets)/targets.abs()).mean()
-        l05 = model.L05_loss()
-        loss = mse + lambda_l05 * l05
-        loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), clip_norm)
-        optimizer.step()
+        for xb, yb in loader:
+            optimizer.zero_grad()
+            preds = model(xb)
+            mse = (criterion(preds, yb) / yb.abs()).mean()
+            l05 = model.L05_loss()
+            loss = mse + lambda_l05 * l05
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), clip_norm)
+            optimizer.step()
 
-        rel_err = torch.mean(torch.abs(preds - targets) / torch.abs(targets + 1e-8))
+        with torch.no_grad():
+            full_preds = model(data["inputs"])
+            rel_err = torch.mean(
+                torch.abs(full_preds - data["targets"]) /
+                torch.abs(data["targets"] + 1e-8)
+            )
+            mse_full = (criterion(full_preds, data["targets"]) / data["targets"].abs()).mean()
 
-        # record metrics every interval
         if epoch % progress_interval == 0 or epoch == epochs:
-            history['epoch'].append(epoch)
-            history['train_loss'].append(loss.item())
-            history['train_mse'].append(mse.item())
-            history['train_l05'].append((lambda_l05 * l05).item())
-            history['train_rel_err'].append(rel_err.item())
+            history["epoch"].append(epoch)
+            history["train_loss"].append(loss.item())
+            history["train_mse"].append(mse_full.item())
+            history["train_l05"].append((lambda_l05 * l05).item())
+            history["train_rel_err"].append(rel_err.item())
             pbar.set_postfix({
-                'epoch': f"{epoch}/{epochs}",
-                'mse': f"{mse.item():.6f}",
-                'rel_err': f"{rel_err.item():.6f}"
+                "epoch": f"{epoch}/{epochs}",
+                "mse": f"{mse_full.item():.6f}",
+                "rel_err": f"{rel_err.item():.6f}",
             })
-            pbar.update(progress_interval)
-        else:
-            pbar.update(1)
+        if rel_err.item() <= early_stop:
+            pbar.update(epochs - epoch + 1)
+            break
+        pbar.update(1)
+
     pbar.close()
 
     df_hist = pd.DataFrame(history)
-    final_mse = df_hist['train_mse'].iloc[-1]
+    final_mse = df_hist["train_mse"].iloc[-1] if len(df_hist) else float("inf")
     return model, df_hist, final_mse
 
 # --- Main & CLI ----------------------------------------------------
@@ -123,6 +152,9 @@ def main():
     parser.add_argument('--clip-norm', type=float, default=1.0)
     parser.add_argument('--device', choices=['cpu', 'cuda'], default=None)
     parser.add_argument('--progress-interval', type=int, default=500)
+    parser.add_argument('--batch-size', type=int, default=512)
+    parser.add_argument('--early-stop', type=float, default=1e-3,
+                        help='Stop training when relative error falls below this value')
     parser.add_argument('--output-prefix', type=str, default='outputs/grid_search')
     args = parser.parse_args()
 
@@ -147,9 +179,15 @@ def main():
             start_time = time.time()
 
             model, df_hist, final_mse = train_model(
-                shape, data, args.epochs, args.lr,
-                args.lambda_l05, args.clip_norm,
-                args.progress_interval
+                shape,
+                data,
+                args.epochs,
+                args.lr,
+                args.lambda_l05,
+                args.clip_norm,
+                args.progress_interval,
+                batch_size=args.batch_size,
+                early_stop=args.early_stop,
             )
             duration = time.time() - start_time
             eps_per_s = args.epochs / duration

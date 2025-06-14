@@ -1,1 +1,0 @@
-from nmrkan.models import *
