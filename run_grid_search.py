@@ -12,8 +12,8 @@ import sympy as sp
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
 
-from src.kharkan.modelKAN import KharKAN, _clean_expr
-from src.kharkan.NMR import get_frequences_ordered
+from nmrkan.models import KharKAN, _clean_expr
+from nmrkan.nmr import get_frequences_ordered
 
 # --- Logging setup -----------------------------------------------
 logging.basicConfig(
