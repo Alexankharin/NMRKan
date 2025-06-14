@@ -358,7 +358,7 @@ if __name__ == "__main__":
     final_model.load_state_dict(best_state)
     optimizer = optim.Adam(final_model.parameters(), lr=1e-4)
     criterion = nn.MSELoss()
-    EPOCHS = 200000
+    EPOCHS = 20000
 
     for epoch in trange(EPOCHS, desc="Full Retrain"):
         optimizer.zero_grad()

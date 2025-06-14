@@ -81,8 +81,8 @@ def train_model(
     """
 
     model = KharKAN(shape)
-    if hasattr(torch, "compile"):
-        model = torch.compile(model)
+    # if hasattr(torch, "compile"):
+    #     model = torch.compile(model)
     device = data["inputs"].device
     model.to(device)
 
@@ -100,25 +100,20 @@ def train_model(
         "train_rel_err": [],
     }
     pbar = tqdm(total=epochs, desc=f"Training {shape}", ncols=0, leave=True)
-
+    xb, yb = data["inputs"], data["targets"]
     for epoch in range(1, epochs + 1):
-        for xb, yb in loader:
-            optimizer.zero_grad()
-            preds = model(xb)
-            mse = (criterion(preds, yb) / yb.abs()).mean()
-            l05 = model.L05_loss()
-            loss = mse + lambda_l05 * l05
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), clip_norm)
-            optimizer.step()
-
-        with torch.no_grad():
-            full_preds = model(data["inputs"])
-            rel_err = torch.mean(
-                torch.abs(full_preds - data["targets"]) /
-                torch.abs(data["targets"] + 1e-8)
-            )
-            mse_full = (criterion(full_preds, data["targets"]) / data["targets"].abs()).mean()
+        # for xb, yb in loader:
+        optimizer.zero_grad()
+        preds = model(xb)
+        mses = criterion(preds, yb)
+        mse_norm = (mses / yb.abs()).mean()
+        l05 = model.L05_loss()
+        loss = mse_norm + lambda_l05 * l05 + mses.mean()
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), clip_norm)
+        optimizer.step()
+        mse_full = mses.mean()
+        rel_err = mse_norm
 
         if epoch % progress_interval == 0 or epoch == epochs:
             history["epoch"].append(epoch)

@@ -122,22 +122,22 @@ def evaluate_architecture(
     criterion = torch.nn.MSELoss()
     inputs = data['train_input'].to(device)
     labels = data['train_label'].to(device)
-    dataset = TensorDataset(inputs, labels)
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    # dataset = TensorDataset(inputs, labels)
+    # loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     # Training loop
     loop_start = time.time()
     pbar = tqdm.tqdm(range(epochs), desc="Epochs")
+    xb, yb = inputs, labels
     for i in pbar:
-        for xb, yb in loader:
-            optimizer.zero_grad()
-            preds = model(xb)
-            mse = criterion(preds, yb)
-            l05_penalty = model.L05_loss()
-            loss = mse + lambda_l05 * l05_penalty
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=clip_norm)
-            optimizer.step()
+        optimizer.zero_grad()
+        preds = model(xb)
+        mse = criterion(preds, yb)
+        l05_penalty = model.L05_loss()
+        loss = mse + lambda_l05 * l05_penalty
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=clip_norm)
+        optimizer.step()
         with torch.no_grad():
             full_preds = model(inputs)
             rel_err = torch.mean(
