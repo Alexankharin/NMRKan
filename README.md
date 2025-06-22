@@ -32,6 +32,20 @@ Install all dependencies with:
 pip install -r requirements.txt
 ```
 
+## Main Notebook Workflow
+The primary workflow is demonstrated in `notebooks/Single_run_end_to_end_test.ipynb`. This notebook walks through:
+- Generating synthetic NMR datasets
+- Training a Kolmogorov-Arnold Network (KAN) model
+- Extracting symbolic expressions from the trained model
+- Cleaning and interpreting the learned formulas
+- Comparing neural and symbolic outputs
+- Visualizing training progress and results
+
+Each step is explained in detail, making it accessible for both programmers and non-programmers interested in symbolic regression and scientific machine learning.
+
+## Why Symbolic Regression?
+Symbolic regression provides interpretable, human-readable formulas that describe the relationships in your data. This is especially valuable in scientific domains, where understanding the underlying physics is as important as predictive accuracy. The approach used here aims to bridge the gap between black-box neural models and analytical theory.
+
 ## Usage
 1. Install dependencies as above.
 2. Run the symbolic regressor:
@@ -44,8 +58,7 @@ pip install -r requirements.txt
    python run_grid_search.py
    python genetic_KAN.py
    ```
-4. Explore and visualize results using the notebooks in the `notebooks/` directory.
-3. Explore and visualize results using the notebooks in the `notebooks/` directory.
+4. Explore and visualize results using the notebooks in the `notebooks/` directory, especially `Single_run_end_to_end_test.ipynb` for a full workflow example.
 
 ## Data
 - All raw and processed data is stored in the `data/` directory. This includes synthetic datasets and results from previous runs.
@@ -70,3 +83,12 @@ If you use this code or ideas in your research, please cite appropriately. (Add 
 - If you encounter missing package errors, ensure you have installed all dependencies from `requirements.txt`.
 - For CUDA/GPU issues, set `--device cpu` when running the script if you do not have a compatible GPU.
 - For questions or issues, please open an issue on the repository or contact the author.
+
+## Contributing & Extending
+Contributions are welcome! You can extend the project by:
+- Adding new datasets or physical systems
+- Improving model architectures or training routines
+- Enhancing symbolic post-processing or interpretability
+- Creating new analysis notebooks
+
+Feel free to open issues or pull requests with suggestions or improvements.
