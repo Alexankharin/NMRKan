@@ -1,5 +1,5 @@
 # NMR Symbolic Regression Repository
-
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Alexankharin/NMRKan)
 This repository simulates NMR frequencies by solving eigenvalues of specific matrices and attempts to symbolically approximate the results, aiming to recover perturbation theory from simulated data.
 
 ## Overview
