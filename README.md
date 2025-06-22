@@ -70,3 +70,12 @@ If you use this code or ideas in your research, please cite appropriately. (Add 
 - If you encounter missing package errors, ensure you have installed all dependencies from `requirements.txt`.
 - For CUDA/GPU issues, set `--device cpu` when running the script if you do not have a compatible GPU.
 - For questions or issues, please open an issue on the repository or contact the author.
+
+## Profiling with Scalene
+To analyze performance, install the `scalene` package and run the new script under the profiler:
+
+```bash
+python -m scalene scalene_test.py --json --outfile scalene.json
+```
+
+This generates `scalene.json` with CPU and memory usage details for the training loop implemented in `scalene_test.py`.
