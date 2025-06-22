@@ -78,11 +78,15 @@ class DenseKanLayer(nn.Module):
         act_outs = [act(x) for act in self.activations]
         y = torch.stack(act_outs, dim=2)
         a = torch.softmax(self.act_logits, dim=1)
-        v = (y * a.unsqueeze(0)).sum(dim=2)
+        v = torch.einsum("bik,ik->bi", y, a)
+        # v = (y * a.unsqueeze(0)).sum(dim=2)
         return self.linear(v)
 
     def L05_reg(self) -> Tensor:
-        return torch.sum(torch.softmax(self.act_logits, dim=1) ** 0.5)
+        # if only 1 weight is non-zero, the L05 norm is 0
+        return (
+            torch.sum(torch.softmax(self.act_logits, dim=1) ** 0.5) - 1
+        )  # 0.5-norm of the softmax probabilities
 
     def anneal(self, rate: float = 0.1) -> None:
         with torch.no_grad():

@@ -163,8 +163,8 @@ def main():
     data = {'inputs': inputs, 'targets': targets}
 
     # Grid search
-    NUM_LAYERS = [1, 2]
-    NEURONS = [1, 2, 4, 8]
+    NUM_LAYERS = [1]
+    NEURONS = [4, 8]
     results = []
 
     for nl in NUM_LAYERS:

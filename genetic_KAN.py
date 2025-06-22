@@ -3,7 +3,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from tqdm import trange
+from tqdm import trange, tqdm
+from loguru import logger
 
 from nmrkan.models import KharKAN
 
@@ -19,22 +20,14 @@ def make_dataset_from_function(
 ):
     """
     Generate inputs (x0, x1, x0/x1, x1/x0) and labels via `func(x0, x1)`.
-
-    Guarantees:
-      - train_input:  torch.FloatTensor, shape (num_samples, 4)
-      - train_label:  torch.FloatTensor, shape (num_samples, k)
-
-    func(x0, x1) can return:
-      - tuple/list of k 1D arrays, each of length batch_kept
-      - a 1D array of length batch_kept   → treated as k=1
-      - a 2D array shape (batch_kept, k)
     """
+    logger.info("Starting dataset generation for {} samples", num_samples)
     collected = 0
     X0s, X1s, RXs, RYs = [], [], [], []
     Ys = []
 
+    pbar = tqdm(total=num_samples, desc="Generating data")
     while collected < num_samples:
-        # oversample so that after masking we get enough points
         batch_size = int((num_samples - collected) * 1.5) + 10
 
         # 1) random in [min_x, max_x), [min_y, max_y)
@@ -51,16 +44,13 @@ def make_dataset_from_function(
         # 3) call user function
         out = func(x0m, x1m)
 
-        # 4) normalize `out` to a (batch_kept, k) array
+        # 4) normalize output to (batch_kept, k)
         if isinstance(out, (tuple, list)):
-            # tuple/list of k arrays length batch_kept
             Y = np.stack(out, axis=1)
         elif isinstance(out, np.ndarray):
             if out.ndim == 1:
-                # single-output → (batch_kept, 1)
                 Y = out.reshape(-1, 1)
             elif out.ndim == 2:
-                # already (batch_kept, k)
                 Y = out
             else:
                 raise ValueError(f"func returned array with ndim={out.ndim}")
@@ -75,292 +65,231 @@ def make_dataset_from_function(
         Ys.append(Y)
 
         collected += len(x0m)
+        pbar.update(len(x0m))
 
-    # 6) concatenate and slice to exactly num_samples
+    pbar.close()
+    logger.info("Concatenating and slicing to exactly {} samples", num_samples)
+
+    # 6) concatenate and slice
     x0_all = np.concatenate(X0s)[:num_samples]
     x1_all = np.concatenate(X1s)[:num_samples]
     rx_all = np.concatenate(RXs)[:num_samples]
     ry_all = np.concatenate(RYs)[:num_samples]
     y_all  = np.concatenate(Ys)[:num_samples]
 
-    # 7) stack inputs and convert to torch
+    # 7) stack and convert to torch
     X = np.stack([x0_all, x1_all, rx_all, ry_all], axis=1).astype(np.float32)
     Y = y_all.astype(np.float32)
 
+    logger.info("Dataset generation complete")
     return {
         'train_input': torch.from_numpy(X),
         'train_label': torch.from_numpy(Y),
     }
 
+
 def get_perturbation(x, y):
     """
-    Example `func(x, y)`: returns three arrays (f0, f1, f2),
-    each of shape (batch_kept,).
+    Example `func(x, y)`: returns three arrays (f0, f1, f2).
     """
     f0 = x / np.sqrt(2) + x * x / (8 * y)
     f1 = x / np.sqrt(2) - x * x / (8 * y)
     f2 = x * np.sqrt(2)
     return (f0, f1, f2)
 
+
 class GAWeightPerturbation:
     """
-    A simple genetic-algorithm wrapper that evolves a population of KAN models
-    by perturbing their weights. Supports two mutation modes:
-      1) Gaussian noise added to every weight tensor.
-      2) Random replacement of a fraction p of weights with new random values.
-
-    Usage:
-      - Initialize with your hyperparameters and data tensors.
-      - Call `best_state, best_fitness = ga.run()` to evolve and get the best model.
-      - Optionally, fully retrain `best_state` for more epochs and extract symbolic formulas.
+    Genetic algorithm wrapper that evolves KAN models by perturbing weights.
     """
 
     def __init__(
         self,
         shape,
         model_cls,
-        inputs: torch.Tensor,
-        labels: torch.Tensor,
-        device: torch.device = None,
-        population_size: int = 10,
-        num_parents: int = 4,
-        offspring_per_parent: int = 2,
-        generations: int = 5,
-        train_steps: int = 10000,
-        lr: float = 1e-4,
-        l05_penalty: float = 0.1,
-        sigma: float = 1e-3,
-        mutation_type: str = 'gaussian',  # 'gaussian' or 'random_replace'
-        random_replace_p: float = 0.05,    # fraction of weights to replace if using random_replace
+        inputs,
+        labels,
+        device=None,
+        population_size=8,
+        num_parents=2,
+        offspring_per_parent=4,
+        generations=5,
+        train_steps=10000,
+        lr=1e-4,
+        l05_penalty=0.1,
+        sigma=1e-3,
+        mutation_type="gaussian",
+        random_replace_p=0.05,
     ):
-        """
-        :param shape: tuple for KharKAN constructor, e.g. (4,4,3)
-        :param model_cls: class of your model, e.g. KharKAN
-        :param inputs, labels: full training set (already on device)
-        :param population_size: number of individuals per generation
-        :param num_parents: how many top performers to select each gen
-        :param offspring_per_parent: how many children each parent produces
-        :param generations: how many GA iterations to run
-        :param train_steps: training steps per individual per generation
-        :param lr: learning rate for Adam during evaluation
-        :param l05_penalty: weight of L0.5 regularization in loss
-        :param sigma: standard deviation for Gaussian perturbations
-        :param mutation_type: 'gaussian' or 'random_replace'
-        :param random_replace_p: if mutation_type=='random_replace', this fraction of weights is reset
-        """
+        logger.info(
+            "Initializing GA: P={}, K={}, M={}, G={} ",
+            population_size,
+            num_parents,
+            offspring_per_parent,
+            generations,
+        )
         self.shape = shape
         self.Model = model_cls
         self.inputs = inputs
         self.labels = labels
         self.device = device or torch.device("cpu")
-
-        # GA hyperparameters
         self.P = population_size
         self.K = num_parents
         self.M = offspring_per_parent
         self.G = generations
         self.train_steps = train_steps
-
-        # Training hyperparameters
         self.lr = lr
         self.l05_penalty = l05_penalty
-
-        # Mutation hyperparameters
         self.sigma = sigma
         self.mutation_type = mutation_type
         self.random_replace_p = random_replace_p
-
         self.criterion = nn.MSELoss(reduction="none")
 
-        # Initialize population: list of model state_dicts with fresh random weights
+        # Initialize random population
         self.population = []
-        for _ in range(self.P):
+        for i in range(self.P):
             model = self.Model(self.shape).to(self.device)
             self.population.append(model.state_dict())
+        logger.info("Population initialized with {} individuals", self.P)
 
     def _train_and_score(self, state_dict):
-        """
-        Instantiate a KAN, load its weights, train for self.train_steps,
-        and return (updated_state_dict, fitness_score).
-        Fitness is plain MSE on the training set after the small-budget training.
-        """
-        # 1) Build model and optimizer
         model = self.Model(self.shape).to(self.device)
         model.load_state_dict(state_dict)
         optimizer = optim.Adam(model.parameters(), lr=self.lr)
 
-        # 2) Short training loop
-        for _ in range(self.train_steps):
+        # short training with progress bar
+        for _ in trange(self.train_steps, desc="Eval train steps", leave=False):
             optimizer.zero_grad()
             preds = model(self.inputs)
             mse_loss = self.criterion(preds, self.labels).mean()
             reg_loss = model.L05_loss() * self.l05_penalty
-            loss = mse_loss + reg_loss
-            loss.backward()
+            (mse_loss + reg_loss).backward()
             optimizer.step()
 
-        # 3) Compute final fitness (lower is better)
+        # compute fitness
         with torch.no_grad():
             final_preds = model(self.inputs)
             fitness = nn.functional.mse_loss(final_preds, self.labels).item()
-
-        # Return its new state_dict and fitness for selection
         return model.state_dict(), fitness
 
-    def _select_parents(self, scored_population):
-        """
-        Select the top-K individuals by lowest fitness.
-        scored_population: list of (state_dict, fitness)
-        """
-        scored_population.sort(key=lambda x: x[1])  # sort by fitness ascending
-        parents = [sd for sd, _ in scored_population[: self.K]]
-        return parents
-
     def _mutate(self, parent_state):
-        """
-        Produce one child state dict from the parent_state by applying one of:
-          - Gaussian noise to every weight tensor (mutation_type='gaussian')
-          - Random replacement of p% of entries in each tensor (mutation_type='random_replace')
-        Non-weight buffers (e.g. running_mean) are cloned unchanged.
-        """
         child_state = {}
         for key, tensor in parent_state.items():
             if isinstance(tensor, torch.Tensor) and tensor.dtype.is_floating_point:
-                # Decide mutation mode
-                if self.mutation_type == 'gaussian':
-                    # Add small Gaussian noise to every element
-                    noise = torch.randn_like(tensor) * self.sigma
-                    child_state[key] = tensor + noise
-
-                elif self.mutation_type == 'random_replace':
-                    # Copy original tensor
+                if self.mutation_type in ("gaussian", "both"):
+                    t = tensor + torch.randn_like(tensor) * self.sigma
+                else:
                     t = tensor.clone()
-                    # Create mask for entries to replace
+                if self.mutation_type in ("random_replace", "both"):
                     mask = torch.rand_like(t) < self.random_replace_p
-                    # Replace masked entries with new random values (Gaussian noise)
                     t[mask] = torch.randn_like(t[mask]) * self.sigma
-                    child_state[key] = t
-
-                else:
-                    raise ValueError(f"Unknown mutation_type {self.mutation_type}")
-
+                child_state[key] = t
             else:
-                # Non-float tensors (e.g. int buffers) or non-tensors: just clone
-                if isinstance(tensor, torch.Tensor):
-                    child_state[key] = tensor.clone()
-                else:
-                    child_state[key] = copy.deepcopy(tensor)
-
+                child_state[key] = (
+                    tensor.clone()
+                    if isinstance(tensor, torch.Tensor)
+                    else copy.deepcopy(tensor)
+                )
         return child_state
 
     def run(self):
-        """
-        Execute the full GA:
-          - For each generation:
-              * Evaluate & score all individuals
-              * Select top-K parents
-              * Produce new population via mutation
-          - After all generations, do one more evaluation to pick the absolute best
-        Returns: (best_state_dict, best_fitness)
-        """
+        logger.info("Starting GA run for {} generations", self.G)
+
+        # 1) initial scoring of the population
+        scored = [self._train_and_score(s) for s in self.population]
+
         for gen in range(1, self.G + 1):
-            print(f"\n=== Generation {gen}/{self.G} ===")
-            scored = []
-            # Evaluate every individual in the current population
-            for idx, state in enumerate(self.population, start=1):
-                new_state, fit = self._train_and_score(state)
-                scored.append((new_state, fit))
-                print(f"  Individual {idx}/{self.P} → MSE: {fit:.6f}")
+            logger.info("=== Generation {}/{} ===", gen, self.G)
 
-            # Select parents
-            parents = self._select_parents(scored)
-            best_fit = min(f for _, f in scored)
-            print(f"  → Best fitness this gen: {best_fit:.6f}")
+            # 2) pick the K best parents
+            scored.sort(key=lambda x: x[1])
+            parents = scored[: self.K]
 
-            # Build next generation
-            next_pop = []
-            # 1) Keep parents unchanged
-            next_pop.extend(parents)
-            # 2) For each parent, create M offspring
-            for parent in parents:
+            # 3) generate M offspring from each parent (mutate + train)
+            children = []
+            for p_state, p_fit in parents:
                 for _ in range(self.M):
-                    child = self._mutate(parent)
-                    next_pop.append(child)
+                    mutant = self._mutate(p_state)
+                    children.append(mutant)
 
-            # Trim or pad to maintain population size P
-            self.population = next_pop[: self.P]
-            while len(self.population) < self.P:
-                # If somehow too few (unlikely), add a fresh random model
-                m = self.Model(self.shape).to(self.device)
-                self.population.append(m.state_dict())
+            # 4) score all offspring
+            scored_children = [self._train_and_score(c) for c in children]
 
-        # Final evaluation: pick the absolute best
-        final_scored = [self._train_and_score(s) for s in self.population]
-        fits = [f for _, f in final_scored]
-        best_idx = int(np.argmin(fits))
-        best_state, best_fit = final_scored[best_idx]
-        print(f"\n*** GA complete. Best individual #{best_idx} → MSE: {best_fit:.6f}")
+            # 5) combine parents (with their existing fitness) and offspring,
+            #    then take the best P individuals overall
+            combined = parents + scored_children
+            combined.sort(key=lambda x: x[1])
+            next_gen = combined[: self.P]
+
+            # 6) log the fitness of the top K so you can still see “parents”
+            for i, (_, fit) in enumerate(next_gen[: self.K], 1):
+                logger.info("Parent #{} best fitness: {:.6f}", i, fit)
+
+            # 7) set up for the next iteration
+            self.population = [state for state, _ in next_gen]
+            scored = next_gen
+
+        # done!
+        best_state, best_fit = min(scored, key=lambda x: x[1])
+        logger.success("GA complete. Best MSE: {:.6f}", best_fit)
         return best_state, best_fit
 
 
 if __name__ == "__main__":
-    # === Example usage ===
     import numpy as np
     from nmrkan.nmr import get_frequences_ordered
 
     def get_perturbation(x, y):
-        """Synthetic function: returns three outputs based on x,y."""
         f0 = x / 2**0.5 + x * x / 8 / y
         f1 = x / 2**0.5 - x * x / 8 / y
         f2 = x * 2**0.5
         return f0, f1, f2
 
-    # Generate a toy dataset
-    def make_dataset(n):
-        x0 = np.random.uniform(-1, 1, n)
-        x1 = np.random.uniform(-1, 1, n)
-        ratioX = x0 / x1
-        ratioY = x1 / x0
-        labels = np.stack(get_perturbation(x0, x1), axis=1)
-        inputs = np.stack([x0, x1, ratioX, ratioY], axis=1)
-        return (
-            torch.tensor(inputs, dtype=torch.float32),
-            torch.tensor(labels, dtype=torch.float32),
-        )
-    data = make_dataset_from_function(20000, get_perturbation, min_x=-32, max_x=-5, min_y=-15, max_y=-0.1, ratio_threshold=10)
+    # Generate dataset
+    data = make_dataset_from_function(
+        20000,
+        get_perturbation,
+        min_x=-32,
+        max_x=-5,
+        min_y=-15,
+        max_y=-0.1,
+        ratio_threshold=10,
+    )
     inputs, labels = data['train_input'], data['train_label']
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     inputs, labels = inputs.to(device), labels.to(device)
-    # Instantiate the GA with either 'gaussian' or 'random_replace'
+
+    # Initialize GA
     ga = GAWeightPerturbation(
         shape=(4, 4, 3),
         model_cls=KharKAN,
         inputs=inputs,
         labels=labels,
         device=device,
-        population_size=16,
-        num_parents=4,
+        population_size=8,
+        num_parents=2,
         offspring_per_parent=4,
         generations=5,
-        train_steps=10000,
+        train_steps=20000,
         lr=1e-4,
         l05_penalty=0.1,
-        sigma=1,  # standard deviation for Gaussian noise or gaussuan replacement
-        mutation_type='random_replace',  # try 'gaussian' or 'random_replace'
-        random_replace_p=0.1,            # 10% of weights reset randomly
+        sigma=1.0,
+        mutation_type="both",
+        random_replace_p=0.1,
     )
 
-    # Run the GA and get the best model so far
+    # Run GA
     best_state, best_score = ga.run()
 
-    # Finally: full retrain of the winner (optional)
+    # Full retrain of the best model
+    logger.info("Starting full retrain for 20000 epochs")
     final_model = KharKAN((4, 4, 3)).to(device)
     final_model.load_state_dict(best_state)
     optimizer = optim.Adam(final_model.parameters(), lr=1e-4)
     criterion = nn.MSELoss()
     EPOCHS = 20000
 
-    for epoch in trange(EPOCHS, desc="Full Retrain"):
+    for _ in trange(EPOCHS, desc="Full Retrain"):
         optimizer.zero_grad()
         preds = final_model(inputs)
         mse = criterion(preds, labels)
@@ -368,6 +297,5 @@ if __name__ == "__main__":
         (mse + reg).backward()
         optimizer.step()
 
-    # Extract symbolic formulas
     exprs = final_model.symbolic_formula(round_digits=5)
-    print(exprs)
+    logger.success("Symbolic expressions:\n{}", exprs)
