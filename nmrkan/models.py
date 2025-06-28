@@ -85,7 +85,7 @@ class DenseKanLayer(nn.Module):
     def L05_reg(self) -> Tensor:
         # if only 1 weight is non-zero, the L05 norm is 0
         return (
-            torch.sum(torch.softmax(self.act_logits, dim=1) ** 0.5) - 1
+            torch.sum(torch.softmax(self.act_logits, dim=1) ** 0.5) - self.input_dim
         )  # 0.5-norm of the softmax probabilities
 
     def anneal(self, rate: float = 0.1) -> None:
