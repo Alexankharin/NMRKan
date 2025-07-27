@@ -4,7 +4,7 @@ Multi-experiment KAN runner for NMR spectroscopy data.
 
 This script runs multiple KAN experiments with different architectures and parameters,
 comparing perturbation theory data vs precise eigenvalue data. It generates comprehensive
-reports with symbolic expressions, training curves, and surface plots saved as PDF and CSV.
+reports with symbolic expressions, training curves, and surface plots saved as PDF.
 
 Usage:
     python run_many_experiments.py
@@ -630,6 +630,10 @@ def main():
         # Create datasets with different input dimensions for this parameter set
         datasets_3d = {}
         datasets_4d = {}
+    
+        # Create datasets with different input dimensions for this parameter set
+        datasets_3d = {}
+        datasets_4d = {}
         
         for arch in config.architectures:
             input_dim = arch[0]
@@ -751,7 +755,278 @@ def main():
     
     # Print summary statistics using utility functions
     print_console_summary(all_results)
-    print_detailed_console_summary(all_results)
+
+if __name__ == "__main__":
+    main()
+        # Title page
+        fig = plt.figure(figsize=(11, 8.5))
+        fig.suptitle('KAN NMR Spectroscopy Experiments Report', fontsize=16, fontweight='bold')
+        
+        ax = fig.add_subplot(111)
+        ax.axis('off')
+        
+        report_text = f"""
+        Comprehensive KAN Experiments for NMR Spectroscopy
+        
+        Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}
+        
+        Experiment Configuration:
+        • Parameter sets tested: {len(param_names)} ({param_names})
+        • Architectures tested: {len(config.architectures)} ({config.architectures})
+        • Learning rates: {config.learning_rates}
+        • L05 penalties: {config.l05_penalties}
+        • Training epochs: {config.epochs}
+        • Number of samples: {config.num_samples}
+        • Device: {config.device}
+        
+        Parameter Set Ranges:
+        """
+        
+        for pname in param_names:
+            pparams = config.data_params[pname]
+            report_text += f"""
+        • {pname.upper()}:
+          - Jintra: [{pparams["MIN_JINTRA"]}, {pparams["MAX_JINTRA"]}]
+          - deltaJ: [{pparams["MIN_DELTAJ"]}, {pparams["MAX_DELTAJ"]}]
+        """
+        
+        report_text += f"""
+        Total experiments completed: {len([r for r in all_results if 'error' not in r])} / {total_experiments}
+        """
+        
+        ax.text(0.1, 0.9, report_text, transform=ax.transAxes, fontsize=12,
+                verticalalignment='top', fontfamily='monospace')
+        
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
+        
+        # Data visualization pages for each parameter set
+        for params_name in param_names:
+            datasets_3d = all_datasets[params_name]['3d']
+            datasets_4d = all_datasets[params_name]['4d']
+            
+            if datasets_3d:
+                fig = plt.figure(figsize=(15, 10))
+                fig.suptitle(f'3D Data Surfaces - {params_name.upper()} Parameter Set - 3 Input Architecture', fontsize=14, fontweight='bold')
+                create_surface_plots(datasets_3d['pert'], datasets_3d['eigen'], fig)
+                pdf.savefig(fig, bbox_inches='tight')
+                plt.close(fig)
+            
+            if datasets_4d:
+                fig = plt.figure(figsize=(15, 10))
+                fig.suptitle(f'3D Data Surfaces - {params_name.upper()} Parameter Set - 4 Input Architecture', fontsize=14, fontweight='bold')
+                create_surface_plots(datasets_4d['pert'], datasets_4d['eigen'], fig)
+                pdf.savefig(fig, bbox_inches='tight')
+                plt.close(fig)
+        
+        # Summary page
+        fig = plt.figure(figsize=(15, 10))
+        fig.suptitle('Experiment Summary and Comparison', fontsize=14, fontweight='bold')
+        create_experiment_summary_page(all_results, fig)
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
+        
+        # Formula table page
+        fig = plt.figure(figsize=(15, 12))
+        create_formula_table_page(all_results, fig)
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
+        
+        # Comprehensive summary table
+        fig = plt.figure(figsize=(20, 15))
+        create_comprehensive_summary_table(all_results, fig)
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
+        
+        # Best results summary
+        fig = plt.figure(figsize=(15, 10))
+        create_best_results_summary(all_results, fig)
+        pdf.savefig(fig, bbox_inches='tight')
+        plt.close(fig)
+        
+        # Individual experiment pages
+        for result in all_results:
+            if 'error' in result:
+                continue
+                
+            fig = plt.figure(figsize=(15, 10))
+            fig.suptitle(f"Experiment: {result['experiment_id']}", fontsize=14, fontweight='bold')
+            
+            # Plot training curves
+            plot_training_curves(result, fig, 1)
+            
+            # Add formula text
+            ax_text = fig.add_subplot(2, 3, 4)
+            ax_text.axis('off')
+            
+            formula_text = f"Architecture: {result['architecture']}\n"
+            formula_text += f"LR: {result['lr']}, L05: {result['l05_penalty']}\n\n"
+            
+            if 'perturbation' in result and 'error' not in result['perturbation']:
+                formula_text += "PERTURBATION THEORY FORMULAS:\n"
+                formula_text += "Original Formulas:\n"
+                for name, formula in result['perturbation'].get('formulas', {}).items():
+                    if formula is not None:
+                        formula_text += f"  {name}: {formula}\n"
+                    else:
+                        formula_text += f"  {name}: None\n"
+                
+                formula_text += "Refined Formulas (after fine-tuning):\n"
+                for name, formula in result['perturbation'].get('refined_formulas', {}).items():
+                    if formula is not None:
+                        formula_text += f"  {name}: {formula}\n"
+                    else:
+                        formula_text += f"  {name}: None\n"
+                
+                formula_text += "Symbolic MSE Scores:\n"
+                for name, mse in result['perturbation'].get('symbolic_mse_scores', {}).items():
+                    formula_text += f"  {name}: {mse:.2e}\n"
+                
+                formula_text += f"Total Complexity: {result['perturbation'].get('total_complexity', 'N/A')}\n"
+                formula_text += f"Final Neural MSE: {result['perturbation'].get('final_mse', 'N/A'):.2e}\n\n"
+            
+            if 'eigenvalue' in result and 'error' not in result['eigenvalue']:
+                formula_text += "EIGENVALUE FORMULAS:\n"
+                formula_text += "Original Formulas:\n"
+                for name, formula in result['eigenvalue'].get('formulas', {}).items():
+                    if formula is not None:
+                        formula_text += f"  {name}: {formula}\n"
+                    else:
+                        formula_text += f"  {name}: None\n"
+                
+                formula_text += "Refined Formulas (after fine-tuning):\n"
+                for name, formula in result['eigenvalue'].get('refined_formulas', {}).items():
+                    if formula is not None:
+                        formula_text += f"  {name}: {formula}\n"
+                    else:
+                        formula_text += f"  {name}: None\n"
+                
+                formula_text += "Symbolic MSE Scores:\n"
+                for name, mse in result['eigenvalue'].get('symbolic_mse_scores', {}).items():
+                    formula_text += f"  {name}: {mse:.2e}\n"
+                
+                formula_text += f"Total Complexity: {result['eigenvalue'].get('total_complexity', 'N/A')}\n"
+                formula_text += f"Final Neural MSE: {result['eigenvalue'].get('final_mse', 'N/A'):.2e}\n"
+            
+            ax_text.text(0.05, 0.95, formula_text, transform=ax_text.transAxes,
+                        fontsize=8, verticalalignment='top', fontfamily='monospace')
+            
+            pdf.savefig(fig, bbox_inches='tight')
+            plt.close(fig)
+    
+    # Save results to JSON
+    save_results_to_json(all_results, output_dir)
+    
+    print(f"\nExperiments completed!")
+    print(f"PDF report saved to: {pdf_path}")
+    print(f"Results directory: {output_dir}")
+    
+    # Print summary statistics
+    successful_results = [r for r in all_results if 'error' not in r]
+    print(f"\nSummary: {len(successful_results)}/{total_experiments} experiments completed successfully")
+    
+    # Group results by parameter set
+    results_by_params = {}
+    for result in successful_results:
+        exp_id = result['experiment_id']
+        params_name = exp_id.split('_')[0]  # Extract parameter set name from experiment ID
+        if params_name not in results_by_params:
+            results_by_params[params_name] = []
+        results_by_params[params_name].append(result)
+    
+    print(f"\nResults by Parameter Set:")
+    for params_name, param_results in results_by_params.items():
+        print(f"\n{params_name.upper()} Parameter Set:")
+        print(f"  Completed experiments: {len(param_results)}")
+        
+        if param_results:
+            best_pert = min(param_results, 
+                           key=lambda x: x.get('perturbation', {}).get('final_mse', float('inf')))
+            best_eigen = min(param_results,
+                            key=lambda x: x.get('eigenvalue', {}).get('final_mse', float('inf')))
+            
+            print(f"  Best Perturbation MSE: {best_pert.get('perturbation', {}).get('final_mse', 'N/A'):.2e} ({best_pert['experiment_id']})")
+            print(f"  Best Eigenvalue MSE: {best_eigen.get('eigenvalue', {}).get('final_mse', 'N/A'):.2e} ({best_eigen['experiment_id']})")
+    
+    if successful_results:
+        overall_best_pert = min(successful_results, 
+                               key=lambda x: x.get('perturbation', {}).get('final_mse', float('inf')))
+        overall_best_eigen = min(successful_results,
+                                key=lambda x: x.get('eigenvalue', {}).get('final_mse', float('inf')))
+        
+        print(f"\nOverall Best Results:")
+        print(f"  Best Perturbation Theory Result:")
+        print(f"    Experiment: {overall_best_pert['experiment_id']}")
+        print(f"    MSE: {overall_best_pert.get('perturbation', {}).get('final_mse', 'N/A'):.2e}")
+        
+        print(f"  Best Eigenvalue Result:")
+        print(f"    Experiment: {overall_best_eigen['experiment_id']}")
+        print(f"    MSE: {overall_best_eigen.get('eigenvalue', {}).get('final_mse', 'N/A'):.2e}")
+    
+    # Print comprehensive summary table to console
+    print(f"\n{'='*100}")
+    print("COMPREHENSIVE RESULTS SUMMARY")
+    print(f"{'='*100}")
+    print(f"{'Param Set':<12} {'Input':<5} {'Data Type':<12} {'Neural MSE':<12} {'Best Sym MSE':<12} {'Formulas':<8} {'Orig Compl':<10} {'Ref Compl':<10}")
+    print("-" * 100)
+    
+    # Group results by parameter set and input dimension for summary
+    summary_stats = {}
+    
+    for result in successful_results:
+        exp_id = result['experiment_id']
+        params_name = exp_id.split('_')[0]
+        architecture = result['architecture']
+        input_dim = f"{architecture[0]}D"
+        
+        key = f"{params_name}_{input_dim}"
+        if key not in summary_stats:
+            summary_stats[key] = {'perturbation': [], 'eigenvalue': []}
+        
+        for data_type in ['perturbation', 'eigenvalue']:
+            if data_type in result and 'error' not in result[data_type]:
+                summary_stats[key][data_type].append(result[data_type])
+    
+    # Print summary for each parameter set and dimension
+    for key, data in summary_stats.items():
+        params_name, input_dim = key.split('_')
+        
+        for data_type, results_list in data.items():
+            if results_list:
+                # Find best neural MSE
+                best_neural_mse = min(r.get('final_mse', float('inf')) for r in results_list)
+                
+                # Find best symbolic MSE across all outputs
+                all_symbolic_mses = []
+                total_formulas = 0
+                total_orig_complexity = 0
+                total_refined_complexity = 0
+                
+                for r in results_list:
+                    symbolic_mses = r.get('symbolic_mse_scores', {})
+                    all_symbolic_mses.extend([mse for mse in symbolic_mses.values() if mse != float('inf')])
+                    
+                    formulas = r.get('formulas', {})
+                    total_formulas += sum(1 for f in formulas.values() if f is not None)
+                    
+                    total_orig_complexity += r.get('total_complexity', 0)
+                    
+                    refined_formulas = r.get('refined_formulas', {})
+                    total_refined_complexity += sum(sp.count_ops(f) for f in refined_formulas.values() if f is not None)
+                
+                best_symbolic_mse = min(all_symbolic_mses) if all_symbolic_mses else float('inf')
+                avg_orig_complexity = total_orig_complexity / len(results_list) if results_list else 0
+                avg_refined_complexity = total_refined_complexity / len(results_list) if results_list else 0
+                total_possible_formulas = len(results_list) * 3  # 3 outputs per experiment
+                
+                print(f"{params_name.upper():<12} {input_dim:<5} {data_type.capitalize():<12} "
+                      f"{best_neural_mse:<12.2e} {best_symbolic_mse:<12.2e} "
+                      f"{total_formulas}/{total_possible_formulas:<8} {avg_orig_complexity:<10.1f} {avg_refined_complexity:<10.1f}")
+    
+    print("-" * 100)
+    print("Legend: Param Set = Parameter Set, Input = Input Dimension, Neural MSE = Best Neural Network MSE")
+    print("        Best Sym MSE = Best Symbolic MSE, Formulas = Successful/Total, Compl = Average Complexity")
+    print(f"{'='*100}")
 
 
 if __name__ == "__main__":
