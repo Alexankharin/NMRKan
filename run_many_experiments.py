@@ -125,7 +125,7 @@ def get_perturbation(Jintra: np.ndarray, deltaJ: np.ndarray) -> np.ndarray:
     f1 = deltaJ / 2**0.5 + deltaJ * deltaJ / 8 / Jintra
     f2 = deltaJ / 2**0.5 - deltaJ * deltaJ / 8 / Jintra
     f0 = deltaJ * (2**0.5)
-    return -np.stack((f2, f1, f0), axis=1)
+    return -np.stack((f2, f1, f0), axis=1).reshape(-1, 3)
 
 
 def make_dataset_from_function(
