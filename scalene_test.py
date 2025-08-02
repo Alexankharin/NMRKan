@@ -10,9 +10,12 @@ from nmrkan.models import KharKAN, _clean_expr
 
 def clean_up_formula(expr: dict[str, sp.Expr], name: str) -> sp.Expr | None:
     x0, x1, x2, x3 = sp.symbols("x_0 x_1 x_2 x_3")
+    j, dJ = sp.symbols("j dJ")  # Physical variable names
     raw = expr.get(name, None)
     if isinstance(raw, sp.Expr):
-        e = raw.subs({x2: x0/x1, x3: x1/x0}).expand()
+        # Consistent mapping: x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra, x3=Jintra/deltaJ
+        # Replace with: dJ, dJ/j, j, j/dJ
+        e = raw.subs({x0: dJ, x1: dJ / j, x2: j, x3: j / dJ}).expand()
         nums = {n: round(float(n), 5) for n in e.atoms(sp.Number)}
         e = e.xreplace(nums)
         e = _clean_expr(e, eps=1e-5)

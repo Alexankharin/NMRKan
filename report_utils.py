@@ -18,11 +18,27 @@ from pathlib import Path
 def safe_format_float(value, format_str=":.2e", default="N/A"):
     """Safely format a float value, returning default if not a number."""
     try:
-        if isinstance(value, (int, float)) and not np.isnan(value) and value != float('inf'):
+        # Handle None values
+        if value is None:
+            return default
+
+        # Convert to float first to handle string numbers
+        if isinstance(value, str):
+            try:
+                value = float(value)
+            except (ValueError, TypeError):
+                return default
+
+        # Check if it's a valid number
+        if (
+            isinstance(value, (int, float))
+            and not np.isnan(value)
+            and not np.isinf(value)
+        ):
             return f"{float(value):{format_str}}"
         else:
             return default
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, AttributeError):
         return default
 
 

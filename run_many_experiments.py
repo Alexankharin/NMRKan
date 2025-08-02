@@ -58,14 +58,21 @@ class ExperimentConfig:
     """Configuration class for experiments."""
     
     def __init__(self):
-        # Model architectures to test
+        # Model architectures to test - consistent mapping: x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra, x3=Jintra/deltaJ
         self.architectures = [
-            (3, 4, 3),      # 3 inputs (Jintra, deltaJ, ratio), 4 hidden, 3 outputs
-            (3, 6, 3),      # 3 inputs, 6 hidden, 3 outputs
-            (3, 8, 3),      # 3 inputs, 8 hidden, 3 outputs
-            (4, 4, 3),      # 4 inputs (add ratio2), 4 hidden, 3 outputs
-            (4, 6, 3),      # 4 inputs, 6 hidden, 3 outputs
-            (4, 8, 3),      # 4 inputs, 8 hidden, 3 outputs
+            (2, 4, 3),  # 2 inputs (deltaJ, deltaJ/Jintra), 4 hidden, 3 outputs
+            (2, 6, 3),  # 2 inputs, 6 hidden, 3 outputs
+            (2, 8, 3),  # 2 inputs, 8 hidden, 3 outputs
+            (3, 4, 3),  # 3 inputs (deltaJ, deltaJ/Jintra, Jintra), 4 hidden, 3 outputs
+            (3, 6, 3),  # 3 inputs, 6 hidden, 3 outputs
+            (3, 8, 3),  # 3 inputs, 8 hidden, 3 outputs
+            (
+                4,
+                4,
+                3,
+            ),  # 4 inputs (deltaJ, deltaJ/Jintra, Jintra, Jintra/deltaJ), 4 hidden, 3 outputs
+            (4, 6, 3),  # 4 inputs, 6 hidden, 3 outputs
+            (4, 8, 3),  # 4 inputs, 8 hidden, 3 outputs
         ]
         
         # Training parameters to test
@@ -83,12 +90,12 @@ class ExperimentConfig:
                 "MAX_DELTAJ": -0.1,
                 "RATIO_THRESHOLD": 100,
             },
-            "nonlinear" : {
-                "MIN_JINTRA" : -32,
-                "MAX_JINTRA" : -5,
-                "MIN_DELTAJ" : -15,
-                "MAX_DELTAJ" : -0.1,
-                "RATIO_THRESHOLD" : 100,
+            "nonlinear": {
+                "MIN_JINTRA": -32,
+                "MAX_JINTRA": -5,
+                "MIN_DELTAJ": -15,
+                "MAX_DELTAJ": -0.1,
+                "RATIO_THRESHOLD": 100,
             },
             "realistic": {
                 "MIN_JINTRA": -15,
@@ -102,8 +109,15 @@ class ExperimentConfig:
                 "MAX_JINTRA": 10,
                 "MIN_DELTAJ": -1,
                 "MAX_DELTAJ": 1,
-                "RATIO_THRESHOLD": 100
-            }
+                "RATIO_THRESHOLD": 100,
+            },
+            "realistic_truncated": {
+                "MIN_JINTRA": -15,
+                "MAX_JINTRA": -12,
+                "MIN_DELTAJ": -2,
+                "MAX_DELTAJ": -0.2,
+                "RATIO_THRESHOLD": 100,
+            },
         }
         
         self.num_samples = 20000
@@ -129,26 +143,28 @@ def get_perturbation(Jintra: np.ndarray, deltaJ: np.ndarray) -> np.ndarray:
 
 
 def make_dataset_from_function(
-    num_samples: int, 
+    num_samples: int,
     func,
-    min_Jintra: float = -32, 
-    max_Jintra: float = -5, 
-    min_deltaJ: float = -15, 
-    max_deltaJ: float = -0.1, 
+    min_Jintra: float = -32,
+    max_Jintra: float = -5,
+    min_deltaJ: float = -15,
+    max_deltaJ: float = -0.1,
     ratio_threshold: float = 100,
-    include_ratios: bool = True
+    include_ratios: bool = True,
+    input_mode: str = "3d",  # "2d", "3d", or "4d"
 ) -> Dict[str, torch.Tensor]:
     """
     Generate a dataset using a user-supplied function of two variables.
-    
+
     Args:
         num_samples: Number of samples to generate
         func: Function that takes (Jintra, deltaJ) and returns labels
         min_Jintra, max_Jintra: Range for Jintra parameter
-        min_deltaJ, max_deltaJ: Range for deltaJ parameter  
+        min_deltaJ, max_deltaJ: Range for deltaJ parameter
         ratio_threshold: Maximum allowed ratio value (for filtering)
-        include_ratios: Whether to include ratio features in inputs
-        
+        include_ratios: Whether to include ratio features in inputs (for 3d/4d modes)
+        input_mode: Type of input features - "2d" (deltaJ, deltaJ/Jintra), "3d" (Jintra, deltaJ, deltaJ/Jintra), "4d" (Jintra, deltaJ, deltaJ/Jintra, Jintra/deltaJ)
+
     Returns:
         Dictionary with 'train_input' and 'train_label' as torch tensors
     """
@@ -191,12 +207,25 @@ def make_dataset_from_function(
     labels = np.concatenate(label_list)[:num_samples]
     ratioX = deltaj / jintra
     ratioY = jintra / deltaj
-    # Prepare input features
-    if include_ratios:
-        input_features = np.stack([jintra, deltaj, ratioX, ratioY], axis=1)
+
+    # Prepare input features based on input_mode with consistent mapping:
+    # x0 = deltaJ, x1 = deltaJ/Jintra, x2 = Jintra, x3 = Jintra/deltaJ
+    if input_mode == "2d":
+        # x0=deltaJ, x1=deltaJ/Jintra
+        input_features = np.stack([deltaj, ratioX], axis=1)
+    elif input_mode == "3d":
+        # x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra
+        input_features = np.stack([deltaj, ratioX, jintra], axis=1)
+    elif input_mode == "4d":
+        # x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra, x3=Jintra/deltaJ
+        input_features = np.stack([deltaj, ratioX, jintra, ratioY], axis=1)
     else:
-        input_features = np.stack([jintra, deltaj, ratioX], axis=1)
-    
+        # Backward compatibility - use include_ratios parameter
+        if include_ratios:
+            input_features = np.stack([deltaj, ratioX, jintra, ratioY], axis=1)
+        else:
+            input_features = np.stack([deltaj, ratioX, jintra], axis=1)
+
     return {
         'train_input': torch.tensor(input_features).float(),
         'train_label': torch.tensor(labels).float()
@@ -288,23 +317,39 @@ def train_kan_model(
     return loss_history, mse_history, rel_err_history, mse_value
 
 
-def extract_symbolic_formulas(model: KharKAN, round_digits: int = 2) -> Dict[str, Optional[sp.Expr]]:
+def extract_symbolic_formulas(
+    model: KharKAN, input_dim: int = 3, round_digits: int = 2
+) -> Dict[str, Optional[sp.Expr]]:
     """Extract and clean symbolic formulas from trained model."""
     try:
         raw_formulas = model.symbolic_formula(round_digits=5)
         cleaned_formulas = {}
         
         x0, x1, x2, x3 = sp.symbols('x_0 x_1 x_2 x_3')
-        
+        j, dJ = sp.symbols("j dJ")  # Physical variable names
+
         for output_name in ['z_0', 'z_1', 'z_2']:
             raw = raw_formulas.get(output_name, None)
             if raw is not None and isinstance(raw, sp.Expr):
-                # Substitute ratio features for interpretability
-                e = raw.subs({x2: x1/x0, x3: x0/x1}).expand()
+                # Consistent mapping: x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra, x3=Jintra/deltaJ
+                # Replace with meaningful variable names: dJ, dJ/j, j, j/dJ
+                if input_dim == 2:
+                    # x0=deltaJ, x1=deltaJ/Jintra
+                    e = raw.subs({x0: dJ, x1: dJ / j})
+                elif input_dim == 3:
+                    # x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra
+                    e = raw.subs({x0: dJ, x1: dJ / j, x2: j})
+                elif input_dim == 4:
+                    # x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra, x3=Jintra/deltaJ
+                    e = raw.subs({x0: dJ, x1: dJ / j, x2: j, x3: j / dJ})
+                else:
+                    e = raw
+
                 e = _fix_powers(e)
                 e = _round_expr(e, 5)
                 e = _clean_expr(e, eps=1e-5)
                 e = _round_expr(e, round_digits)
+                cleaned_formulas[output_name] = e
                 cleaned_formulas[output_name] = e
             else:
                 cleaned_formulas[output_name] = None
@@ -469,8 +514,8 @@ def run_single_experiment(
         loss_hist_pert, mse_hist_pert, rel_err_hist_pert, final_mse_pert = train_kan_model(
             model_pert, data_pert, config, lr, l05_penalty, config.device
         )
-        
-        formulas_pert = extract_symbolic_formulas(model_pert)
+
+        formulas_pert = extract_symbolic_formulas(model_pert, architecture[0])
         complexity_pert = calculate_formula_complexity(formulas_pert)
         
         # Fine-tune symbolic formulas
@@ -512,8 +557,8 @@ def run_single_experiment(
         loss_hist_eigen, mse_hist_eigen, rel_err_hist_eigen, final_mse_eigen = train_kan_model(
             model_eigen, data_eigen, config, lr, l05_penalty, config.device
         )
-        
-        formulas_eigen = extract_symbolic_formulas(model_eigen)
+
+        formulas_eigen = extract_symbolic_formulas(model_eigen, architecture[0])
         complexity_eigen = calculate_formula_complexity(formulas_eigen)
         
         # Fine-tune symbolic formulas
@@ -628,28 +673,89 @@ def main():
         print(f"Parameters: {params}")
         
         # Create datasets with different input dimensions for this parameter set
+        datasets_2d = {}
         datasets_3d = {}
         datasets_4d = {}
         
         for arch in config.architectures:
             input_dim = arch[0]
-            
-            if input_dim == 3 and '3d' not in datasets_3d:
+
+            if input_dim == 2 and "2d" not in datasets_2d:
+                # Generate 2-input datasets - first generate eigenvalue data
+                data_eigen_2d = make_dataset_from_function(
+                    config.num_samples,
+                    get_frequences_ordered,
+                    min_Jintra=params["MIN_JINTRA"],
+                    max_Jintra=params["MAX_JINTRA"],
+                    min_deltaJ=params["MIN_DELTAJ"],
+                    max_deltaJ=params["MAX_DELTAJ"],
+                    ratio_threshold=params["RATIO_THRESHOLD"],
+                    input_mode="2d",
+                )
+
+                # Generate perturbation data with same inputs as eigenvalue data
+                # For 2D mode, we need to reconstruct Jintra from deltaJ and ratio
+                # Since ratio = deltaJ/Jintra, then Jintra = deltaJ/ratio
+                deltaJ_vals = data_eigen_2d["train_input"][
+                    :, 0:1
+                ].numpy()  # First column is deltaJ
+                ratio_vals = data_eigen_2d["train_input"][
+                    :, 1:2
+                ].numpy()  # Second column is deltaJ/Jintra
+                jintra_vals = deltaJ_vals / ratio_vals  # Reconstruct Jintra
+
+                data_pert_2d = {
+                    "train_input": data_eigen_2d["train_input"].clone(),
+                    "train_label": torch.tensor(
+                        get_perturbation(jintra_vals, deltaJ_vals)
+                    ).float(),
+                }
+
+                print(f"2D Dataset shapes for {params_name}:")
+                print(f"  Eigenvalue input: {data_eigen_2d['train_input'].shape}")
+                print(f"  Eigenvalue label: {data_eigen_2d['train_label'].shape}")
+                print(f"  Perturbation input: {data_pert_2d['train_input'].shape}")
+                print(f"  Perturbation label: {data_pert_2d['train_label'].shape}")
+
+                print(f"2D Data value ranges for {params_name}:")
+                print(
+                    f"  Eigenvalue label range: [{data_eigen_2d['train_label'].min():.2e}, {data_eigen_2d['train_label'].max():.2e}]"
+                )
+                print(
+                    f"  Perturbation label range: [{data_pert_2d['train_label'].min():.2e}, {data_pert_2d['train_label'].max():.2e}]"
+                )
+                print(
+                    f"  Eigenvalue label mean: {data_eigen_2d['train_label'].mean():.2e}"
+                )
+                print(
+                    f"  Perturbation label mean: {data_pert_2d['train_label'].mean():.2e}"
+                )
+
+                datasets_2d = {"pert": data_pert_2d, "eigen": data_eigen_2d}
+
+            elif input_dim == 3 and "3d" not in datasets_3d:
                 # Generate 3-input datasets - first generate eigenvalue data
                 data_eigen_3d = make_dataset_from_function(
-                    config.num_samples, get_frequences_ordered,
-                    min_Jintra=params["MIN_JINTRA"], max_Jintra=params["MAX_JINTRA"],
-                    min_deltaJ=params["MIN_DELTAJ"], max_deltaJ=params["MAX_DELTAJ"],
-                    ratio_threshold=params["RATIO_THRESHOLD"], include_ratios=False
+                    config.num_samples,
+                    get_frequences_ordered,
+                    min_Jintra=params["MIN_JINTRA"],
+                    max_Jintra=params["MAX_JINTRA"],
+                    min_deltaJ=params["MIN_DELTAJ"],
+                    max_deltaJ=params["MAX_DELTAJ"],
+                    ratio_threshold=params["RATIO_THRESHOLD"],
+                    input_mode="3d",
                 )
                 
                 # Generate perturbation data with same inputs as eigenvalue data
+                # For 3D: x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra
                 data_pert_3d = {
-                    'train_input': data_eigen_3d['train_input'].clone(),
-                    'train_label': torch.tensor(get_perturbation(
-                        data_eigen_3d['train_input'][:, 0:1].numpy(), 
-                        data_eigen_3d['train_input'][:, 1:2].numpy()
-                    )).float()
+                    "train_input": data_eigen_3d["train_input"].clone(),
+                    "train_label": torch.tensor(
+                        get_perturbation(
+                            data_eigen_3d["train_input"][:, 2:3].numpy(),  # x2 = Jintra
+                            data_eigen_3d["train_input"][:, 0:1].numpy(),  # x0 = deltaJ
+                        )
+                    ).float(),
                 }
                 
                 print(f"3D Dataset shapes for {params_name}:")
@@ -669,27 +775,35 @@ def main():
             elif input_dim == 4 and '4d' not in datasets_4d:
                 # Generate 4-input datasets - first generate eigenvalue data
                 data_eigen_4d = make_dataset_from_function(
-                    config.num_samples, get_frequences_ordered,
-                    min_Jintra=params["MIN_JINTRA"], max_Jintra=params["MAX_JINTRA"],
-                    min_deltaJ=params["MIN_DELTAJ"], max_deltaJ=params["MAX_DELTAJ"],
-                    ratio_threshold=params["RATIO_THRESHOLD"], include_ratios=True
+                    config.num_samples,
+                    get_frequences_ordered,
+                    min_Jintra=params["MIN_JINTRA"],
+                    max_Jintra=params["MAX_JINTRA"],
+                    min_deltaJ=params["MIN_DELTAJ"],
+                    max_deltaJ=params["MAX_DELTAJ"],
+                    ratio_threshold=params["RATIO_THRESHOLD"],
+                    input_mode="4d",
                 )
                 
                 # Generate perturbation data with same inputs as eigenvalue data
+                # For 4D: x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra, x3=Jintra/deltaJ
                 data_pert_4d = {
-                    'train_input': data_eigen_4d['train_input'].clone(),
-                    'train_label': torch.tensor(get_perturbation(
-                        data_eigen_4d['train_input'][:, 0:1].numpy(), 
-                        data_eigen_4d['train_input'][:, 1:2].numpy()
-                    )).float()
+                    "train_input": data_eigen_4d["train_input"].clone(),
+                    "train_label": torch.tensor(
+                        get_perturbation(
+                            data_eigen_4d["train_input"][:, 2:3].numpy(),  # x2 = Jintra
+                            data_eigen_4d["train_input"][:, 0:1].numpy(),  # x0 = deltaJ
+                        )
+                    ).float(),
                 }
                 
                 datasets_4d = {'pert': data_pert_4d, 'eigen': data_eigen_4d}
         
         # Store datasets for this parameter set
         all_datasets[params_name] = {
-            '3d': datasets_3d,
-            '4d': datasets_4d
+            "2d": datasets_2d,
+            "3d": datasets_3d,
+            "4d": datasets_4d,
         }
     
     # Run experiments
@@ -702,7 +816,8 @@ def main():
         print(f"\n{'='*80}")
         print(f"RUNNING EXPERIMENTS FOR PARAMETER SET: {params_name.upper()}")
         print(f"{'='*80}")
-        
+
+        datasets_2d = all_datasets[params_name]["2d"]
         datasets_3d = all_datasets[params_name]['3d']
         datasets_4d = all_datasets[params_name]['4d']
         
@@ -715,7 +830,10 @@ def main():
                     print(f"\nExperiment {experiment_count}/{total_experiments}: {experiment_id}")
                     
                     # Select appropriate dataset based on input dimension
-                    if architecture[0] == 3:
+                    if architecture[0] == 2:
+                        data_pert = datasets_2d["pert"]
+                        data_eigen = datasets_2d["eigen"]
+                    elif architecture[0] == 3:
                         data_pert = datasets_3d['pert']
                         data_eigen = datasets_3d['eigen']
                     else:  # 4 inputs

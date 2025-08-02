@@ -19,30 +19,33 @@ def make_dataset_from_function(
     ratio_threshold: float = 100,
 ):
     """
-    Generate inputs (x0, x1, x0/x1, x1/x0) and labels via `func(x0, x1)`.
+    Generate inputs with consistent mapping: x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra, x3=Jintra/deltaJ
+    and labels via `func(Jintra, deltaJ)`.
     """
     logger.info("Starting dataset generation for {} samples", num_samples)
     collected = 0
-    X0s, X1s, RXs, RYs = [], [], [], []
+    JINTRAs, DELTAJs, RATIO1s, RATIO2s = [], [], [], []
     Ys = []
 
     pbar = tqdm(total=num_samples, desc="Generating data")
     while collected < num_samples:
         batch_size = int((num_samples - collected) * 1.5) + 10
 
-        # 1) random in [min_x, max_x), [min_y, max_y)
-        x0 = np.random.uniform(min_x, max_x, size=batch_size)
-        x1 = np.random.uniform(min_y, max_y, size=batch_size)
+        # 1) random Jintra in [min_x, max_x), deltaJ in [min_y, max_y)
+        jintra = np.random.uniform(min_x, max_x, size=batch_size)
+        deltaj = np.random.uniform(min_y, max_y, size=batch_size)
 
         # 2) filter out extreme ratios
-        ratioX = x0 / x1
-        ratioY = x1 / x0
-        mask = (np.abs(ratioX) < ratio_threshold * 10) & (np.abs(ratioY) < ratio_threshold * 10)
-        x0m, x1m = x0[mask], x1[mask]
-        rxm, rym = ratioX[mask], ratioY[mask]
+        ratio1 = deltaj / jintra  # deltaJ/Jintra
+        ratio2 = jintra / deltaj  # Jintra/deltaJ
+        mask = (np.abs(ratio1) < ratio_threshold * 10) & (
+            np.abs(ratio2) < ratio_threshold * 10
+        )
+        jintra_m, deltaj_m = jintra[mask], deltaj[mask]
+        r1m, r2m = ratio1[mask], ratio2[mask]
 
-        # 3) call user function
-        out = func(x0m, x1m)
+        # 3) call user function with (Jintra, deltaJ)
+        out = func(jintra_m, deltaj_m)
 
         # 4) normalize output to (batch_kept, k)
         if isinstance(out, (tuple, list)):
@@ -58,27 +61,30 @@ def make_dataset_from_function(
             raise ValueError("func must return tuple, list, or numpy.ndarray")
 
         # 5) collect
-        X0s.append(x0m)
-        X1s.append(x1m)
-        RXs.append(rxm)
-        RYs.append(rym)
+        JINTRAs.append(jintra_m)
+        DELTAJs.append(deltaj_m)
+        RATIO1s.append(ratio1[mask])
+        RATIO2s.append(ratio2[mask])
         Ys.append(Y)
 
-        collected += len(x0m)
-        pbar.update(len(x0m))
+        collected += len(jintra_m)
+        pbar.update(len(jintra_m))
 
     pbar.close()
     logger.info("Concatenating and slicing to exactly {} samples", num_samples)
 
     # 6) concatenate and slice
-    x0_all = np.concatenate(X0s)[:num_samples]
-    x1_all = np.concatenate(X1s)[:num_samples]
-    rx_all = np.concatenate(RXs)[:num_samples]
-    ry_all = np.concatenate(RYs)[:num_samples]
+    jintra_all = np.concatenate(JINTRAs)[:num_samples]
+    deltaj_all = np.concatenate(DELTAJs)[:num_samples]
+    ratio1_all = np.concatenate(RATIO1s)[:num_samples]
+    ratio2_all = np.concatenate(RATIO2s)[:num_samples]
     y_all  = np.concatenate(Ys)[:num_samples]
 
     # 7) stack and convert to torch
-    X = np.stack([x0_all, x1_all, rx_all, ry_all], axis=1).astype(np.float32)
+    # x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra, x3=Jintra/deltaJ
+    X = np.stack([deltaj_all, ratio1_all, jintra_all, ratio2_all], axis=1).astype(
+        np.float32
+    )
     Y = y_all.astype(np.float32)
 
     logger.info("Dataset generation complete")
