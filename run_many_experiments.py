@@ -321,44 +321,39 @@ def extract_symbolic_formulas(
     model: KharKAN, input_dim: int = 3, round_digits: int = 2
 ) -> Dict[str, Optional[sp.Expr]]:
     """Extract and clean symbolic formulas from trained model."""
-    try:
-        raw_formulas = model.symbolic_formula(round_digits=5)
-        cleaned_formulas = {}
-        
-        x0, x1, x2, x3 = sp.symbols('x_0 x_1 x_2 x_3')
-        j, dJ = sp.symbols("j dJ")  # Physical variable names
+    raw_formulas = model.symbolic_formula(round_digits=5)
+    cleaned_formulas = {}
 
-        for output_name in ['z_0', 'z_1', 'z_2']:
-            raw = raw_formulas.get(output_name, None)
-            if raw is not None and isinstance(raw, sp.Expr):
-                # Consistent mapping: x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra, x3=Jintra/deltaJ
-                # Replace with meaningful variable names: dJ, dJ/j, j, j/dJ
-                if input_dim == 2:
-                    # x0=deltaJ, x1=deltaJ/Jintra
-                    e = raw.subs({x0: dJ, x1: dJ / j})
-                elif input_dim == 3:
-                    # x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra
-                    e = raw.subs({x0: dJ, x1: dJ / j, x2: j})
-                elif input_dim == 4:
-                    # x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra, x3=Jintra/deltaJ
-                    e = raw.subs({x0: dJ, x1: dJ / j, x2: j, x3: j / dJ})
-                else:
-                    e = raw
+    x0, x1, x2, x3 = sp.symbols("x_0 x_1 x_2 x_3")
+    j, dJ = sp.symbols("j dJ")  # Physical variable names
 
-                e = _fix_powers(e)
-                e = _round_expr(e, 5)
-                e = _clean_expr(e, eps=1e-5)
-                e = _round_expr(e, round_digits)
-                cleaned_formulas[output_name] = e
-                cleaned_formulas[output_name] = e
+    for output_name in ["z_0", "z_1", "z_2"]:
+        raw = raw_formulas.get(output_name, None)
+        if raw is not None and isinstance(raw, sp.Expr):
+            # Consistent mapping: x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra, x3=Jintra/deltaJ
+            # Replace with meaningful variable names: dJ, dJ/j, j, j/dJ
+            if input_dim == 2:
+                # x0=deltaJ, x1=deltaJ/Jintra
+                e = raw.subs({x0: dJ, x1: dJ / j})
+            elif input_dim == 3:
+                # x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra
+                e = raw.subs({x0: dJ, x1: dJ / j, x2: j})
+            elif input_dim == 4:
+                # x0=deltaJ, x1=deltaJ/Jintra, x2=Jintra, x3=Jintra/deltaJ
+                e = raw.subs({x0: dJ, x1: dJ / j, x2: j, x3: j / dJ})
             else:
-                cleaned_formulas[output_name] = None
-                
-        return cleaned_formulas
-    except Exception as e:
-        print(f"Error extracting symbolic formulas: {e}")
-        return {f'z_{i}': None for i in range(3)}
+                e = raw
 
+            e = _fix_powers(e)
+            e = _round_expr(e, 5)
+            e = _clean_expr(e, eps=1e-5)
+            e = _round_expr(e, round_digits)
+            cleaned_formulas[output_name] = e
+            cleaned_formulas[output_name] = e
+        else:
+            cleaned_formulas[output_name] = None
+
+    return cleaned_formulas
 
 def train_module_on_formula(formula: sp.Expr, inputs: torch.Tensor, labels: torch.Tensor, 
                            device: torch.device, epochs: int = 5000, lr: float = 0.001) -> Tuple[torch.nn.Module, float]:
@@ -450,15 +445,12 @@ def finetune_symbolic_formulas(formulas: Dict[str, Optional[sp.Expr]],
             if trained_module is not None:
                 trained_modules[output_name] = trained_module
                 mse_scores[output_name] = final_mse
-                
+
                 # Extract refined formula from trained module
-                try:
-                    refined_formula = trained_module.to_sympy()
-                    refined_formula = round_expr(refined_formula, 3)
-                    refined_formulas[output_name] = refined_formula
-                    print(f"{output_name} - MSE after fine-tuning: {final_mse:.2e}")
-                except:
-                    refined_formulas[output_name] = formula
+                refined_formula = trained_module.to_sympy()
+                refined_formula = round_expr(refined_formula, 3)
+                refined_formulas[output_name] = refined_formula
+                print(f"{output_name} - MSE after fine-tuning: {final_mse:.2e}")
             else:
                 mse_scores[output_name] = float('inf')
                 refined_formulas[output_name] = formula
@@ -509,89 +501,74 @@ def run_single_experiment(
     # Run perturbation theory experiment
     print("\n--- Perturbation Theory Data ---")
     model_pert = KharKAN(architecture)
-    
-    try:
-        loss_hist_pert, mse_hist_pert, rel_err_hist_pert, final_mse_pert = train_kan_model(
-            model_pert, data_pert, config, lr, l05_penalty, config.device
-        )
 
-        formulas_pert = extract_symbolic_formulas(model_pert, architecture[0])
-        complexity_pert = calculate_formula_complexity(formulas_pert)
-        
-        # Fine-tune symbolic formulas
-        print("Fine-tuning symbolic formulas...")
-        trained_modules_pert, mse_scores_pert, refined_formulas_pert = finetune_symbolic_formulas(
-            formulas_pert, data_pert, config.device
-        )
-        
-        results['perturbation'] = {
-            'final_mse': final_mse_pert,
-            'loss_history': loss_hist_pert,
-            'mse_history': mse_hist_pert,
-            'rel_err_history': rel_err_hist_pert,
-            'formulas': formulas_pert,
-            'refined_formulas': refined_formulas_pert,
-            'symbolic_mse_scores': mse_scores_pert,
-            'complexity': complexity_pert,
-            'total_complexity': sum(c for c in complexity_pert.values() if c != float('inf'))
-        }
-        
-        print(f"Perturbation - Final MSE: {final_mse_pert:.2e}")
-        for name, formula in formulas_pert.items():
-            if formula is not None:
-                print(f"{name}: {formula}")
-                
-    except Exception as e:
-        print(f"Error in perturbation experiment: {e}")
-        results['perturbation'] = {'error': str(e)}
-    finally:
-        del model_pert
-        torch.cuda.empty_cache()
-        gc.collect()
-    
+    loss_hist_pert, mse_hist_pert, rel_err_hist_pert, final_mse_pert = train_kan_model(
+        model_pert, data_pert, config, lr, l05_penalty, config.device
+    )
+
+    formulas_pert = extract_symbolic_formulas(model_pert, architecture[0])
+    complexity_pert = calculate_formula_complexity(formulas_pert)
+
+    # Fine-tune symbolic formulas
+    print("Fine-tuning symbolic formulas...")
+    trained_modules_pert, mse_scores_pert, refined_formulas_pert = (
+        finetune_symbolic_formulas(formulas_pert, data_pert, config.device)
+    )
+
+    results["perturbation"] = {
+        "final_mse": final_mse_pert,
+        "loss_history": loss_hist_pert,
+        "mse_history": mse_hist_pert,
+        "rel_err_history": rel_err_hist_pert,
+        "formulas": formulas_pert,
+        "refined_formulas": refined_formulas_pert,
+        "symbolic_mse_scores": mse_scores_pert,
+        "complexity": complexity_pert,
+        "total_complexity": sum(
+            c for c in complexity_pert.values() if c != float("inf")
+        ),
+    }
+
+    print(f"Perturbation - Final MSE: {final_mse_pert:.2e}")
+    for name, formula in formulas_pert.items():
+        if formula is not None:
+            print(f"{name}: {formula}")
+
     # Run eigenvalue experiment
     print("\n--- Eigenvalue Data ---")
     model_eigen = KharKAN(architecture)
-    
-    try:
-        loss_hist_eigen, mse_hist_eigen, rel_err_hist_eigen, final_mse_eigen = train_kan_model(
-            model_eigen, data_eigen, config, lr, l05_penalty, config.device
-        )
 
-        formulas_eigen = extract_symbolic_formulas(model_eigen, architecture[0])
-        complexity_eigen = calculate_formula_complexity(formulas_eigen)
-        
-        # Fine-tune symbolic formulas
-        print("Fine-tuning symbolic formulas...")
-        trained_modules_eigen, mse_scores_eigen, refined_formulas_eigen = finetune_symbolic_formulas(
-            formulas_eigen, data_eigen, config.device
-        )
-        
-        results['eigenvalue'] = {
-            'final_mse': final_mse_eigen,
-            'loss_history': loss_hist_eigen,
-            'mse_history': mse_hist_eigen,
-            'rel_err_history': rel_err_hist_eigen,
-            'formulas': formulas_eigen,
-            'refined_formulas': refined_formulas_eigen,
-            'symbolic_mse_scores': mse_scores_eigen,
-            'complexity': complexity_eigen,
-            'total_complexity': sum(c for c in complexity_eigen.values() if c != float('inf'))
-        }
-        
-        print(f"Eigenvalue - Final MSE: {final_mse_eigen:.2e}")
-        for name, formula in formulas_eigen.items():
-            if formula is not None:
-                print(f"{name}: {formula}")
-                
-    except Exception as e:
-        print(f"Error in eigenvalue experiment: {e}")
-        results['eigenvalue'] = {'error': str(e)}
-    finally:
-        del model_eigen
-        torch.cuda.empty_cache()
-        gc.collect()
-    
+    loss_hist_eigen, mse_hist_eigen, rel_err_hist_eigen, final_mse_eigen = (
+        train_kan_model(model_eigen, data_eigen, config, lr, l05_penalty, config.device)
+    )
+
+    formulas_eigen = extract_symbolic_formulas(model_eigen, architecture[0])
+    complexity_eigen = calculate_formula_complexity(formulas_eigen)
+
+    # Fine-tune symbolic formulas
+    print("Fine-tuning symbolic formulas...")
+    trained_modules_eigen, mse_scores_eigen, refined_formulas_eigen = (
+        finetune_symbolic_formulas(formulas_eigen, data_eigen, config.device)
+    )
+
+    results["eigenvalue"] = {
+        "final_mse": final_mse_eigen,
+        "loss_history": loss_hist_eigen,
+        "mse_history": mse_hist_eigen,
+        "rel_err_history": rel_err_hist_eigen,
+        "formulas": formulas_eigen,
+        "refined_formulas": refined_formulas_eigen,
+        "symbolic_mse_scores": mse_scores_eigen,
+        "complexity": complexity_eigen,
+        "total_complexity": sum(
+            c for c in complexity_eigen.values() if c != float("inf")
+        ),
+    }
+
+    print(f"Eigenvalue - Final MSE: {final_mse_eigen:.2e}")
+    for name, formula in formulas_eigen.items():
+        if formula is not None:
+            print(f"{name}: {formula}")
     return results
 
 
@@ -662,7 +639,13 @@ def main():
     print(f"Output directory: {output_dir}")
     
     # Iterate over all parameter sets for comprehensive testing
-    param_names = ["working", "nonlinear", "realistic", "bidirectional"]
+    param_names = [
+        "working",
+        "nonlinear",
+        "realistic",
+        "bidirectional",
+        "realistic_truncated",
+    ]
     all_datasets = {}
     
     print("\nGenerating datasets for all parameter sets...")

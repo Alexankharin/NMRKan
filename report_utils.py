@@ -15,7 +15,7 @@ from typing import Dict, List, Any, Optional
 from pathlib import Path
 
 
-def safe_format_float(value, format_str=":.2e", default="N/A"):
+def safe_format_float(value, format_str=".2e", default="N/A"):
     """Safely format a float value, returning default if not a number."""
     try:
         # Handle None values
