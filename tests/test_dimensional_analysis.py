@@ -33,20 +33,35 @@ def test_dimensional_analysis():
     test_formulas = [
         # Good formulas (dimensionally consistent)
         ("Simple frequency", dJ, True),
-        ("Sum of frequencies", dJ + j, True),  
-        ("Frequency combination", dJ + j/2, True),
-        ("Perturbation theory", dJ/sp.sqrt(2) + dJ**2/(8*j), True),
-        ("Complex mixed", x0*x1 + x2*x3, True),        # Hz*dimensionless + Hz*dimensionless
-
-        
+        ("Sum of frequencies", dJ + j, True),
+        ("Frequency combination", dJ + j / 2, True),
+        ("Perturbation theory", dJ / sp.sqrt(2) + dJ**2 / (8 * j), True),
+        (
+            "Complex mixed",
+            x0 * x1 + x2 * x3,
+            True,
+        ),  # Hz*dimensionless + Hz*dimensionless
+        (
+            "polynomial frequency",
+            -0.03 * dJ * j**2.0
+            - 1.23 * dJ
+            + 0.19 * dJ**2.0 / j**2.0
+            + 0.02 * j
+            + 0.01 * j**2.0
+            + 0.05,
+            False,
+        ),
         # Bad formulas (dimensionally inconsistent)
-        ("Mixed dimensions in sum", dJ + dJ/j, False),  # Hz + dimensionless
-        ("Dimensional exponent", sp.exp(dJ), False),     # exp(Hz) is invalid
-        ("More mixed dimensions", x0 + x1, False),       # Hz + dimensionless
-        
+        ("Mixed dimensions in sum", dJ + dJ / j, False),  # Hz + dimensionless
+        ("Dimensional exponent", sp.exp(dJ), False),  # exp(Hz) is invalid
+        ("More mixed dimensions", x0 + x1, False),  # Hz + dimensionless
         # Formulas that can be fixed
-        ("Fixable mixed sum", dJ + j + dJ/j, True),     # Should keep frequency terms
-        ("Multiple exp terms", sp.exp(dJ/j) + sp.exp(dJ), True),  # Should zero out exp(dJ)
+        ("Fixable mixed sum", dJ + j + dJ / j, True),  # Should keep frequency terms
+        (
+            "Multiple exp terms",
+            sp.exp(dJ / j) + sp.exp(dJ),
+            True,
+        ),  # Should zero out exp(dJ)
     ]
     
     print("Testing formulas:")

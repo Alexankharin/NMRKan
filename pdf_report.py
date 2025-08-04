@@ -317,6 +317,118 @@ def create_formula_table_page(all_results, fig):
             ax.set_title(f'Formula Results (Page {page+1}/{num_pages})', pad=20)
 
 
+def create_optimization_results_table(all_results, fig):
+    """Create a table showing coefficient optimization results."""
+
+    fig.clear()
+    fig.suptitle("Coefficient Optimization Results", fontsize=16, fontweight="bold")
+
+    # Collect optimization data
+    opt_data = []
+
+    for result in all_results:
+        if "error" in result:
+            continue
+
+        exp_id = result["experiment_id"]
+        architecture = str(result["architecture"])
+
+        for data_type in ["perturbation", "eigenvalue"]:
+            if data_type in result and "error" not in result[data_type]:
+                data = result[data_type]
+
+                # Extract optimization results
+                optimization_results = data.get("optimization_results", {})
+
+                for output_name in ["z_0", "z_1", "z_2"]:
+                    opt_result = optimization_results.get(output_name, {})
+
+                    if opt_result and opt_result.get("optimization_success", False):
+                        original_mse = opt_result.get("original_mse", float("inf"))
+                        optimized_mse = opt_result.get("optimized_mse", float("inf"))
+                        epochs_trained = opt_result.get("epochs_trained", 0)
+                        improvement = (
+                            ((original_mse - optimized_mse) / original_mse * 100)
+                            if original_mse > 0
+                            else 0
+                        )
+
+                        opt_data.append(
+                            {
+                                "Experiment": exp_id,
+                                "Architecture": architecture,
+                                "Data_Type": data_type.capitalize(),
+                                "Output": output_name,
+                                "Original_MSE": safe_format_float(original_mse),
+                                "Optimized_MSE": safe_format_float(optimized_mse),
+                                "Improvement_%": f"{improvement:.1f}%",
+                                "Epochs": epochs_trained,
+                                "Status": "Success",
+                            }
+                        )
+                    else:
+                        message = opt_result.get("message", "No optimization attempted")
+                        opt_data.append(
+                            {
+                                "Experiment": exp_id,
+                                "Architecture": architecture,
+                                "Data_Type": data_type.capitalize(),
+                                "Output": output_name,
+                                "Original_MSE": "N/A",
+                                "Optimized_MSE": "N/A",
+                                "Improvement_%": "N/A",
+                                "Epochs": "N/A",
+                                "Status": message[:30]
+                                + ("..." if len(message) > 30 else ""),
+                            }
+                        )
+
+    if not opt_data:
+        ax = fig.add_subplot(111)
+        ax.text(
+            0.5,
+            0.5,
+            "No optimization results found",
+            ha="center",
+            va="center",
+            transform=ax.transAxes,
+            fontsize=14,
+        )
+        ax.axis("off")
+        return
+
+    # Create table
+    df = pd.DataFrame(opt_data)
+
+    # Split into multiple tables if too many rows
+    rows_per_page = 20
+    num_pages = (len(df) + rows_per_page - 1) // rows_per_page
+
+    for page in range(num_pages):
+        start_idx = page * rows_per_page
+        end_idx = min((page + 1) * rows_per_page, len(df))
+        page_data = df.iloc[start_idx:end_idx]
+
+        ax = fig.add_subplot(num_pages, 1, page + 1)
+        ax.axis("tight")
+        ax.axis("off")
+
+        table = ax.table(
+            cellText=page_data.values,
+            colLabels=page_data.columns,
+            cellLoc="center",
+            loc="center",
+        )
+        table.auto_set_font_size(False)
+        table.set_fontsize(7)
+        table.scale(1.2, 1.5)
+
+        if page == 0:
+            ax.set_title(f"Optimization Results (Page {page + 1}/{num_pages})", pad=20)
+        else:
+            ax.set_title(f"Optimization Results (Page {page + 1}/{num_pages})", pad=20)
+
+
 def create_comprehensive_summary_table(all_results, fig):
     """Create a comprehensive summary table with MSE, formulas, and complexity for each parameter set and architecture."""
     
@@ -620,7 +732,13 @@ def generate_pdf_report(all_results: List[Dict[str, Any]], all_datasets: Dict, c
         create_formula_table_page(all_results, fig)
         pdf.savefig(fig, bbox_inches='tight')
         plt.close(fig)
-        
+
+        # Coefficient optimization results
+        fig = plt.figure(figsize=(18, 12))
+        create_optimization_results_table(all_results, fig)
+        pdf.savefig(fig, bbox_inches="tight")
+        plt.close(fig)
+
         # Comprehensive summary table
         fig = plt.figure(figsize=(20, 15))
         create_comprehensive_summary_table(all_results, fig)

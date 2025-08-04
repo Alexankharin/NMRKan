@@ -43,7 +43,6 @@ if "." not in sys.path:
 
 from nmrkan.models import KharKAN, _clean_expr, _fix_powers, _round_expr
 from nmrkan.nmr import get_frequences_ordered
-from nmrkan.sympy_torch import torchModelFromFormula
 from report_utils import save_results_to_csv, print_console_summary, print_detailed_console_summary
 from pdf_report import generate_pdf_report
 
@@ -355,110 +354,144 @@ def extract_symbolic_formulas(
 
     return cleaned_formulas
 
-def train_module_on_formula(formula: sp.Expr, inputs: torch.Tensor, labels: torch.Tensor, 
-                           device: torch.device, epochs: int = 5000, lr: float = 0.001) -> Tuple[torch.nn.Module, float]:
+
+def apply_dimensional_fixing(
+    formulas: Dict[str, Optional[sp.Expr]],
+    input_dim: int,
+    x_data: Optional[torch.Tensor] = None,
+    y_data: Optional[Dict[str, torch.Tensor]] = None,
+    expected_output_dim: Optional[str] = "Hz",
+) -> Tuple[Dict[str, sp.Expr], Dict[str, bool], Dict[str, str], Dict[str, Dict]]:
     """
-    Train a symbolic module created from a formula.
-    
+    Apply dimensional analysis to fix symbolic formulas and optionally optimize coefficients.
+
     Args:
-        formula: SymPy expression to convert to PyTorch module
-        inputs: Input tensor (batch_size, num_inputs)
-        labels: Target tensor (batch_size, 1)
-        device: Device to train on
-        epochs: Number of training epochs
-        lr: Learning rate
-        
+        formulas: Dictionary of symbolic formulas from KAN model
+        input_dim: Number of input dimensions (2, 3, or 4)
+        x_data: Input data for coefficient optimization (optional)
+        y_data: Output data for coefficient optimization (optional)
+        expected_output_dim: Expected output dimension ("Hz" or "dimensionless")
+
     Returns:
-        Tuple of (trained_module, final_mse)
+        Tuple of (fixed_formulas, consistency_flags, messages, optimization_results)
     """
-    if formula is None:
-        return None, float('inf')
-    
     try:
-        # Create PyTorch model from formula
-        module = torchModelFromFormula(formula)
-        module.to(device)
-        
-        # Setup training
-        optimizer = torch.optim.Adam(module.parameters(), lr=lr)
-        criterion = torch.nn.MSELoss()
-        
-        # Prepare input dictionary for symbolic model
-        input_dict = {}
-        num_inputs = inputs.shape[1]
-        for i in range(num_inputs):
-            input_dict[f"x_{i}"] = inputs[:, i:i+1]
-        
-        # Training loop
-        for epoch in range(epochs):
-            optimizer.zero_grad()
-            outputs = module(input_dict)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-        
-        # Calculate final MSE
-        with torch.no_grad():
-            final_outputs = module(input_dict)
-            final_mse = criterion(final_outputs, labels).item()
-        
-        return module, final_mse
-        
-    except Exception as e:
-        print(f"Error training symbolic module: {e}")
-        return None, float('inf')
+        from nmrkan.dimensional_analysis import (
+            analyze_nmr_formula,
+            optimize_formula_coefficients,
+        )
+        from nmrkan.dimensional_analysis import Dimension, _hz
+    except ImportError:
+        print(
+            "Warning: dimensional_analysis module not available, returning original formulas"
+        )
+        return (
+            formulas,
+            {k: True for k in formulas.keys()},
+            {k: "No dimensional analysis" for k in formulas.keys()},
+            {k: {} for k in formulas.keys()},
+        )
 
+    # Set expected output dimension
+    if expected_output_dim == "Hz":
+        expected_dim = _hz(1)
+    elif expected_output_dim == "dimensionless":
+        expected_dim = Dimension()
+    else:
+        expected_dim = _hz(1)  # default to Hz
 
-def finetune_symbolic_formulas(formulas: Dict[str, Optional[sp.Expr]], 
-                              data: Dict[str, torch.Tensor], 
-                              device: torch.device) -> Tuple[Dict[str, torch.nn.Module], Dict[str, float], Dict[str, sp.Expr]]:
-    """
-    Fine-tune symbolic formulas using torchModelFromFormula.
-    
-    Args:
-        formulas: Dictionary of symbolic formulas
-        data: Dictionary with 'train_input' and 'train_label'
-        device: Device to train on
-        
-    Returns:
-        Tuple of (trained_modules, mse_scores, refined_formulas)
-    """
-    trained_modules = {}
-    mse_scores = {}
-    refined_formulas = {}
-    
-    inputs = data['train_input'].to(device)
-    labels = data['train_label'].to(device)
-    
-    for i, (output_name, formula) in enumerate(formulas.items()):
+    fixed_formulas = {}
+    consistency_flags = {}
+    messages = {}
+    optimization_results = {}
+
+    print(
+        f"Applying dimensional analysis to fix formulas (expecting {expected_output_dim})..."
+    )
+
+    for output_name, formula in formulas.items():
         if formula is not None:
-            print(f"Fine-tuning formula for {output_name}...")
-            
-            # Extract corresponding output labels
-            output_labels = labels[:, i:i+1]
-            
-            # Train the symbolic module
-            trained_module, final_mse = train_module_on_formula(
-                formula, inputs, output_labels, device
-            )
-            
-            if trained_module is not None:
-                trained_modules[output_name] = trained_module
-                mse_scores[output_name] = final_mse
+            print(f"Analyzing formula for {output_name}: {formula}")
 
-                # Extract refined formula from trained module
-                refined_formula = trained_module.to_sympy()
-                refined_formula = round_expr(refined_formula, 3)
-                refined_formulas[output_name] = refined_formula
-                print(f"{output_name} - MSE after fine-tuning: {final_mse:.2e}")
+            # Analyze the formula with dimensional analysis
+            analysis = analyze_nmr_formula(formula, expected_output_dim=expected_dim)
+
+            # Use the fixed formula if it's different and consistent
+            if analysis["formula_changed"] and analysis["fixed_consistent"]:
+                fixed_formulas[output_name] = analysis["fixed_formula"]
+                consistency_flags[output_name] = True
+                messages[output_name] = f"Fixed: {analysis['fixed_message']}"
+                print(f"  {output_name} - Fixed formula: {analysis['fixed_formula']}")
+            elif analysis["original_consistent"]:
+                fixed_formulas[output_name] = formula
+                consistency_flags[output_name] = True
+                messages[output_name] = f"Original OK: {analysis['original_message']}"
+                print(f"  {output_name} - Original formula is dimensionally consistent")
             else:
-                mse_scores[output_name] = float('inf')
-                refined_formulas[output_name] = formula
+                # Try to use fixed formula even if not fully consistent
+                if analysis["formula_changed"]:
+                    fixed_formulas[output_name] = analysis["fixed_formula"]
+                    consistency_flags[output_name] = False
+                    messages[output_name] = (
+                        f"Partially fixed: {analysis['fixed_message']}"
+                    )
+                    print(
+                        f"  {output_name} - Partially fixed: {analysis['fixed_formula']}"
+                    )
+                else:
+                    fixed_formulas[output_name] = formula
+                    consistency_flags[output_name] = False
+                    messages[output_name] = (
+                        f"Could not fix: {analysis['original_message']}"
+                    )
+                    print(f"  {output_name} - Could not fix dimensional issues")
+
+            # Perform coefficient optimization if data is provided
+            if x_data is not None and y_data is not None and output_name in y_data:
+                print(f"  {output_name} - Optimizing coefficients...")
+                try:
+                    x_np = x_data.detach().cpu().numpy()
+                    y_np = y_data[output_name].detach().cpu().numpy()
+
+                    opt_result = optimize_formula_coefficients(
+                        fixed_formulas[output_name], x_np, y_np, max_epochs=500, lr=0.01
+                    )
+
+                    if opt_result["optimization_success"]:
+                        fixed_formulas[output_name] = opt_result["optimized_formula"]
+                        messages[output_name] += (
+                            f" | Coeffs optimized: MSE {opt_result['original_mse']:.4f} → {opt_result['optimized_mse']:.4f}"
+                        )
+                        print(f"  {output_name} - Coefficient optimization successful")
+                    else:
+                        print(
+                            f"  {output_name} - Coefficient optimization failed: {opt_result['message']}"
+                        )
+
+                    optimization_results[output_name] = opt_result
+
+                except Exception as e:
+                    print(f"  {output_name} - Coefficient optimization error: {str(e)}")
+                    optimization_results[output_name] = {
+                        "optimization_success": False,
+                        "message": f"Optimization error: {str(e)}",
+                    }
+            else:
+                optimization_results[output_name] = {
+                    "optimization_success": False,
+                    "message": "No data provided for optimization",
+                }
+
         else:
-            mse_scores[output_name] = float('inf')
-            refined_formulas[output_name] = None
-    
-    return trained_modules, mse_scores, refined_formulas
+            fixed_formulas[output_name] = None
+            consistency_flags[output_name] = False
+            messages[output_name] = "No formula found"
+            optimization_results[output_name] = {
+                "optimization_success": False,
+                "message": "No formula to optimize",
+            }
+
+    return fixed_formulas, consistency_flags, messages, optimization_results
 
 
 def calculate_formula_complexity(formulas: Dict[str, Optional[sp.Expr]]) -> Dict[str, int]:
@@ -507,12 +540,26 @@ def run_single_experiment(
     )
 
     formulas_pert = extract_symbolic_formulas(model_pert, architecture[0])
+
     complexity_pert = calculate_formula_complexity(formulas_pert)
 
-    # Fine-tune symbolic formulas
-    print("Fine-tuning symbolic formulas...")
-    trained_modules_pert, mse_scores_pert, refined_formulas_pert = (
-        finetune_symbolic_formulas(formulas_pert, data_pert, config.device)
+    # Apply dimensional analysis to fix formulas and optimize coefficients
+    print("Applying dimensional analysis to fix formulas...")
+    (
+        refined_formulas_pert,
+        consistency_flags_pert,
+        fix_messages_pert,
+        optimization_results_pert,
+    ) = apply_dimensional_fixing(
+        formulas_pert,
+        architecture[0],
+        x_data=data_pert["train_input"],
+        y_data={
+            "z_0": data_pert["train_label"][:, 0],
+            "z_1": data_pert["train_label"][:, 1],
+            "z_2": data_pert["train_label"][:, 2],
+        },
+        expected_output_dim="Hz",
     )
 
     results["perturbation"] = {
@@ -522,7 +569,9 @@ def run_single_experiment(
         "rel_err_history": rel_err_hist_pert,
         "formulas": formulas_pert,
         "refined_formulas": refined_formulas_pert,
-        "symbolic_mse_scores": mse_scores_pert,
+        "dimensional_consistency": consistency_flags_pert,
+        "dimensional_messages": fix_messages_pert,
+        "optimization_results": optimization_results_pert,
         "complexity": complexity_pert,
         "total_complexity": sum(
             c for c in complexity_pert.values() if c != float("inf")
@@ -545,10 +594,23 @@ def run_single_experiment(
     formulas_eigen = extract_symbolic_formulas(model_eigen, architecture[0])
     complexity_eigen = calculate_formula_complexity(formulas_eigen)
 
-    # Fine-tune symbolic formulas
-    print("Fine-tuning symbolic formulas...")
-    trained_modules_eigen, mse_scores_eigen, refined_formulas_eigen = (
-        finetune_symbolic_formulas(formulas_eigen, data_eigen, config.device)
+    # Apply dimensional analysis to fix formulas and optimize coefficients
+    print("Applying dimensional analysis to fix formulas...")
+    (
+        refined_formulas_eigen,
+        consistency_flags_eigen,
+        fix_messages_eigen,
+        optimization_results_eigen,
+    ) = apply_dimensional_fixing(
+        formulas_eigen,
+        architecture[0],
+        x_data=data_eigen["train_input"],
+        y_data={
+            "z_0": data_eigen["train_label"][:, 0],
+            "z_1": data_eigen["train_label"][:, 1],
+            "z_2": data_eigen["train_label"][:, 2],
+        },
+        expected_output_dim="Hz",
     )
 
     results["eigenvalue"] = {
@@ -558,7 +620,9 @@ def run_single_experiment(
         "rel_err_history": rel_err_hist_eigen,
         "formulas": formulas_eigen,
         "refined_formulas": refined_formulas_eigen,
-        "symbolic_mse_scores": mse_scores_eigen,
+        "dimensional_consistency": consistency_flags_eigen,
+        "dimensional_messages": fix_messages_eigen,
+        "optimization_results": optimization_results_eigen,
         "complexity": complexity_eigen,
         "total_complexity": sum(
             c for c in complexity_eigen.values() if c != float("inf")
@@ -592,11 +656,14 @@ def save_results_to_json(all_results, output_dir):
                 data = result[data_type]
                 if 'error' not in data:
                     serializable_data = {
-                        'final_mse': data.get('final_mse'),
-                        'total_complexity': data.get('total_complexity'),
-                        'formulas': {},
-                        'refined_formulas': {},
-                        'symbolic_mse_scores': data.get('symbolic_mse_scores', {})
+                        "final_mse": data.get("final_mse"),
+                        "total_complexity": data.get("total_complexity"),
+                        "formulas": {},
+                        "refined_formulas": {},
+                        "dimensional_consistency": data.get(
+                            "dimensional_consistency", {}
+                        ),
+                        "dimensional_messages": data.get("dimensional_messages", {}),
                     }
                     
                     # Convert sympy expressions to strings
@@ -846,8 +913,8 @@ def main():
     
     # Save results to JSON
     save_results_to_json(all_results, output_dir)
-    
-    print(f"\nExperiments completed!")
+
+    print("\nExperiments completed!")
     print(f"Results directory: {output_dir}")
     
     # Print summary statistics using utility functions

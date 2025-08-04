@@ -8,6 +8,15 @@ from .datagen import (
     CalcFreqsIdealized,
     compute_transition_frequency,
 )
+from .dimensional_analysis import (
+    Dimension,
+    analyze_nmr_formula,
+    check_dimensional_consistency,
+    apply_dimensional_analysis,
+    get_variable_dimensions,
+    get_nmr_output_dimension,
+    optimize_formula_coefficients,
+)
 
 __all__ = [
     "KharKAN",
@@ -20,4 +29,11 @@ __all__ = [
     "HMatrixIdealized",
     "CalcFreqsIdealized",
     "compute_transition_frequency",
+    "Dimension",
+    "analyze_nmr_formula",
+    "check_dimensional_consistency",
+    "apply_dimensional_analysis",
+    "get_variable_dimensions",
+    "get_nmr_output_dimension",
+    "optimize_formula_coefficients",
 ]
