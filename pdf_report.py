@@ -24,6 +24,164 @@ except ImportError:
 from report_utils import safe_format_float
 
 
+def create_dimensionless_plots(data_pert, data_eigen, fig, input_dim=1):
+    """Create plots for dimensionless data (1D or 2D inputs)."""
+
+    try:
+        # Extract data for plotting
+        X_pert = data_pert["train_input"].numpy()
+        Z_pert = data_pert["train_label"].numpy()
+
+        X_eigen = data_eigen["train_input"].numpy()
+        Z_eigen = data_eigen["train_label"].numpy()
+
+        print("Plotting dimensionless data shapes:")
+        print(f"  X_pert: {X_pert.shape}, Z_pert: {Z_pert.shape}")
+        print(f"  X_eigen: {X_eigen.shape}, Z_eigen: {Z_eigen.shape}")
+
+        # Sample subset for cleaner plots
+        n_samples = min(2000, len(X_pert))
+        indices = np.random.choice(len(X_pert), n_samples, replace=False)
+
+        if input_dim == 1:
+            # 1D input plots (dJ/J vs output)
+            for i in range(min(3, Z_pert.shape[1] if len(Z_pert.shape) > 1 else 1)):
+                # Perturbation data
+                ax = fig.add_subplot(2, 3, i + 1)
+
+                if len(Z_pert.shape) > 1 and Z_pert.shape[1] > i:
+                    z_data_pert = Z_pert[indices, i]
+                else:
+                    z_data_pert = (
+                        Z_pert[indices]
+                        if i == 0
+                        else np.zeros_like(indices, dtype=float)
+                    )
+
+                scatter = ax.scatter(
+                    X_pert[indices, 0],
+                    z_data_pert,
+                    c=z_data_pert,
+                    cmap="viridis",
+                    s=2,
+                    alpha=0.7,
+                )
+                ax.set_xlabel("dJ/J (dimensionless)")
+                ax.set_ylabel(f"Z{i}/J (dimensionless)")
+                ax.set_title(f"Perturbation Theory - Output {i}")
+                ax.grid(True, alpha=0.3)
+                try:
+                    plt.colorbar(scatter, ax=ax, shrink=0.8)
+                except Exception as e:
+                    print(f"Colorbar error for 1D perturbation plot {i}: {e}")
+
+                # Eigenvalue data
+                ax = fig.add_subplot(2, 3, i + 4)
+
+                if len(Z_eigen.shape) > 1 and Z_eigen.shape[1] > i:
+                    z_data_eigen = Z_eigen[indices, i]
+                else:
+                    z_data_eigen = (
+                        Z_eigen[indices]
+                        if i == 0
+                        else np.zeros_like(indices, dtype=float)
+                    )
+
+                scatter = ax.scatter(
+                    X_eigen[indices, 0],
+                    z_data_eigen,
+                    c=z_data_eigen,
+                    cmap="plasma",
+                    s=2,
+                    alpha=0.7,
+                )
+                ax.set_xlabel("dJ/J (dimensionless)")
+                ax.set_ylabel(f"Z{i}/J (dimensionless)")
+                ax.set_title(f"Eigenvalue - Output {i}")
+                ax.grid(True, alpha=0.3)
+                try:
+                    plt.colorbar(scatter, ax=ax, shrink=0.8)
+                except Exception as e:
+                    print(f"Colorbar error for 1D eigenvalue plot {i}: {e}")
+
+        elif input_dim == 2:
+            # 2D input plots (create 3D scatter plots with dJ/J, J/dJ, output)
+            for i in range(min(3, Z_pert.shape[1] if len(Z_pert.shape) > 1 else 1)):
+                # Perturbation data
+                ax = fig.add_subplot(2, 3, i + 1, projection="3d")
+
+                if len(Z_pert.shape) > 1 and Z_pert.shape[1] > i:
+                    z_data_pert = Z_pert[indices, i]
+                else:
+                    z_data_pert = (
+                        Z_pert[indices]
+                        if i == 0
+                        else np.zeros_like(indices, dtype=float)
+                    )
+
+                scatter = ax.scatter(
+                    X_pert[indices, 0],
+                    X_pert[indices, 1],
+                    z_data_pert,
+                    c=z_data_pert,
+                    cmap="viridis",
+                    s=1,
+                    alpha=0.6,
+                )
+                ax.set_xlabel("dJ/J (dimensionless)")
+                ax.set_ylabel("J/dJ (dimensionless)")
+                ax.set_zlabel(f"Z{i}/J (dimensionless)")
+                ax.set_title(f"Perturbation Theory - Output {i}")
+                try:
+                    plt.colorbar(scatter, ax=ax, shrink=0.5)
+                except Exception as e:
+                    print(f"Colorbar error for 2D perturbation plot {i}: {e}")
+
+                # Eigenvalue data
+                ax = fig.add_subplot(2, 3, i + 4, projection="3d")
+
+                if len(Z_eigen.shape) > 1 and Z_eigen.shape[1] > i:
+                    z_data_eigen = Z_eigen[indices, i]
+                else:
+                    z_data_eigen = (
+                        Z_eigen[indices]
+                        if i == 0
+                        else np.zeros_like(indices, dtype=float)
+                    )
+
+                scatter = ax.scatter(
+                    X_eigen[indices, 0],
+                    X_eigen[indices, 1],
+                    z_data_eigen,
+                    c=z_data_eigen,
+                    cmap="plasma",
+                    s=1,
+                    alpha=0.6,
+                )
+                ax.set_xlabel("dJ/J (dimensionless)")
+                ax.set_ylabel("J/dJ (dimensionless)")
+                ax.set_zlabel(f"Z{i}/J (dimensionless)")
+                ax.set_title(f"Eigenvalue - Output {i}")
+                try:
+                    plt.colorbar(scatter, ax=ax, shrink=0.5)
+                except Exception as e:
+                    print(f"Colorbar error for 2D eigenvalue plot {i}: {e}")
+
+    except Exception as e:
+        print(f"Error creating dimensionless plots: {e}")
+        # Create a simple text plot instead
+        ax = fig.add_subplot(111)
+        ax.text(
+            0.5,
+            0.5,
+            f"Error creating dimensionless plots: {str(e)}",
+            ha="center",
+            va="center",
+            transform=ax.transAxes,
+        )
+        ax.axis("off")
+
+
 def create_surface_plots(data_pert, data_eigen, fig, start_subplot=1):
     """Create 3D surface plots for the data."""
     
@@ -36,8 +194,8 @@ def create_surface_plots(data_pert, data_eigen, fig, start_subplot=1):
         X_eigen = data_eigen['train_input'][:, 0].numpy()
         Y_eigen = data_eigen['train_input'][:, 1].numpy()  
         Z_eigen = data_eigen['train_label'].numpy()
-        
-        print(f"Plotting data shapes:")
+
+        print("Plotting data shapes:")
         print(f"  X_pert: {X_pert.shape}, Y_pert: {Y_pert.shape}, Z_pert: {Z_pert.shape}")
         print(f"  X_eigen: {X_eigen.shape}, Y_eigen: {Y_eigen.shape}, Z_eigen: {Z_eigen.shape}")
         
@@ -664,11 +822,21 @@ def generate_pdf_report(all_results: List[Dict[str, Any]], all_datasets: Dict, c
         
         ax = fig.add_subplot(111)
         ax.axis('off')
-        
+
+        # Detect experiment type
+        experiment_type = (
+            "Regular"
+            if any("3d" in all_datasets.get(pname, {}) for pname in param_names)
+            else "Dimensionless"
+        )
+
         report_text = f"""
-        Comprehensive KAN Experiments for NMR Spectroscopy
+        Comprehensive KAN Experiments for NMR Spectroscopy ({experiment_type})
         
-        Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}
+        Generated: {time.strftime("%Y-%m-%d %H:%M:%S")}
+        
+        Experiment Type: {experiment_type}
+        {"• Regular experiments use physical variables (deltaJ, deltaJ/Jintra, Jintra, Jintra/deltaJ)" if experiment_type == "Regular" else "• Dimensionless experiments use ratios (dJ/J, J/dJ) and predict Z/J"}
         
         Experiment Configuration:
         • Parameter sets tested: {len(param_names)} ({param_names})
@@ -703,21 +871,64 @@ def generate_pdf_report(all_results: List[Dict[str, Any]], all_datasets: Dict, c
         
         # Data visualization pages for each parameter set
         for params_name in param_names:
-            datasets_3d = all_datasets[params_name]['3d']
-            datasets_4d = all_datasets[params_name]['4d']
-            
-            if datasets_3d:
-                fig = plt.figure(figsize=(15, 10))
-                fig.suptitle(f'3D Data Surfaces - {params_name.upper()} Parameter Set - 3 Input Architecture', fontsize=14, fontweight='bold')
-                create_surface_plots(datasets_3d['pert'], datasets_3d['eigen'], fig)
-                pdf.savefig(fig, bbox_inches='tight')
-                plt.close(fig)
-            
-            if datasets_4d:
-                fig = plt.figure(figsize=(15, 10))
-                fig.suptitle(f'3D Data Surfaces - {params_name.upper()} Parameter Set - 4 Input Architecture', fontsize=14, fontweight='bold')
-                create_surface_plots(datasets_4d['pert'], datasets_4d['eigen'], fig)
-                pdf.savefig(fig, bbox_inches='tight')
+            # Handle both regular experiments (3d, 4d) and dimensionless experiments (1d, 2d)
+            if "3d" in all_datasets[params_name]:
+                # Regular experiments
+                datasets_3d = all_datasets[params_name]["3d"]
+                datasets_4d = all_datasets[params_name]["4d"]
+
+                if datasets_3d:
+                    fig = plt.figure(figsize=(15, 10))
+                    fig.suptitle(
+                        f"3D Data Surfaces - {params_name.upper()} Parameter Set - 3 Input Architecture",
+                        fontsize=14,
+                        fontweight="bold",
+                    )
+                    create_surface_plots(datasets_3d["pert"], datasets_3d["eigen"], fig)
+                    pdf.savefig(fig, bbox_inches="tight")
+                    plt.close(fig)
+
+                if datasets_4d:
+                    fig = plt.figure(figsize=(15, 10))
+                    fig.suptitle(
+                        f"3D Data Surfaces - {params_name.upper()} Parameter Set - 4 Input Architecture",
+                        fontsize=14,
+                        fontweight="bold",
+                    )
+                    create_surface_plots(datasets_4d["pert"], datasets_4d["eigen"], fig)
+                    pdf.savefig(fig, bbox_inches="tight")
+                    plt.close(fig)
+
+            elif "1d" in all_datasets[params_name]:
+                # Dimensionless experiments
+                datasets_1d = all_datasets[params_name]["1d"]
+                datasets_2d = all_datasets[params_name]["2d"]
+
+                if datasets_1d:
+                    fig = plt.figure(figsize=(15, 10))
+                    fig.suptitle(
+                        f"Dimensionless Data Plots - {params_name.upper()} Parameter Set - 1 Input Architecture",
+                        fontsize=14,
+                        fontweight="bold",
+                    )
+                    create_dimensionless_plots(
+                        datasets_1d["pert"], datasets_1d["eigen"], fig, input_dim=1
+                    )
+                    pdf.savefig(fig, bbox_inches="tight")
+                    plt.close(fig)
+
+                if datasets_2d:
+                    fig = plt.figure(figsize=(15, 10))
+                    fig.suptitle(
+                        f"Dimensionless Data Plots - {params_name.upper()} Parameter Set - 2 Input Architecture",
+                        fontsize=14,
+                        fontweight="bold",
+                    )
+                    create_dimensionless_plots(
+                        datasets_2d["pert"], datasets_2d["eigen"], fig, input_dim=2
+                    )
+                    pdf.savefig(fig, bbox_inches="tight")
+                    plt.close(fig)
                 plt.close(fig)
         
         # Summary page

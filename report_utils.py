@@ -63,27 +63,28 @@ def extract_experiment_data_for_csv(all_results: List[Dict[str, Any]]) -> List[D
                 
                 # Extract basic experiment info
                 base_info = {
-                    'experiment_id': exp_id,
-                    'param_set': params_name.upper(),
-                    'data_type': data_type.capitalize(),
-                    'input_dimension': f"{input_dim}D",
-                    'architecture': str(architecture),
-                    'learning_rate': lr,
-                    'l05_penalty': l05_penalty,
-                    'neural_mse': safe_format_float(data.get('final_mse')),
-                    'total_original_complexity': data.get('total_complexity', 0),
+                    "experiment_id": exp_id,
+                    "parameter_set": params_name.upper(),
+                    "data_source": data_type.capitalize(),
+                    "input_variables": f"{input_dim}D",
+                    "architecture": str(architecture),
+                    "learning_rate": lr,
+                    "l05_penalty": l05_penalty,
+                    "neural_network_mse": safe_format_float(data.get("final_mse")),
+                    "physical_units_mse": safe_format_float(data.get("physical_mse")),
+                    "total_dimensionless_complexity": data.get("total_complexity", 0),
                 }
                 
                 # Extract formulas and their properties
                 formulas = data.get('formulas', {})
                 refined_formulas = data.get('refined_formulas', {})
                 symbolic_mse_scores = data.get('symbolic_mse_scores', {})
-                
-                # Calculate total refined complexity
+
+                # Calculate total refined complexity for physical unit formulas
                 total_refined_complexity = sum(
                     sp.count_ops(f) for f in refined_formulas.values() if f is not None
                 )
-                base_info['total_refined_complexity'] = total_refined_complexity
+                base_info["total_physical_complexity"] = total_refined_complexity
                 
                 # Add formula-specific data for each output
                 for output_name in ['z_0', 'z_1', 'z_2']:
@@ -93,16 +94,30 @@ def extract_experiment_data_for_csv(all_results: List[Dict[str, Any]]) -> List[D
                     
                     # Create a row for this specific output
                     row_data = base_info.copy()
-                    row_data.update({
-                        'output': output_name,
-                        'original_formula': str(original_formula) if original_formula else 'None',
-                        'original_complexity': sp.count_ops(original_formula) if original_formula else 0,
-                        'refined_formula': str(refined_formula) if refined_formula else 'None',
-                        'refined_complexity': sp.count_ops(refined_formula) if refined_formula else 0,
-                        'symbolic_mse': safe_format_float(symbolic_mse),
-                        'formula_found': 'Yes' if original_formula else 'No',
-                        'formula_refined': 'Yes' if refined_formula else 'No'
-                    })
+                    row_data.update(
+                        {
+                            "output_frequency": output_name,
+                            "dimensionless_formula": str(original_formula)
+                            if original_formula
+                            else "None",
+                            "dimensionless_complexity": sp.count_ops(original_formula)
+                            if original_formula
+                            else 0,
+                            "physical_units_formula": str(refined_formula)
+                            if refined_formula
+                            else "None",
+                            "physical_complexity": sp.count_ops(refined_formula)
+                            if refined_formula
+                            else 0,
+                            "symbolic_regression_mse": safe_format_float(symbolic_mse),
+                            "dimensionless_formula_found": "Yes"
+                            if original_formula
+                            else "No",
+                            "physical_formula_derived": "Yes"
+                            if refined_formula
+                            else "No",
+                        }
+                    )
                     
                     csv_data.append(row_data)
     
@@ -119,9 +134,9 @@ def save_results_to_csv(all_results: List[Dict[str, Any]], output_dir: Path) -> 
     
     # Create DataFrame
     df = pd.DataFrame(csv_data)
-    
-    # Sort by parameter set, data type, and neural MSE
-    df = df.sort_values(['param_set', 'data_type', 'neural_mse'])
+
+    # Sort by parameter set, data source, and neural MSE
+    df = df.sort_values(["parameter_set", "data_source", "neural_network_mse"])
     
     # Save to CSV
     csv_path = output_dir / 'experiment_results.csv'
@@ -189,21 +204,24 @@ def create_summary_csv_data(all_results: List[Dict[str, Any]]) -> List[Dict[str,
             successful_formulas = sum(1 for f in data.get('formulas', {}).values() if f is not None)
             successful_refined = sum(1 for f in refined_formulas.values() if f is not None)
             
-            summary_data.append({
-                'param_set': params_name.upper(),
-                'input_dimension': input_dim,
-                'data_type': data_type.capitalize(),
-                'best_architecture': str(best_result['architecture']),
-                'best_experiment_id': best_result['experiment_id'],
-                'neural_mse': safe_format_float(final_mse),
-                'best_symbolic_mse': safe_format_float(best_symbolic_mse),
-                'formulas_found': f"{successful_formulas}/3",
-                'formulas_refined': f"{successful_refined}/3",
-                'original_complexity': total_complexity_orig,
-                'refined_complexity': total_complexity_refined,
-                'learning_rate': best_result.get('lr', 'N/A'),
-                'l05_penalty': best_result.get('l05_penalty', 'N/A')
-            })
+            summary_data.append(
+                {
+                    "parameter_set": params_name.upper(),
+                    "input_variables": input_dim,
+                    "data_source": data_type.capitalize(),
+                    "best_architecture": str(best_result["architecture"]),
+                    "best_experiment_id": best_result["experiment_id"],
+                    "neural_network_mse": safe_format_float(final_mse),
+                    "physical_units_mse": safe_format_float(data.get("physical_mse")),
+                    "best_symbolic_mse": safe_format_float(best_symbolic_mse),
+                    "dimensionless_formulas_found": f"{successful_formulas}/3",
+                    "physical_formulas_derived": f"{successful_refined}/3",
+                    "dimensionless_complexity": total_complexity_orig,
+                    "physical_complexity": total_complexity_refined,
+                    "learning_rate": best_result.get("lr", "N/A"),
+                    "l05_penalty": best_result.get("l05_penalty", "N/A"),
+                }
+            )
     
     return summary_data
 
