@@ -323,18 +323,19 @@ def extract_and_convert_to_physical_formulas(
 ) -> Dict[str, Optional[sp.Expr]]:
     """
     Extract symbolic formulas from trained dimensionless model and convert to physical units.
-    
+
     Process:
     1. Extract raw formulas from model (in dimensionless form Z/J)
-    2. Replace variable names: x0 -> dJ/J, x1 -> J/dJ  
+    2. Replace variable names: x0 -> dJ/J, x1 -> J/dJ
     3. Multiply by J to convert from dimensionless (Z/J) to physical units (Z)
-    4. Simplify and clean the formulas
-    
+    4. Apply mathematical simplifications (dJ/J * J/dJ = 1)
+    5. Simplify and clean the formulas
+
     Args:
         model: Trained KharKAN model
         input_dim: Number of input dimensions (1 or 2)
         round_digits: Number of digits to round coefficients
-        
+
     Returns:
         Dictionary with output names as keys and physical unit formulas as values
     """
@@ -342,26 +343,27 @@ def extract_and_convert_to_physical_formulas(
     cleaned_formulas = {}
 
     x0, x1 = sp.symbols("x_0 x_1")
-    dJ_over_J, J_over_dJ = sp.symbols("dJ/J J/dJ")  # Use meaningful variable names
-    J = sp.symbols("J")  # Physical scaling variable
+    # Use proper mathematical symbols for correct simplification
+    dJ, J = sp.symbols("dJ J")
 
     for output_name in ["z_0", "z_1", "z_2"]:
         raw = raw_formulas.get(output_name, None)
         if raw is not None and isinstance(raw, sp.Expr):
-            # Step 1: Replace with meaningful dimensionless variable names
+            # Step 1: Replace with actual mathematical expressions
             if input_dim == 1:
                 # x0 = dJ/J
-                e = raw.subs({x0: dJ_over_J})
+                e = raw.subs({x0: dJ / J})
             elif input_dim == 2:
-                # x0 = dJ/J, x1 = J/dJ  
-                e = raw.subs({x0: dJ_over_J, x1: J_over_dJ})
+                # x0 = dJ/J, x1 = J/dJ
+                e = raw.subs({x0: dJ / J, x1: J / dJ})
             else:
                 e = raw
 
             # Step 2: Multiply by J to convert from dimensionless (Z/J) to physical units (Z)
             e = e * J
 
-            # Step 3: Simplify the formula
+            # Step 3: Apply mathematical simplifications
+            # This will correctly handle cases like (dJ/J) * (J/dJ) = 1
             e = sp.simplify(e)
             
             # Step 4: Clean and round
