@@ -57,9 +57,9 @@ def test_variable_substitution():
 def test_dataset_generation():
     """Test that the dataset generation works correctly."""
     print("\nTesting dataset generation:")
-    
-    from run_many_experiments import make_dataset_from_function, get_perturbation
-    from nmrkan.nmr import get_frequences_ordered
+
+    from run_many_experiments import make_dataset_from_function
+    from data_generation import get_frequences_ordered, get_perturbation
     
     # Test 2D dataset
     print("  Testing 2D dataset:")

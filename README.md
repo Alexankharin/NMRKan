@@ -1,53 +1,167 @@
-# NMR Symbolic Regression Repository
+# NMRKan - NMR Symbolic Regression Framework
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Alexankharin/NMRKan)
-This repository simulates NMR frequencies by solving eigenvalues of specific matrices and attempts to symbolically approximate the results, aiming to recover perturbation theory from simulated data.
+
+A unified framework for NMR frequency prediction using symbolic regression with Kolmogorov-Arnold Networks (KANs). This repository simulates NMR frequencies by solving eigenvalues of specific matrices and uses symbolic regression to recover interpretable formulas from the data.
 
 ## Overview
-This project provides a framework for generating synthetic NMR (Nuclear Magnetic Resonance) frequency data, training neural-symbolic models to fit the data, and extracting interpretable symbolic formulas. The ultimate goal is to recover or approximate perturbation theory results from simulated data using symbolic regression.
+NMRKan provides a comprehensive toolkit for:
+- Generating synthetic NMR frequency data from quantum mechanical simulations
+- Training neural-symbolic models (KANs) to fit the data
+- Extracting interpretable symbolic formulas from trained models
+- Running systematic experiments with different data generation approaches
+- Comparing regular and dimensionless formulations
 
-## Structure
-- `nmrkan/` - Core library with models and physics helpers
-- `data/` - All datasets and raw data files
-- `notebooks/` - Jupyter/VSCode notebooks for experiments and analysis
-- `outputs/` - Figures and result outputs
-- `run_symbolic_regressor.py` - Main entrypoint for running symbolic regression
-- `run_grid_search.py` - Simple grid search experiment
-- `genetic_KAN.py` - Evolutionary weight perturbation demo
-- `requirements.txt` - List of required Python packages
+The ultimate goal is to recover or approximate perturbation theory results from simulated data using symbolic regression, bridging the gap between black-box neural models and analytical theory.
+
+## New Simplified Structure (2025)
+
+After refactoring, the repository now has a cleaner, more organized structure with fewer entry points:
+
+### 📁 Repository Organization
+```
+├── main.py                          # 🚀 MAIN ENTRY POINT - Unified CLI
+├── experiments/
+│   └── run_experiments.py          # Consolidated experiment runner
+├── data_generation/                 # All data generation code
+│   ├── __init__.py
+│   ├── eigenvalues_4CH2.py         # 4CH2 system calculations  
+│   ├── nmr_datagen.py              # General NMR data generation
+│   └── datasets.py                 # Dataset creation utilities
+├── nmrkan/                         # Core models and analysis
+│   ├── models.py                   # KAN model implementations
+│   ├── dimensional_analysis.py     # Physics-aware analysis
+│   └── sympy_torch.py             # SymPy integration
+├── data/                           # Generated datasets
+├── experiment_results/             # Experiment outputs
+├── notebooks/                      # Analysis notebooks
+├── tests/                          # Unit tests
+└── legacy/                         # Old scripts (for reference)
+    ├── run_many_experiments.py
+    ├── run_many_experiments_dimensionless.py
+    ├── run_symbolic_regressor.py
+    ├── run_grid_search.py
+    └── genetic_KAN.py
+```
+
+### 🎯 Simple Usage
+
+The new unified interface makes everything accessible through a single command:
+
+```bash
+# Run all experiments (regular + dimensionless)
+python main.py experiment
+
+# Run only regular experiments  
+python main.py experiment --mode regular
+
+# Run only dimensionless experiments
+python main.py experiment --mode dimensionless
+
+# Run symbolic regression
+python main.py symbolic
+
+# Run grid search optimization
+python main.py grid-search
+
+# Run genetic algorithm optimization
+python main.py genetic
+
+# Show repository status
+python main.py status
+
+# List available configuration files
+python main.py list-configs
+
+# Get help
+python main.py --help
+```
+
+## Quick Start
+
+1. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Run a quick experiment:**
+   ```bash
+   python main.py experiment --mode working
+   ```
+
+3. **Check results:**
+   ```bash
+   python main.py status
+   ```
+
+## Key Features
+
+### 🔬 **Multiple Data Generation Approaches**
+- **Regular**: Physical units with dimensional analysis
+- **Dimensionless**: Scale-invariant formulations
+- **4CH2 System**: Specialized 4-spin system calculations
+
+### 🧠 **Advanced Neural Architecture**
+- Kolmogorov-Arnold Networks (KANs) for symbolic regression
+- Automatic symbolic formula extraction
+- Physics-aware dimensional analysis
+
+### 📊 **Comprehensive Experiments**
+- Systematic parameter sweeps
+- Multiple architecture comparisons  
+- Automatic report generation
+- CSV and JSON result exports
+
+### 🎛️ **Flexible Configuration**
+- Command-line interface for all operations
+- Configurable experiment parameters
+- Multiple optimization algorithms
+
+## Migration from Old Structure
+
+If you were using the old scripts directly:
+
+| Old Command                                    | New Command                                      |
+| ---------------------------------------------- | ------------------------------------------------ |
+| `python run_many_experiments.py`               | `python main.py experiment --mode regular`       |
+| `python run_many_experiments_dimensionless.py` | `python main.py experiment --mode dimensionless` |
+| `python run_symbolic_regressor.py`             | `python main.py symbolic`                        |
+| `python run_grid_search.py`                    | `python main.py grid-search`                     |
+| `python genetic_KAN.py`                        | `python main.py genetic`                         |
 
 ## Requirements
 - Python 3.9+
-- See `requirements.txt` for all dependencies:
-  - numpy
-  - pandas
-  - torch
-  - sympy
-  - optuna
-  - tqdm
-  - matplotlib
-  - scipy
+- PyTorch
+- NumPy, SciPy
+- SymPy
+- Matplotlib
+- See `requirements.txt` for complete list
 
-Install all dependencies with:
-```bash
-pip install -r requirements.txt
-```
+## Scientific Background
 
-## Main Notebook Workflow
-The primary workflow is demonstrated in `notebooks/Single_run_end_to_end_test.ipynb`. This notebook walks through:
-- Generating synthetic NMR datasets
-- Training a Kolmogorov-Arnold Network (KAN) model
-- Extracting symbolic expressions from the trained model
-- Cleaning and interpreting the learned formulas
-- Comparing neural and symbolic outputs
-- Visualizing training progress and results
+### Why Symbolic Regression?
+Symbolic regression provides interpretable, human-readable formulas that describe relationships in data. This is especially valuable in scientific domains where understanding the underlying physics is as important as predictive accuracy.
 
-Each step is explained in detail, making it accessible for both programmers and non-programmers interested in symbolic regression and scientific machine learning.
+### NMR Frequency Prediction
+The framework models NMR transition frequencies by:
+1. Generating quantum mechanical Hamiltonians
+2. Computing eigenvalues and transition frequencies
+3. Training neural networks to learn the frequency patterns
+4. Extracting symbolic expressions from the trained networks
+5. Validating results against known perturbation theory
 
-## Why Symbolic Regression?
-Symbolic regression provides interpretable, human-readable formulas that describe the relationships in your data. This is especially valuable in scientific domains, where understanding the underlying physics is as important as predictive accuracy. The approach used here aims to bridge the gap between black-box neural models and analytical theory.
+This approach helps bridge the gap between computational quantum mechanics and analytical theory, potentially discovering new approximations or confirming existing ones.
 
-## Usage
-1. Install dependencies as above.
+## Contributing
+
+The repository now has a much cleaner structure. When contributing:
+- Use the unified `main.py` interface for testing
+- Add new data generation methods to `data_generation/`
+- Core model improvements go in `nmrkan/`
+- All experiments use the consolidated runner in `experiments/`
+
+## Citation
+
+If you use this code in your research, please cite our work on symbolic regression for quantum systems.
 2. Run the symbolic regressor:
    ```bash
    python run_symbolic_regressor.py

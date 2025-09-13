@@ -13,7 +13,7 @@ if "." not in sys.path:
 
 try:
     from nmrkan.models import KharKAN
-    from nmrkan.nmr import get_frequences_ordered
+    from data_generation import get_frequences_ordered
     print("✓ Successfully imported KharKAN and get_frequences_ordered")
 except ImportError as e:
     print(f"✗ Import error: {e}")

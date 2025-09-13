@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
+import sys
+from pathlib import Path
+
+# Add the parent directory to the Python path so we can import nmrkan
+current_dir = Path(__file__).parent
+parent_dir = current_dir.parent
+if str(parent_dir) not in sys.path:
+    sys.path.insert(0, str(parent_dir))
+
 import time
 import gc
 import argparse
 import logging
-
 import numpy as np
 import pandas as pd
 import torch
@@ -14,6 +22,10 @@ import tqdm
 
 from nmrkan.models import KharKAN, _clean_expr
 from data_generation import get_frequences, get_frequences_ordered
+
+# Fix PyTorch compilation issues
+import torch._dynamo
+torch._dynamo.config.suppress_errors = True
 
 # --- Set up logging -----------------------------------------------
 logging.basicConfig(

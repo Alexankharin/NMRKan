@@ -1,3 +1,12 @@
+import sys
+from pathlib import Path
+
+# Add the parent directory to the Python path so we can import nmrkan
+current_dir = Path(__file__).parent
+parent_dir = current_dir.parent
+if str(parent_dir) not in sys.path:
+    sys.path.insert(0, str(parent_dir))
+
 import copy
 import numpy as np
 import torch
