@@ -103,6 +103,25 @@ def run_genetic_algorithm(config: Optional[str] = None) -> int:
         return 1
 
 
+def run_normalized_eigenvalues(config: Optional[str] = None) -> int:
+    """Run normalized eigenvalue KAN training."""
+    print("Running normalized eigenvalue KAN training...")
+    
+    cmd = [sys.executable, "experiments/run_experiments.py", "--mode", "normalized-eigenvalues"]
+    if config:
+        cmd.extend(["--config", config])
+    
+    try:
+        result = subprocess.run(cmd, check=True)
+        return result.returncode
+    except subprocess.CalledProcessError as e:
+        print(f"Error running normalized eigenvalue training: {e}")
+        return e.returncode
+    except FileNotFoundError:
+        print("Error: experiments/run_experiments.py not found")
+        return 1
+
+
 def list_available_configs() -> None:
     """List available configuration files."""
     config_dir = Path("configs")
@@ -154,6 +173,7 @@ def show_status() -> None:
     print("  symbolic       - Run symbolic regression")
     print("  grid-search    - Run grid search optimization")
     print("  genetic        - Run genetic algorithm optimization")
+    print("  normalized-eigenvalues - Train KAN with normalized eigenvalue data")
     print("  status         - Show this status information")
     print("  list-configs   - List available configuration files")
 
@@ -171,6 +191,7 @@ Examples:
   python main.py symbolic
   python main.py grid-search
   python main.py genetic
+  python main.py normalized-eigenvalues
   python main.py status
   python main.py list-configs
         """
@@ -196,6 +217,10 @@ Examples:
     genetic_parser = subparsers.add_parser("genetic", help="Run genetic algorithm optimization")
     genetic_parser.add_argument("--config", type=str, help="Path to configuration file")
     
+    # Normalized eigenvalues subcommand
+    norm_eigen_parser = subparsers.add_parser("normalized-eigenvalues", help="Train KAN with normalized eigenvalue data")
+    norm_eigen_parser.add_argument("--config", type=str, help="Path to configuration file")
+    
     # Status subcommand
     subparsers.add_parser("status", help="Show repository status")
     
@@ -217,6 +242,8 @@ Examples:
         return run_grid_search(args.config)
     elif args.command == "genetic":
         return run_genetic_algorithm(args.config)
+    elif args.command == "normalized-eigenvalues":
+        return run_normalized_eigenvalues(args.config)
     elif args.command == "status":
         show_status()
         return 0

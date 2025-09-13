@@ -22,6 +22,10 @@ from .datasets import (
     make_dimensionless_dataset_from_function,
     get_eigenvalue_dimensionless,
     get_perturbation_dimensionless,
+    get_perturbation,
+    get_normalized_eigenvalues,
+    make_normalized_eigenvalue_dataset,
+    NormalizedEigenvalueSurface,
 )
 
 __all__ = [
@@ -43,4 +47,8 @@ __all__ = [
     "make_dimensionless_dataset_from_function",
     "get_eigenvalue_dimensionless",
     "get_perturbation_dimensionless",
+    "get_perturbation",
+    "get_normalized_eigenvalues",
+    "make_normalized_eigenvalue_dataset",
+    "NormalizedEigenvalueSurface",
 ]

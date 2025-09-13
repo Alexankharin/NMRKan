@@ -29,7 +29,8 @@ if "." not in sys.path:
     sys.path.append(".")
 
 from nmrkan.models import KharKAN, _clean_expr, _fix_powers, _round_expr
-from nmrkan.dimensional_analysis import apply_dimensional_fixing, calculate_formula_complexity
+from run_many_experiments import apply_dimensional_fixing, calculate_formula_complexity
+
 from data_generation import (
     make_dataset_from_function,
     make_dimensionless_dataset_from_function,
@@ -37,6 +38,7 @@ from data_generation import (
     get_perturbation_dimensionless,
     get_perturbation,
     get_frequences_ordered,
+    make_normalized_eigenvalue_dataset,
 )
 from report_utils import save_results_to_csv, print_console_summary, print_detailed_console_summary
 
@@ -71,6 +73,13 @@ class UnifiedExperimentConfig:
             (2, 4, 3),  # 2 inputs (dJ/J, J/dJ), 4 hidden, 3 outputs
             (2, 6, 3),  # 2 inputs, 6 hidden, 3 outputs
             (2, 8, 3),  # 2 inputs, 8 hidden, 3 outputs
+        ]
+        
+        self.normalized_eigenvalue_architectures = [
+            (1, 8, 8),   # 1 input (dJ/J), 8 hidden, 8 outputs (8 normalized eigenvalues)
+            (1, 12, 8),  # 1 input, 12 hidden, 8 outputs
+            (1, 16, 8),  # 1 input, 16 hidden, 8 outputs  
+            (1, 20, 8),  # 1 input, 20 hidden, 8 outputs
         ]
         
         # Training parameters to test
@@ -228,63 +237,67 @@ def run_single_experiment(
     print(f"Mode: {'Dimensionless' if is_dimensionless else 'Regular'}")
     print(f"{'='*60}")
     
-    # Run perturbation theory experiment
-    print("\n--- Perturbation Theory Data ---")
-    model_pert = KharKAN(architecture)
-    
-    loss_hist_pert, mse_hist_pert, rel_err_hist_pert, final_mse_pert = train_kan_model(
-        model_pert, data_pert, config, lr, l05_penalty, config.device
-    )
-    
-    formulas_pert = extract_symbolic_formulas(model_pert, architecture[0])
-    complexity_pert = calculate_formula_complexity(formulas_pert)
-    
-    # Apply dimensional analysis to fix formulas and optimize coefficients (only for regular mode)
-    if not is_dimensionless:
-        print("Applying dimensional analysis to fix formulas...")
-        (
-            refined_formulas_pert,
-            consistency_flags_pert,
-            fix_messages_pert,
-            optimization_results_pert,
-        ) = apply_dimensional_fixing(
-            formulas_pert,
-            architecture[0],
-            x_data=data_pert["train_input"],
-            y_data={
-                "z_0": data_pert["train_label"][:, 0],
-                "z_1": data_pert["train_label"][:, 1],
-                "z_2": data_pert["train_label"][:, 2],
-            },
-            expected_output_dim="Hz",
+    # Run perturbation theory experiment (skip if data_pert is None)
+    if data_pert is not None:
+        print("\n--- Perturbation Theory Data ---")
+        model_pert = KharKAN(architecture)
+        
+        loss_hist_pert, mse_hist_pert, rel_err_hist_pert, final_mse_pert = train_kan_model(
+            model_pert, data_pert, config, lr, l05_penalty, config.device
         )
+        
+        formulas_pert = extract_symbolic_formulas(model_pert, architecture[0])
+        complexity_pert = calculate_formula_complexity(formulas_pert)
+        
+        # Apply dimensional analysis to fix formulas and optimize coefficients (only for regular mode)
+        if not is_dimensionless:
+            print("Applying dimensional analysis to fix formulas...")
+            (
+                refined_formulas_pert,
+                consistency_flags_pert,
+                fix_messages_pert,
+                optimization_results_pert,
+            ) = apply_dimensional_fixing(
+                formulas_pert,
+                architecture[0],
+                x_data=data_pert["train_input"],
+                y_data={
+                    "z_0": data_pert["train_label"][:, 0],
+                    "z_1": data_pert["train_label"][:, 1],
+                    "z_2": data_pert["train_label"][:, 2],
+                },
+                expected_output_dim="Hz",
+            )
+        else:
+            # For dimensionless experiments, no dimensional analysis needed
+            refined_formulas_pert = formulas_pert
+            consistency_flags_pert = {name: True for name in formulas_pert.keys()}
+            fix_messages_pert = {name: "Dimensionless - no fixing needed" for name in formulas_pert.keys()}
+            optimization_results_pert = {name: {"success": True, "message": "Dimensionless"} for name in formulas_pert.keys()}
+        
+        results["perturbation"] = {
+            "final_mse": final_mse_pert,
+            "loss_history": loss_hist_pert,
+            "mse_history": mse_hist_pert,
+            "rel_err_history": rel_err_hist_pert,
+            "formulas": formulas_pert,
+            "refined_formulas": refined_formulas_pert,
+            "dimensional_consistency": consistency_flags_pert,
+            "dimensional_messages": fix_messages_pert,
+            "optimization_results": optimization_results_pert,
+            "complexity": complexity_pert,
+            "total_complexity": sum(
+                c for c in complexity_pert.values() if c != float("inf")
+            ),
+        }
+        
+        print(f"Perturbation - Final MSE: {final_mse_pert:.2e}")
+        for name, formula in formulas_pert.items():
+            if formula is not None:
+                print(f"{name}: {formula}")
     else:
-        # For dimensionless experiments, no dimensional analysis needed
-        refined_formulas_pert = formulas_pert
-        consistency_flags_pert = {name: True for name in formulas_pert.keys()}
-        fix_messages_pert = {name: "Dimensionless - no fixing needed" for name in formulas_pert.keys()}
-        optimization_results_pert = {name: {"success": True, "message": "Dimensionless"} for name in formulas_pert.keys()}
-    
-    results["perturbation"] = {
-        "final_mse": final_mse_pert,
-        "loss_history": loss_hist_pert,
-        "mse_history": mse_hist_pert,
-        "rel_err_history": rel_err_hist_pert,
-        "formulas": formulas_pert,
-        "refined_formulas": refined_formulas_pert,
-        "dimensional_consistency": consistency_flags_pert,
-        "dimensional_messages": fix_messages_pert,
-        "optimization_results": optimization_results_pert,
-        "complexity": complexity_pert,
-        "total_complexity": sum(
-            c for c in complexity_pert.values() if c != float("inf")
-        ),
-    }
-    
-    print(f"Perturbation - Final MSE: {final_mse_pert:.2e}")
-    for name, formula in formulas_pert.items():
-        if formula is not None:
-            print(f"{name}: {formula}")
+        print("\n--- Skipping Perturbation Theory (not applicable for normalized eigenvalues) ---")
+        results["perturbation"] = None
     
     # Run eigenvalue experiment
     print("\n--- Eigenvalue Data ---")
@@ -300,6 +313,13 @@ def run_single_experiment(
     # Apply dimensional analysis to fix formulas and optimize coefficients (only for regular mode)
     if not is_dimensionless:
         print("Applying dimensional analysis to fix formulas...")
+        
+        # Create y_data dictionary based on the number of outputs
+        num_outputs = data_eigen["train_label"].shape[1]
+        y_data = {}
+        for i in range(num_outputs):
+            y_data[f"z_{i}"] = data_eigen["train_label"][:, i]
+        
         (
             refined_formulas_eigen,
             consistency_flags_eigen,
@@ -309,11 +329,7 @@ def run_single_experiment(
             formulas_eigen,
             architecture[0],
             x_data=data_eigen["train_input"],
-            y_data={
-                "z_0": data_eigen["train_label"][:, 0],
-                "z_1": data_eigen["train_label"][:, 1],
-                "z_2": data_eigen["train_label"][:, 2],
-            },
+            y_data=y_data,
             expected_output_dim="Hz",
         )
     else:
@@ -670,10 +686,70 @@ def run_dimensionless_experiments(config: UnifiedExperimentConfig, output_dir: P
     return all_results
 
 
+def run_normalized_eigenvalue_experiments(config: UnifiedExperimentConfig, output_dir: Path, param_names: List[str]) -> List[Dict]:
+    """Run normalized eigenvalue experiments with 1 input (deltaJ/Jintra) and 8 outputs (normalized eigenvalues)."""
+    print("\n" + "="*80)
+    print("RUNNING NORMALIZED EIGENVALUE EXPERIMENTS")
+    print("="*80)
+    
+    all_results = []
+    
+    # Generate datasets for all parameter sets
+    print("\nGenerating normalized eigenvalue datasets for all parameter sets...")
+    
+    for params_name in param_names:
+        params = config.data_params[params_name]
+        print(f"\n--- Generating data for parameter set: {params_name} ---")
+        print(f"Parameters: {params}")
+        
+        # Generate dataset with 1 input (deltaJ/Jintra) and 8 outputs (normalized eigenvalues)
+        normalized_eigen_data = make_normalized_eigenvalue_dataset(
+            config.num_samples,
+            min_Jintra=params["MIN_JINTRA"],
+            max_Jintra=params["MAX_JINTRA"],
+            min_deltaJ=params["MIN_DELTAJ"],
+            max_deltaJ=params["MAX_DELTAJ"],
+            ratio_threshold=params["RATIO_THRESHOLD"],
+        )
+        
+        # Test all normalized eigenvalue architectures
+        for arch in config.normalized_eigenvalue_architectures:
+            input_dim, hidden_dim, output_dim = arch
+            
+            # Verify input and output dimensions match our dataset
+            assert input_dim == normalized_eigen_data["train_input"].shape[1], f"Input dimension mismatch: {input_dim} vs {normalized_eigen_data['train_input'].shape[1]}"
+            assert output_dim == normalized_eigen_data["train_label"].shape[1], f"Output dimension mismatch: {output_dim} vs {normalized_eigen_data['train_label'].shape[1]}"
+            
+            # Test different learning rates and L0.5 penalties
+            for lr in config.learning_rates:
+                for l05_penalty in config.l05_penalties:
+                    
+                    print(f"\nTesting architecture {arch} with lr={lr}, l05_penalty={l05_penalty}")
+                    print(f"Dataset: {params_name}, Target: normalized_eigenvalues")
+                    print(f"Input shape: {normalized_eigen_data['train_input'].shape}")
+                    print(f"Output shape: {normalized_eigen_data['train_label'].shape}")
+                    
+                    result = run_single_experiment(
+                        architecture=arch,
+                        data_pert=None,  # Not used for normalized eigenvalues
+                        data_eigen=normalized_eigen_data,  # Use our normalized eigenvalue data
+                        config=config,
+                        lr=lr,
+                        l05_penalty=l05_penalty,
+                        experiment_id=f"normalized_eigen_{params_name}_{arch}_{lr}_{l05_penalty}",
+                        params_name=params_name,
+                        is_dimensionless=True  # These are dimensionless normalized values
+                    )
+                    
+                    all_results.append(result)
+    
+    return all_results
+
+
 def main():
     """Main function to run unified experiments."""
     parser = argparse.ArgumentParser(description="Run unified KAN experiments")
-    parser.add_argument("--mode", choices=["regular", "dimensionless", "both"], 
+    parser.add_argument("--mode", choices=["regular", "dimensionless", "both", "normalized-eigenvalues"], 
                        default="both", help="Experiment mode to run")
     parser.add_argument("--config", type=str, help="Path to config file (future feature)")
     
@@ -707,6 +783,10 @@ def main():
     if args.mode in ["dimensionless", "both"]:
         dimensionless_results = run_dimensionless_experiments(config, output_dir, param_names)
         all_results.extend(dimensionless_results)
+    
+    if args.mode == "normalized-eigenvalues":
+        normalized_eigen_results = run_normalized_eigenvalue_experiments(config, output_dir, param_names)
+        all_results.extend(normalized_eigen_results)
     
     # Generate reports and save results
     print("\nGenerating reports...")
