@@ -28,6 +28,30 @@ After refactoring, the repository now has a cleaner, more organized structure wi
 │   ├── nmr_datagen.py              # General NMR data generation
 │   └── datasets.py                 # Dataset creation utilities
 ├── nmrkan/                         # Core models and analysis
+```
+
+### 🎯 New Features
+
+#### Selective Output Training (`output_numbers`)
+The framework now supports training models on specific frequency outputs only:
+
+```python
+from experiments.run_experiments import UnifiedExperimentConfig
+
+# Configure experiment to train on f2 and f0 frequencies only (skip f1)
+config = UnifiedExperimentConfig()
+config.output_numbers = (0, 2)  # Indices: 0=f2, 1=f1, 2=f0
+
+# Neural network architecture automatically adjusts:
+# Original: (2, 4, 3) -> Adjusted: (2, 4, 2)
+# Training data is automatically filtered to selected outputs
+```
+
+**Benefits:**
+- Focus on specific frequency relationships of interest
+- Reduce model complexity for targeted analysis
+- Compare performance across different output combinations
+- Logs display selected outputs and architecture adjustments
 │   ├── models.py                   # KAN model implementations
 │   ├── dimensional_analysis.py     # Physics-aware analysis
 │   └── sympy_torch.py             # SymPy integration

@@ -58,7 +58,11 @@ def extract_experiment_data_for_csv(all_results: List[Dict[str, Any]]) -> List[D
         l05_penalty = result.get('l05_penalty', 'N/A')
         
         for data_type in ['perturbation', 'eigenvalue']:
-            if data_type in result and 'error' not in result[data_type]:
+            if (
+                data_type in result
+                and result[data_type] is not None
+                and "error" not in result[data_type]
+            ):
                 data = result[data_type]
                 
                 # Extract basic experiment info
@@ -87,7 +91,13 @@ def extract_experiment_data_for_csv(all_results: List[Dict[str, Any]]) -> List[D
                 base_info["total_physical_complexity"] = total_refined_complexity
                 
                 # Add formula-specific data for each output
-                for output_name in ['z_0', 'z_1', 'z_2']:
+                # Get all available output names from formulas (z_0, z_1, z_2, ..., z_n)
+                all_output_names = set()
+                all_output_names.update(formulas.keys())
+                all_output_names.update(refined_formulas.keys())
+                all_output_names.update(symbolic_mse_scores.keys())
+
+                for output_name in sorted(all_output_names):
                     original_formula = formulas.get(output_name)
                     refined_formula = refined_formulas.get(output_name)
                     symbolic_mse = symbolic_mse_scores.get(output_name, float('inf'))
@@ -169,7 +179,11 @@ def create_summary_csv_data(all_results: List[Dict[str, Any]]) -> List[Dict[str,
         input_dim = f"{architecture[0]}D" if architecture else "unknownD"
         
         for data_type in ['perturbation', 'eigenvalue']:
-            if data_type in result and 'error' not in result[data_type]:
+            if (
+                data_type in result
+                and result[data_type] is not None
+                and "error" not in result[data_type]
+            ):
                 key = f"{params_name}_{input_dim}_{data_type}"
                 if key not in grouped_results:
                     grouped_results[key] = []
@@ -203,7 +217,10 @@ def create_summary_csv_data(all_results: List[Dict[str, Any]]) -> List[Dict[str,
             
             successful_formulas = sum(1 for f in data.get('formulas', {}).values() if f is not None)
             successful_refined = sum(1 for f in refined_formulas.values() if f is not None)
-            
+
+            # Calculate total expected outputs dynamically
+            total_expected_outputs = len(data.get("formulas", {}))
+
             summary_data.append(
                 {
                     "parameter_set": params_name.upper(),
@@ -214,8 +231,8 @@ def create_summary_csv_data(all_results: List[Dict[str, Any]]) -> List[Dict[str,
                     "neural_network_mse": safe_format_float(final_mse),
                     "physical_units_mse": safe_format_float(data.get("physical_mse")),
                     "best_symbolic_mse": safe_format_float(best_symbolic_mse),
-                    "dimensionless_formulas_found": f"{successful_formulas}/3",
-                    "physical_formulas_derived": f"{successful_refined}/3",
+                    "dimensionless_formulas_found": f"{successful_formulas}/{total_expected_outputs}",
+                    "physical_formulas_derived": f"{successful_refined}/{total_expected_outputs}",
                     "dimensionless_complexity": total_complexity_orig,
                     "physical_complexity": total_complexity_refined,
                     "learning_rate": best_result.get("lr", "N/A"),
@@ -250,8 +267,13 @@ def print_console_summary(all_results: List[Dict[str, Any]]) -> None:
         
         if param_results:
             # Find best perturbation result
-            pert_results = [r for r in param_results 
-                           if 'perturbation' in r and 'error' not in r['perturbation']]
+            pert_results = [
+                r
+                for r in param_results
+                if "perturbation" in r
+                and r["perturbation"] is not None
+                and "error" not in r["perturbation"]
+            ]
             if pert_results:
                 best_pert = min(pert_results, 
                                key=lambda x: x.get('perturbation', {}).get('final_mse', float('inf')))
@@ -259,8 +281,13 @@ def print_console_summary(all_results: List[Dict[str, Any]]) -> None:
                 print(f"  Best Perturbation MSE: {safe_format_float(best_pert_mse)} ({best_pert['experiment_id']})")
             
             # Find best eigenvalue result
-            eigen_results = [r for r in param_results 
-                            if 'eigenvalue' in r and 'error' not in r['eigenvalue']]
+            eigen_results = [
+                r
+                for r in param_results
+                if "eigenvalue" in r
+                and r["eigenvalue"] is not None
+                and "error" not in r["eigenvalue"]
+            ]
             if eigen_results:
                 best_eigen = min(eigen_results,
                                 key=lambda x: x.get('eigenvalue', {}).get('final_mse', float('inf')))
@@ -269,10 +296,20 @@ def print_console_summary(all_results: List[Dict[str, Any]]) -> None:
     
     # Overall best results
     if successful_results:
-        all_pert_results = [r for r in successful_results 
-                           if 'perturbation' in r and 'error' not in r['perturbation']]
-        all_eigen_results = [r for r in successful_results 
-                            if 'eigenvalue' in r and 'error' not in r['eigenvalue']]
+        all_pert_results = [
+            r
+            for r in successful_results
+            if "perturbation" in r
+            and r["perturbation"] is not None
+            and "error" not in r["perturbation"]
+        ]
+        all_eigen_results = [
+            r
+            for r in successful_results
+            if "eigenvalue" in r
+            and r["eigenvalue"] is not None
+            and "error" not in r["eigenvalue"]
+        ]
         
         if all_pert_results:
             overall_best_pert = min(all_pert_results, 
@@ -319,7 +356,11 @@ def print_detailed_console_summary(all_results: List[Dict[str, Any]]) -> None:
             summary_stats[key] = {'perturbation': [], 'eigenvalue': []}
         
         for data_type in ['perturbation', 'eigenvalue']:
-            if data_type in result and 'error' not in result[data_type]:
+            if (
+                data_type in result
+                and result[data_type] is not None
+                and "error" not in result[data_type]
+            ):
                 summary_stats[key][data_type].append(result[data_type])
     
     # Print summary for each parameter set and dimension
@@ -336,14 +377,19 @@ def print_detailed_console_summary(all_results: List[Dict[str, Any]]) -> None:
                 total_formulas = 0
                 total_orig_complexity = 0
                 total_refined_complexity = 0
-                
+                max_outputs = 0  # Track the maximum number of outputs seen
+
                 for r in results_list:
                     symbolic_mses = r.get('symbolic_mse_scores', {})
                     all_symbolic_mses.extend([mse for mse in symbolic_mses.values() if mse != float('inf')])
                     
                     formulas = r.get('formulas', {})
                     total_formulas += sum(1 for f in formulas.values() if f is not None)
-                    
+
+                    # Update max_outputs based on the number of outputs in this result
+                    num_outputs = len(formulas)
+                    max_outputs = max(max_outputs, num_outputs)
+
                     total_orig_complexity += r.get('total_complexity', 0)
                     
                     refined_formulas = r.get('refined_formulas', {})
@@ -352,8 +398,10 @@ def print_detailed_console_summary(all_results: List[Dict[str, Any]]) -> None:
                 best_symbolic_mse = min(all_symbolic_mses) if all_symbolic_mses else float('inf')
                 avg_orig_complexity = total_orig_complexity / len(results_list) if results_list else 0
                 avg_refined_complexity = total_refined_complexity / len(results_list) if results_list else 0
-                total_possible_formulas = len(results_list) * 3  # 3 outputs per experiment
-                
+                total_possible_formulas = (
+                    len(results_list) * max_outputs
+                )  # Dynamic number of outputs per experiment
+
                 print(f"{params_name.upper():<12} {input_dim:<5} {data_type.capitalize():<12} "
                       f"{safe_format_float(best_neural_mse):<12} {safe_format_float(best_symbolic_mse):<12} "
                       f"{total_formulas}/{total_possible_formulas:<8} {avg_orig_complexity:<10.1f} {avg_refined_complexity:<10.1f}")

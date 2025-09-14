@@ -49,6 +49,52 @@ except Exception:
     plt.style.use('default')
 
 
+def adjust_architecture_for_outputs(architecture: tuple, num_outputs: int) -> tuple:
+    """
+    Adjust architecture tuple to match the number of selected outputs.
+
+    Args:
+        architecture: Original architecture tuple (input_dim, hidden_dim, original_output_dim)
+        num_outputs: Number of selected outputs
+
+    Returns:
+        Modified architecture tuple with adjusted output dimension
+    """
+    if len(architecture) == 3:
+        # Standard architecture: (input_dim, hidden_dim, output_dim)
+        return (architecture[0], architecture[1], num_outputs)
+    elif len(architecture) == 4:
+        # Extended architecture: (input_dim, hidden_dim1, hidden_dim2, output_dim)
+        return (architecture[0], architecture[1], architecture[2], num_outputs)
+    else:
+        # Fallback: just replace the last dimension
+        return architecture[:-1] + (num_outputs,)
+
+
+def filter_data_outputs(
+    data: Dict[str, torch.Tensor], output_indices: tuple
+) -> Dict[str, torch.Tensor]:
+    """
+    Filter data dictionary to keep only selected output indices.
+
+    Args:
+        data: Dictionary containing 'train_input', 'train_label', 'val_input', 'val_label'
+        output_indices: Tuple of indices to select from labels
+
+    Returns:
+        Filtered data dictionary with selected outputs only
+    """
+    filtered_data = {}
+    for key, value in data.items():
+        if "label" in key:
+            # Filter label tensors to keep only selected outputs
+            filtered_data[key] = value[:, output_indices]
+        else:
+            # Keep input tensors unchanged
+            filtered_data[key] = value
+    return filtered_data
+
+
 class UnifiedExperimentConfig:
     """Configuration class for unified experiments."""
     
@@ -76,16 +122,14 @@ class UnifiedExperimentConfig:
         ]
         
         self.normalized_eigenvalue_architectures = [
-            (1, 8, 8),   # 1 input (dJ/J), 8 hidden, 8 outputs (8 normalized eigenvalues)
-            (1, 12, 8),  # 1 input, 12 hidden, 8 outputs
-            (1, 16, 8),  # 1 input, 16 hidden, 8 outputs  
-            (1, 20, 8),  # 1 input, 20 hidden, 8 outputs
+            # (1, 8),  # 1 input (dJ/J), 8 hidden, 8 outputs (8 normalized eigenvalues)
+            (1, 8, 8, 8),  # 1 input, 12 hidden, 8 outputs
         ]
         
         # Training parameters to test
         self.learning_rates = [1e-4]
         self.l05_penalties = [0.1]
-        self.epochs = 50000
+        self.epochs = 200000
         self.early_stop_threshold = 1e-4
         
         # Data generation parameters
@@ -126,24 +170,47 @@ class UnifiedExperimentConfig:
                 "RATIO_THRESHOLD": 100,
             },
         }
-        
-        self.num_samples = 20000
+
+        self.num_samples = 200000
         self.batch_size = None  # Use full batch (no batching)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+        # Output selection - tuple of indices to select from labels
+        # (0, 1, 2) corresponds to (f2, f1, f0) frequencies
+        # Default: use all outputs
+        self.output_numbers = (0,)  # Can be changed to (0, 2) for f2,f0 only, etc.
 
-def extract_symbolic_formulas(model: KharKAN, num_inputs: int) -> Dict[str, Optional[Expr]]:
+
+def extract_symbolic_formulas(
+    model: KharKAN, num_inputs: int, num_outputs: int = 3
+) -> Dict[str, Optional[Expr]]:
     """Extract symbolic formulas from a trained KAN model."""
     formula_dict = {}
     
     try:
-        for output_idx in range(3):  # 3 outputs: z_0, z_1, z_2
-            symbolic_formula = model.symbolic_formula(var=[f'x_{i}' for i in range(num_inputs)])[0][output_idx]
-            symbolic_formula = _clean_expr(_fix_powers(_round_expr(symbolic_formula)))
+        symbolic_formulas = model.symbolic_formula()
+        for output_idx in range(num_outputs):
+            if isinstance(symbolic_formulas, list) and len(symbolic_formulas) > 0:
+                # Handle case where symbolic_formula returns a list
+                symbolic_formula = (
+                    symbolic_formulas[0][output_idx]
+                    if len(symbolic_formulas[0]) > output_idx
+                    else None
+                )
+            elif isinstance(symbolic_formulas, dict):
+                # Handle case where symbolic_formula returns a dict directly
+                symbolic_formula = symbolic_formulas.get(f"z_{output_idx}", None)
+            else:
+                symbolic_formula = None
+
+            if symbolic_formula is not None:
+                symbolic_formula = _clean_expr(
+                    _fix_powers(_round_expr(symbolic_formula))
+                )
             formula_dict[f'z_{output_idx}'] = symbolic_formula
     except Exception as e:
         print(f"Warning: Could not extract symbolic formula: {e}")
-        for output_idx in range(3):
+        for output_idx in range(num_outputs):
             formula_dict[f'z_{output_idx}'] = None
     
     return formula_dict
@@ -220,38 +287,78 @@ def run_single_experiment(
     is_dimensionless: bool = False
 ) -> Dict[str, Any]:
     """Run a single experiment configuration."""
-    
+
+    # Adjust architecture for selected outputs
+    num_selected_outputs = len(config.output_numbers)
+    adjusted_architecture = adjust_architecture_for_outputs(
+        architecture, num_selected_outputs
+    )
+
     results = {
-        'experiment_id': experiment_id,
-        'architecture': architecture,
-        'lr': lr,
-        'l05_penalty': l05_penalty,
-        'timestamp': time.time(),
-        'is_dimensionless': is_dimensionless
+        "experiment_id": experiment_id,
+        "architecture": architecture,
+        "adjusted_architecture": adjusted_architecture,
+        "output_numbers": config.output_numbers,
+        "lr": lr,
+        "l05_penalty": l05_penalty,
+        "timestamp": time.time(),
+        "is_dimensionless": is_dimensionless,
     }
-    
+
+    # Create output labels mapping for clarity
+    output_labels = ["f2", "f1", "f0"]  # Based on get_perturbation function
+    selected_output_names = [output_labels[i] for i in config.output_numbers]
+
     print(f"\n{'='*60}")
     print(f"Running Experiment: {experiment_id}")
-    print(f"Architecture: {architecture}, LR: {lr}, L05: {l05_penalty}")
+    print(f"Original Architecture: {architecture}")
+    print(f"Adjusted Architecture: {adjusted_architecture}")
+    print(f"Selected Outputs: {config.output_numbers} -> {selected_output_names}")
+    print(f"LR: {lr}, L05: {l05_penalty}")
     print(f"Using parameter set: {params_name}")
     print(f"Mode: {'Dimensionless' if is_dimensionless else 'Regular'}")
     print(f"{'='*60}")
-    
+
+    # Filter data to selected outputs
+    filtered_data_pert = (
+        filter_data_outputs(data_pert, config.output_numbers)
+        if data_pert is not None
+        else None
+    )
+    filtered_data_eigen = (
+        filter_data_outputs(data_eigen, config.output_numbers)
+        if data_eigen is not None
+        else None
+    )
+
     # Run perturbation theory experiment (skip if data_pert is None)
-    if data_pert is not None:
+    if filtered_data_pert is not None:
         print("\n--- Perturbation Theory Data ---")
-        model_pert = KharKAN(architecture)
-        
-        loss_hist_pert, mse_hist_pert, rel_err_hist_pert, final_mse_pert = train_kan_model(
-            model_pert, data_pert, config, lr, l05_penalty, config.device
+        model_pert = KharKAN(adjusted_architecture)
+
+        loss_hist_pert, mse_hist_pert, rel_err_hist_pert, final_mse_pert = (
+            train_kan_model(
+                model_pert, filtered_data_pert, config, lr, l05_penalty, config.device
+            )
         )
-        
-        formulas_pert = extract_symbolic_formulas(model_pert, architecture[0])
+
+        formulas_pert = extract_symbolic_formulas(
+            model_pert, adjusted_architecture[0], num_outputs=num_selected_outputs
+        )
         complexity_pert = calculate_formula_complexity(formulas_pert)
         
         # Apply dimensional analysis to fix formulas and optimize coefficients (only for regular mode)
         if not is_dimensionless:
             print("Applying dimensional analysis to fix formulas...")
+
+            # Create y_data dictionary based on the number of selected outputs
+            num_outputs_pert = filtered_data_pert["train_label"].shape[1]
+            y_data_pert = {}
+            for i in range(num_outputs_pert):
+                # Map to selected output names for dimensional analysis
+                output_idx = config.output_numbers[i]  # Get original output index
+                y_data_pert[f"z_{output_idx}"] = filtered_data_pert["train_label"][:, i]
+
             (
                 refined_formulas_pert,
                 consistency_flags_pert,
@@ -259,13 +366,9 @@ def run_single_experiment(
                 optimization_results_pert,
             ) = apply_dimensional_fixing(
                 formulas_pert,
-                architecture[0],
-                x_data=data_pert["train_input"],
-                y_data={
-                    "z_0": data_pert["train_label"][:, 0],
-                    "z_1": data_pert["train_label"][:, 1],
-                    "z_2": data_pert["train_label"][:, 2],
-                },
+                adjusted_architecture[0],
+                x_data=filtered_data_pert["train_input"],
+                y_data=y_data_pert,
                 expected_output_dim="Hz",
             )
         else:
@@ -301,24 +404,32 @@ def run_single_experiment(
     
     # Run eigenvalue experiment
     print("\n--- Eigenvalue Data ---")
-    model_eigen = KharKAN(architecture)
+    model_eigen = KharKAN(adjusted_architecture)
     
     loss_hist_eigen, mse_hist_eigen, rel_err_hist_eigen, final_mse_eigen = (
-        train_kan_model(model_eigen, data_eigen, config, lr, l05_penalty, config.device)
+        train_kan_model(
+            model_eigen, filtered_data_eigen, config, lr, l05_penalty, config.device
+        )
     )
-    
-    formulas_eigen = extract_symbolic_formulas(model_eigen, architecture[0])
+
+    # Determine number of outputs from the filtered data
+    num_outputs = filtered_data_eigen["train_label"].shape[1]
+    formulas_eigen = extract_symbolic_formulas(
+        model_eigen, adjusted_architecture[0], num_outputs=num_outputs
+    )
     complexity_eigen = calculate_formula_complexity(formulas_eigen)
     
     # Apply dimensional analysis to fix formulas and optimize coefficients (only for regular mode)
     if not is_dimensionless:
         print("Applying dimensional analysis to fix formulas...")
-        
-        # Create y_data dictionary based on the number of outputs
-        num_outputs = data_eigen["train_label"].shape[1]
+
+        # Create y_data dictionary based on the number of selected outputs
+        num_outputs = filtered_data_eigen["train_label"].shape[1]
         y_data = {}
         for i in range(num_outputs):
-            y_data[f"z_{i}"] = data_eigen["train_label"][:, i]
+            # Map to selected output names for dimensional analysis
+            output_idx = config.output_numbers[i]  # Get original output index
+            y_data[f"z_{output_idx}"] = filtered_data_eigen["train_label"][:, i]
         
         (
             refined_formulas_eigen,
@@ -327,8 +438,8 @@ def run_single_experiment(
             optimization_results_eigen,
         ) = apply_dimensional_fixing(
             formulas_eigen,
-            architecture[0],
-            x_data=data_eigen["train_input"],
+            adjusted_architecture[0],
+            x_data=filtered_data_eigen["train_input"],
             y_data=y_data,
             expected_output_dim="Hz",
         )
@@ -714,7 +825,7 @@ def run_normalized_eigenvalue_experiments(config: UnifiedExperimentConfig, outpu
         
         # Test all normalized eigenvalue architectures
         for arch in config.normalized_eigenvalue_architectures:
-            input_dim, hidden_dim, output_dim = arch
+            input_dim, output_dim = arch[0], arch[-1]
             
             # Verify input and output dimensions match our dataset
             assert input_dim == normalized_eigen_data["train_input"].shape[1], f"Input dimension mismatch: {input_dim} vs {normalized_eigen_data['train_input'].shape[1]}"
