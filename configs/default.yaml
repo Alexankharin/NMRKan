@@ -1,0 +1,63 @@
+# Default NMR KAN Training Configuration
+
+training:
+  epochs: 50000
+  learning_rate: 0.0001
+  batch_size: 1000
+  l05_penalty: 0.1
+  optimizer: adam
+  weight_decay: 0.0
+  momentum: 0.9
+  
+  # Early stopping
+  early_stopping_threshold: 0.0001
+  early_stopping_patience: 1000
+  
+  # Logging and checkpointing
+  save_interval: 10000  # Save less frequently to reduce clutter
+  log_interval: 1000
+  
+  # Training mode: 'single' or 'multi'
+  training_mode: single
+  
+  # Validation
+  validation_split: 0.2
+
+model:
+  # Architecture: [input_dim, hidden_dim, ..., output_dim]
+  layers: [2, 8, 3, 1]
+  
+  # Linear layer settings
+  linear_bias: true
+  
+  # Multi-output specific
+  shared_backbone: true
+
+data:
+  # Dataset type: '4ch2' or 'nmr_datagen'
+  dataset_type: 4ch2
+  
+  # Generation parameters
+  num_samples: 10000
+  
+  # Parameter ranges for generation
+  parameter_ranges:
+    Jintra: [0.1, 10.0]
+    deltaJ: [0.01, 1.0]
+  
+  # Data processing
+  normalize_inputs: true
+  normalize_outputs: false
+  dimensionless: false
+  
+  # Output configuration
+  output_type: frequencies  # 'frequencies' or 'eigenvalues'
+  num_outputs: 3  # 3 for frequencies, 8 for eigenvalues
+  
+  # Data loading
+  shuffle: true
+  drop_last: true
+  num_workers: 0
+  
+  # Caching
+  cache_dataset: true

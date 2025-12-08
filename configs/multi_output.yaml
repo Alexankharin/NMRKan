@@ -1,0 +1,38 @@
+# Multi-Output Training Configuration  
+# Trains separate models for each output frequency
+
+training:
+  epochs: 50000
+  learning_rate: 0.0001
+  batch_size: 1000
+  l05_penalty: 0.1
+  optimizer: adam
+  early_stopping_threshold: 0.0001
+  early_stopping_patience: 1000
+  
+  # Key: multi-output training mode
+  training_mode: multi
+  validation_split: 0.2
+
+model:
+  # Each model: 2D input -> hidden -> 1 output
+  layers: [2, 8, 3, 1]
+  linear_bias: true
+  shared_backbone: false
+
+data:
+  dataset_type: 4ch2
+  num_samples: 10000
+  
+  parameter_ranges:
+    Jintra: [0.1, 10.0]
+    deltaJ: [0.01, 1.0]
+  
+  dimensionless: false
+  normalize_inputs: true
+  normalize_outputs: false
+  
+  output_type: frequencies
+  num_outputs: 3  # Creates 3 separate models
+  
+  cache_dataset: true

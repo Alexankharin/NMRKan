@@ -1,0 +1,36 @@
+# Dimensionless Training Configuration
+# For training with deltaJ/Jintra ratio as input
+
+training:
+  epochs: 50000
+  learning_rate: 0.0001
+  batch_size: 1000
+  l05_penalty: 0.1
+  optimizer: adam
+  early_stopping_threshold: 0.0001
+  early_stopping_patience: 1000
+  training_mode: single
+  validation_split: 0.2
+
+model:
+  # 1D input (deltaJ/Jintra ratio) -> hidden -> 3 frequencies
+  layers: [1, 8, 8, 3]
+  linear_bias: true
+
+data:
+  dataset_type: 4ch2
+  num_samples: 10000
+  
+  parameter_ranges:
+    Jintra: [0.1, 10.0] 
+    deltaJ: [0.01, 1.0]
+  
+  # Key: dimensionless mode uses ratio as input
+  dimensionless: true
+  normalize_inputs: true
+  normalize_outputs: false
+  
+  output_type: frequencies
+  num_outputs: 3
+  
+  cache_dataset: true
