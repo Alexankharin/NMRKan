@@ -1,9 +1,11 @@
 """Model configuration class."""
 
-from dataclasses import dataclass, field
-from typing import List, Tuple, Optional, Callable, Any
+from dataclasses import dataclass
+from typing import Callable, List, Optional, Tuple
 
 import torch
+
+from ..activations import default_activation_bank
 
 
 @dataclass
@@ -16,6 +18,7 @@ class ModelConfig:
     # Activation functions (None means use default)
     activations: Optional[List[Callable[[torch.Tensor], torch.Tensor]]] = None
     activation_reprs: Optional[List[str]] = None
+    include_abs: bool = True
     
     # Linear layer settings
     linear_bias: bool = True
@@ -25,22 +28,18 @@ class ModelConfig:
     
     def __post_init__(self):
         """Set default activations if not provided."""
+        default_activations, default_reprs = default_activation_bank(include_abs=self.include_abs)
+
         if self.activations is None:
-            # Use regular functions instead of lambdas to avoid pickle issues
-            def identity(x):
-                return x
-            
-            def quadratic(x):
-                return x ** 2
-            
-            self.activations = [
-                identity,              # identity
-                quadratic,             # quadratic  
-                torch.zeros_like       # zero
-            ]
+            self.activations = default_activations
         
         if self.activation_reprs is None:
-            self.activation_reprs = ["", "**2", "*0"]
+            if self.activations is default_activations:
+                self.activation_reprs = default_reprs
+            else:
+                raise ValueError(
+                    "activation_reprs must be provided when custom activations are specified"
+                )
         
         # Validate layers
         if len(self.layers) < 2:
@@ -74,6 +73,7 @@ class ModelConfig:
             layers=new_layers,
             activations=self.activations,
             activation_reprs=self.activation_reprs,
+            include_abs=self.include_abs,
             linear_bias=self.linear_bias,
             shared_backbone=self.shared_backbone
         )

@@ -168,6 +168,7 @@ def run_training(args) -> None:
             layers=model_config.layers[:-1] + (1,),  # Change last layer to 1 output
             activations=model_config.activations,
             activation_reprs=model_config.activation_reprs,
+            include_abs=model_config.include_abs,
             linear_bias=model_config.linear_bias,
             shared_backbone=model_config.shared_backbone
         )

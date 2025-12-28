@@ -69,7 +69,8 @@ class BaseTrainer(ABC):
             layers=self.model_config.layers,
             activations=self.model_config.activations,
             activation_reprs=self.model_config.activation_reprs,
-            linear_bias=self.model_config.linear_bias
+            linear_bias=self.model_config.linear_bias,
+            include_abs=self.model_config.include_abs,
         )
         return model.to(self.device)
     

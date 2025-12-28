@@ -29,6 +29,7 @@ model:
   
   # Linear layer settings
   linear_bias: true
+  include_abs: true
   
   # Multi-output specific
   shared_backbone: true

@@ -67,7 +67,8 @@ class MultiOutputTrainer(BaseTrainer):
                 layers=single_config.layers,
                 activations=single_config.activations,
                 activation_reprs=single_config.activation_reprs,
-                linear_bias=single_config.linear_bias
+                linear_bias=single_config.linear_bias,
+                include_abs=single_config.include_abs,
             )
             models.append(model.to(self.device))
         

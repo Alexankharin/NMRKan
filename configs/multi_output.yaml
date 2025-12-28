@@ -18,6 +18,7 @@ model:
   # Each model: 2D input -> hidden -> 1 output
   layers: [2, 8, 3, 1]
   linear_bias: true
+  include_abs: true
   shared_backbone: false
 
 data:

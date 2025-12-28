@@ -16,6 +16,7 @@ model:
   # 1D input (deltaJ/Jintra ratio) -> hidden -> 3 frequencies
   layers: [1, 8, 8, 3]
   linear_bias: true
+  include_abs: true
 
 data:
   dataset_type: 4ch2

@@ -6,6 +6,8 @@ import sympy as sp
 import torch
 from torch import nn
 
+from .activations import default_activation_bank
+
 Tensor = torch.Tensor
 
 __all__ = [
@@ -53,21 +55,27 @@ class DenseKanLayer(nn.Module):
         activations: Optional[List[Callable[[Tensor], Tensor]]] = None,
         activation_reprs: Optional[List[str]] = None,
         bias: bool = True,
+        include_abs: bool = True,
     ) -> None:
         super().__init__()
         self.input_dim = input_dim
         self.output_dim = output_dim
 
         if activations is None:
-            self.activations = [lambda x: x, lambda x: x ** 2, torch.zeros_like]
+            activations, default_reprs = default_activation_bank(include_abs=include_abs)
+            self.activations = activations
+            if activation_reprs is None:
+                activation_reprs = default_reprs
         else:
             self.activations = activations
+            if activation_reprs is None:
+                raise ValueError(
+                    "activation_reprs must be provided when custom activations are specified"
+                )
+
+        self.activation_reprs = activation_reprs
         self.num_act = len(self.activations)
 
-        if activation_reprs is None:
-            self.activation_reprs = ["", "**2", "*0"]
-        else:
-            self.activation_reprs = activation_reprs
         if len(self.activation_reprs) != self.num_act:
             raise ValueError("activation_reprs must match length of activations list")
 
@@ -110,7 +118,16 @@ class DenseKanLayer(nn.Module):
                     if abs(coeff) < 10 ** (-round_digits):
                         continue
                     rep = self.activation_reprs[k]
-                    base = sp.sympify(f"(x_{j}){rep}") if rep else xs[j]
+                    base = xs[j]
+                    if isinstance(rep, str) and rep.strip():
+                        rep_str = rep.strip()
+                        if rep_str.lower() in {"abs", "abs()"}:
+                            base = sp.Abs(xs[j])
+                        elif "{x}" in rep_str:
+                            expr_str = rep_str.format(x=f"(x_{j})")
+                            base = sp.sympify(expr_str)
+                        else:
+                            base = sp.sympify(f"(x_{j}){rep_str}")
                     expr_i += coeff * base
             if abs(b[i]) > 10 ** (-round_digits):
                 expr_i += b[i]
@@ -132,13 +149,36 @@ class KharKAN(nn.Module):
         activations: Optional[List[Callable[[Tensor], Tensor]]] = None,
         activation_reprs: Optional[List[str]] = None,
         linear_bias: bool = True,
+        include_abs: bool = True,
     ) -> None:
         super().__init__()
         if layers is None:
             layers = (2, 8, 3, 1)
+
+        act_bank = activations
+        repr_bank = activation_reprs
+        if act_bank is None or repr_bank is None:
+            default_acts, default_reprs = default_activation_bank(include_abs=include_abs)
+            if act_bank is None:
+                act_bank = default_acts
+            if repr_bank is None:
+                if act_bank is default_acts:
+                    repr_bank = default_reprs
+                else:
+                    raise ValueError(
+                        "activation_reprs must be provided when custom activations are specified"
+                    )
+
         self.layers = nn.ModuleList(
             [
-                DenseKanLayer(layers[i], layers[i + 1], activations, activation_reprs, bias=linear_bias)
+                DenseKanLayer(
+                    layers[i],
+                    layers[i + 1],
+                    act_bank,
+                    repr_bank,
+                    bias=linear_bias,
+                    include_abs=include_abs,
+                )
                 for i in range(len(layers) - 1)
             ]
         )
