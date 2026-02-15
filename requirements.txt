@@ -7,3 +7,4 @@ tqdm>=4.64
 matplotlib>=3.6
 scipy>=1.9
 PyYAML>=6.0
+sparsemax>=0.1.9

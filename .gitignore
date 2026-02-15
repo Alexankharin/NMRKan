@@ -79,3 +79,4 @@ Desktop.ini
 .idea/
 outputs/*
 experiment_results/*
+notebooks/experiment_results/*

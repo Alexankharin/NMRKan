@@ -176,10 +176,18 @@ class SingleOutputTrainer(BaseTrainer):
         # Training loop
         best_val_loss = float('inf')
         epochs_without_improvement = 0
-        
+        sparsemax_epoch = (
+            int(self.training_config.sparsemax_at * self.training_config.epochs)
+            if self.training_config.sparsemax_at > 0 else 0
+        )
+
         progress_bar = tqdm(range(self.training_config.epochs), desc="Training")
-        
+
         for epoch in progress_bar:
+            # Switch to sparsemax at the configured epoch
+            if sparsemax_epoch and epoch == sparsemax_epoch:
+                self.model.switch_to_sparsemax()
+                print(f"\nSwitched to sparsemax at epoch {epoch}/{self.training_config.epochs}")
             # Train one epoch
             train_losses = self.train_epoch(self.model, train_loader, self.optimizer)
             

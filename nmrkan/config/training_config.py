@@ -11,7 +11,7 @@ class TrainingConfig:
     # Training parameters
     epochs: int = 50000
     learning_rate: float = 1e-4
-    batch_size: int = 1000
+    batch_size: int = 10000
     
     # Optimizer settings
     optimizer: str = "adam"  # 'adam' or 'sgd'
@@ -29,6 +29,9 @@ class TrainingConfig:
     save_interval: int = 10000  # Save less frequently to reduce clutter
     log_interval: int = 1000
     
+    # Sparsemax switch: 0 = never, 0 < x < 1 = switch after x fraction of epochs
+    sparsemax_at: float = 0.9
+
     # Training mode
     training_mode: str = "single"  # 'single' or 'multi'
     
@@ -46,6 +49,9 @@ class TrainingConfig:
         if not 0 < self.validation_split < 1:
             raise ValueError(f"Validation split must be between 0 and 1")
         
+        if not (self.sparsemax_at == 0 or 0 < self.sparsemax_at < 1):
+            raise ValueError("sparsemax_at must be 0 (disabled) or between 0 and 1 exclusive")
+
         if self.epochs <= 0:
             raise ValueError("Epochs must be positive")
         

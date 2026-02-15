@@ -6,6 +6,8 @@ import sympy as sp
 import torch
 from torch import nn
 
+from sparsemax import Sparsemax
+
 from .activations import default_activation_bank
 
 Tensor = torch.Tensor
@@ -81,20 +83,31 @@ class DenseKanLayer(nn.Module):
 
         self.act_logits = nn.Parameter(torch.zeros(input_dim, self.num_act))
         self.linear = nn.Linear(input_dim, output_dim, bias=bias)
+        self._sparsemax_fn = Sparsemax(dim=1)
+        self._use_sparsemax = False
+
+    def _activation_weights(self) -> Tensor:
+        if self._use_sparsemax:
+            return self._sparsemax_fn(self.act_logits)
+        return torch.softmax(self.act_logits, dim=1)
+
+    def switch_to_sparsemax(self) -> None:
+        """Switch activation mixing from softmax to sparsemax for sparser selection."""
+        self._use_sparsemax = True
 
     def forward(self, x: Tensor) -> Tensor:  # type: ignore[override]
         act_outs = [act(x) for act in self.activations]
         y = torch.stack(act_outs, dim=2)
-        a = torch.softmax(self.act_logits, dim=1)
+        a = self._activation_weights()
         v = torch.einsum("bik,ik->bi", y, a)
-        # v = (y * a.unsqueeze(0)).sum(dim=2)
         return self.linear(v)
 
     def L05_reg(self) -> Tensor:
-        # if only 1 weight is non-zero, the L05 norm is 0
+        if self._use_sparsemax:
+            return torch.tensor(0.0, device=self.act_logits.device)
         return (
-            torch.sum(torch.softmax(self.act_logits, dim=1) ** 0.5) - self.input_dim
-        )  # 0.5-norm of the softmax probabilities
+            torch.sum(self._activation_weights() ** 0.5) - self.input_dim
+        )
 
     def anneal(self, rate: float = 0.1) -> None:
         with torch.no_grad():
@@ -104,7 +117,7 @@ class DenseKanLayer(nn.Module):
                 self.linear.bias.add_(rate * torch.randn_like(self.linear.bias))
 
     def symbolic_formula(self, clean: bool = True, round_digits: int = 5) -> Dict[str, sp.Expr]:
-        a = torch.softmax(self.act_logits, dim=1).detach().cpu().numpy()
+        a = self._activation_weights().detach().cpu().numpy()
         W = self.linear.weight.detach().cpu().numpy()
         b = self.linear.bias.detach().cpu().numpy() if self.linear.bias is not None else np.zeros(self.output_dim)
 
@@ -190,6 +203,11 @@ class KharKAN(nn.Module):
 
     def L05_loss(self) -> Tensor:
         return sum(layer.L05_reg() for layer in self.layers)
+
+    def switch_to_sparsemax(self) -> None:
+        """Switch all layers from softmax to sparsemax activation mixing."""
+        for layer in self.layers:
+            layer.switch_to_sparsemax()
 
     def anneal(self, rate: float = 0.1) -> None:
         for layer in self.layers:
