@@ -19,6 +19,7 @@ class TrainingConfig:
     momentum: float = 0.9  # for SGD
     
     # Loss function parameters
+    loss_function: str = "mse"  # 'mse' or 'mae'
     l05_penalty: float = 0.1
     
     # Early stopping
@@ -40,6 +41,9 @@ class TrainingConfig:
     
     def __post_init__(self):
         """Validate configuration parameters."""
+        if self.loss_function not in ['mse', 'mae']:
+            raise ValueError(f"Unsupported loss function: {self.loss_function}")
+
         if self.optimizer not in ['adam', 'sgd']:
             raise ValueError(f"Unsupported optimizer: {self.optimizer}")
         

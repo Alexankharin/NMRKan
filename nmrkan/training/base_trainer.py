@@ -60,6 +60,7 @@ class BaseTrainer(ABC):
             'epoch': [],
             'total_loss': [],
             'mse_loss': [],
+            'mae_loss': [],
             'l05_loss': []
         }
         
@@ -108,17 +109,25 @@ class BaseTrainer(ABC):
         Returns:
             Tuple of (total_loss, loss_components_dict)
         """
-        # MSE loss
+        # Compute MSE and MAE
         mse_loss = nn.MSELoss()(predictions, targets)
-        
+        mae_loss = nn.L1Loss()(predictions, targets)
+
+        # Select primary loss based on config
+        if self.training_config.loss_function == 'mae':
+            primary_loss = mae_loss
+        else:
+            primary_loss = mse_loss
+
         # L0.5 regularization for sparsity
         l05_loss = model.L05_loss() if hasattr(model, 'L05_loss') else torch.tensor(0.0)
-        
+
         # Total loss
-        total_loss = mse_loss + self.training_config.l05_penalty * l05_loss
-        
+        total_loss = primary_loss + self.training_config.l05_penalty * l05_loss
+
         loss_components = {
             'mse': mse_loss.item(),
+            'mae': mae_loss.item(),
             'l05': l05_loss.item() if isinstance(l05_loss, torch.Tensor) else l05_loss,
             'total': total_loss.item()
         }
@@ -145,10 +154,12 @@ class BaseTrainer(ABC):
         self.training_history['epoch'].append(epoch)
         self.training_history['total_loss'].append(loss_components['total'])
         self.training_history['mse_loss'].append(loss_components['mse'])
+        self.training_history['mae_loss'].append(loss_components['mae'])
         self.training_history['l05_loss'].append(loss_components['l05'])
-        
+
         if epoch % log_interval == 0 or epoch == 1:
             print(f"Epoch {epoch}: MSE={loss_components['mse']:.6f}, "
+                  f"MAE={loss_components['mae']:.6f}, "
                   f"L0.5={loss_components['l05']:.6f}, "
                   f"Total={loss_components['total']:.6f}")
     

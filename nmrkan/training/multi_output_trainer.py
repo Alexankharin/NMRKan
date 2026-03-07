@@ -52,6 +52,7 @@ class MultiOutputTrainer(BaseTrainer):
                 'epoch': [],
                 'total_loss': [],
                 'mse_loss': [],
+                'mae_loss': [],
                 'l05_loss': []
             })
     
@@ -108,38 +109,29 @@ class MultiOutputTrainer(BaseTrainer):
         for i in range(self.num_outputs):
             epoch_losses.append({
                 'total': 0.0,
-                'mse': 0.0, 
+                'mse': 0.0,
+                'mae': 0.0,
                 'l05': 0.0
             })
-        
+
         num_batches = 0
-        
+
         for batch_inputs, batch_targets in train_loader:
-            # Move to device
             batch_inputs = batch_inputs.to(self.device)
             batch_targets = batch_targets.to(self.device)
-            
-            # Train each model on its corresponding output
+
             for i, (model, optimizer) in enumerate(zip(models, optimizers)):
-                # Extract target for this output
-                target_i = batch_targets[:, i:i+1]  # Keep dimension
-                
-                # Zero gradients
+                target_i = batch_targets[:, i:i+1]
+
                 optimizer.zero_grad()
-                
-                # Forward pass
                 prediction_i = model(batch_inputs)
-                
-                # Compute loss
                 loss, loss_components = self.compute_loss(model, prediction_i, target_i)
-                
-                # Backward pass
                 loss.backward()
                 optimizer.step()
-                
-                # Accumulate losses
+
                 epoch_losses[i]['total'] += loss_components['total']
                 epoch_losses[i]['mse'] += loss_components['mse']
+                epoch_losses[i]['mae'] += loss_components['mae']
                 epoch_losses[i]['l05'] += loss_components['l05']
             
             num_batches += 1
@@ -174,34 +166,28 @@ class MultiOutputTrainer(BaseTrainer):
             eval_losses.append({
                 'total': 0.0,
                 'mse': 0.0,
+                'mae': 0.0,
                 'l05': 0.0
             })
-        
+
         all_predictions = [[] for _ in range(self.num_outputs)]
         all_targets = [[] for _ in range(self.num_outputs)]
-        
+
         num_batches = 0
-        
+
         with torch.no_grad():
             for batch_inputs, batch_targets in data_loader:
-                # Move to device
                 batch_inputs = batch_inputs.to(self.device)
                 batch_targets = batch_targets.to(self.device)
-                
-                # Evaluate each model
+
                 for i, model in enumerate(models):
-                    # Extract target for this output
                     target_i = batch_targets[:, i:i+1]
-                    
-                    # Forward pass
                     prediction_i = model(batch_inputs)
-                    
-                    # Compute loss
                     loss, loss_components = self.compute_loss(model, prediction_i, target_i)
-                    
-                    # Accumulate losses
+
                     eval_losses[i]['total'] += loss_components['total']
                     eval_losses[i]['mse'] += loss_components['mse']
+                    eval_losses[i]['mae'] += loss_components['mae']
                     eval_losses[i]['l05'] += loss_components['l05']
                     
                     # Store predictions and targets
@@ -290,12 +276,16 @@ class MultiOutputTrainer(BaseTrainer):
                 
                 # Update progress bar with average metrics
                 avg_train_mse = sum(loss['mse'] for loss in train_losses) / len(train_losses)
+                avg_train_mae = sum(loss['mae'] for loss in train_losses) / len(train_losses)
                 avg_val_mse = sum(loss['mse'] for loss in val_losses) / len(val_losses)
+                avg_val_mae = sum(loss['mae'] for loss in val_losses) / len(val_losses)
                 avg_best_val = sum(best_val_losses) / len(best_val_losses)
-                
+
                 progress_bar.set_postfix({
                     'Avg Train MSE': f"{avg_train_mse:.6f}",
+                    'Avg Train MAE': f"{avg_train_mae:.6f}",
                     'Avg Val MSE': f"{avg_val_mse:.6f}",
+                    'Avg Val MAE': f"{avg_val_mae:.6f}",
                     'Avg Best Val': f"{avg_best_val:.6f}",
                     'Improved': len(improved_models)
                 })
@@ -350,11 +340,13 @@ class MultiOutputTrainer(BaseTrainer):
         history['epoch'].append(epoch)
         history['total_loss'].append(loss_components['total'])
         history['mse_loss'].append(loss_components['mse'])
+        history['mae_loss'].append(loss_components['mae'])
         history['l05_loss'].append(loss_components['l05'])
-        
+
         if epoch % log_interval == 0 or epoch == 1:
             print(f"Model {model_idx} - Epoch {epoch}: "
                   f"MSE={loss_components['mse']:.6f}, "
+                  f"MAE={loss_components['mae']:.6f}, "
                   f"L0.5={loss_components['l05']:.6f}, "
                   f"Total={loss_components['total']:.6f}")
     

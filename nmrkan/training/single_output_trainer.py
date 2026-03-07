@@ -43,37 +43,30 @@ class SingleOutputTrainer(BaseTrainer):
         
         total_loss = 0.0
         total_mse = 0.0
+        total_mae = 0.0
         total_l05 = 0.0
         num_batches = 0
-        
+
         for batch_inputs, batch_targets in train_loader:
-            # Move to device
             batch_inputs = batch_inputs.to(self.device)
             batch_targets = batch_targets.to(self.device)
-            
-            # Zero gradients
+
             optimizer.zero_grad()
-            
-            # Forward pass
             predictions = model(batch_inputs)
-            
-            # Compute loss
             loss, loss_components = self.compute_loss(model, predictions, batch_targets)
-            
-            # Backward pass
             loss.backward()
             optimizer.step()
-            
-            # Accumulate losses
+
             total_loss += loss_components['total']
             total_mse += loss_components['mse']
+            total_mae += loss_components['mae']
             total_l05 += loss_components['l05']
             num_batches += 1
-        
-        # Return average losses
+
         return {
             'total': total_loss / num_batches,
             'mse': total_mse / num_batches,
+            'mae': total_mae / num_batches,
             'l05': total_l05 / num_batches
         }
     
@@ -95,31 +88,27 @@ class SingleOutputTrainer(BaseTrainer):
         
         total_loss = 0.0
         total_mse = 0.0
+        total_mae = 0.0
         total_l05 = 0.0
         num_batches = 0
-        
+
         all_predictions = []
         all_targets = []
-        
+
         with torch.no_grad():
             for batch_inputs, batch_targets in data_loader:
-                # Move to device
                 batch_inputs = batch_inputs.to(self.device)
                 batch_targets = batch_targets.to(self.device)
-                
-                # Forward pass
+
                 predictions = model(batch_inputs)
-                
-                # Compute loss
                 loss, loss_components = self.compute_loss(model, predictions, batch_targets)
-                
-                # Accumulate losses
+
                 total_loss += loss_components['total']
                 total_mse += loss_components['mse']
+                total_mae += loss_components['mae']
                 total_l05 += loss_components['l05']
                 num_batches += 1
-                
-                # Store predictions and targets for detailed analysis
+
                 all_predictions.append(predictions.cpu())
                 all_targets.append(batch_targets.cpu())
         
@@ -145,6 +134,7 @@ class SingleOutputTrainer(BaseTrainer):
         evaluation_results = {
             'total_loss': total_loss / num_batches,
             'mse': total_mse / num_batches,
+            'mae': total_mae / num_batches,
             'l05': total_l05 / num_batches,
             **output_metrics
         }
@@ -211,7 +201,9 @@ class SingleOutputTrainer(BaseTrainer):
                 # Update progress bar
                 progress_bar.set_postfix({
                     'Train MSE': f"{train_losses['mse']:.6f}",
+                    'Train MAE': f"{train_losses['mae']:.6f}",
                     'Val MSE': f"{current_val_loss:.6f}",
+                    'Val MAE': f"{val_losses['mae']:.6f}",
                     'Best Val': f"{best_val_loss:.6f}"
                 })
             else:

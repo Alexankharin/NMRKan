@@ -31,16 +31,20 @@ def create_training_plots(
     epochs = training_history.get('epoch', [])
     total_losses = training_history.get('total_loss', [])
     mse_losses = training_history.get('mse_loss', [])
+    mae_losses = training_history.get('mae_loss', [])
     l05_losses = training_history.get('l05_loss', [])
-    
+
     if not epochs:
         print("No training history available for plotting")
         return
-    
+
+    has_mae = mae_losses and len(mae_losses) == len(epochs)
+
     # Create subplots
-    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+    n_rows = 2 if not has_mae else 3
+    fig, axes = plt.subplots(n_rows, 2, figsize=(12, 4 * n_rows))
     fig.suptitle('Training Progress', fontsize=16)
-    
+
     # Total loss
     axes[0, 0].plot(epochs, total_losses, 'b-', linewidth=2)
     axes[0, 0].set_title('Total Loss')
@@ -48,7 +52,7 @@ def create_training_plots(
     axes[0, 0].set_ylabel('Loss')
     axes[0, 0].grid(True, alpha=0.3)
     axes[0, 0].set_yscale('log')
-    
+
     # MSE loss
     axes[0, 1].plot(epochs, mse_losses, 'r-', linewidth=2)
     axes[0, 1].set_title('MSE Loss')
@@ -56,23 +60,43 @@ def create_training_plots(
     axes[0, 1].set_ylabel('MSE')
     axes[0, 1].grid(True, alpha=0.3)
     axes[0, 1].set_yscale('log')
-    
+
     # L0.5 regularization
     axes[1, 0].plot(epochs, l05_losses, 'g-', linewidth=2)
     axes[1, 0].set_title('L0.5 Regularization')
     axes[1, 0].set_xlabel('Epoch')
     axes[1, 0].set_ylabel('L0.5 Loss')
     axes[1, 0].grid(True, alpha=0.3)
-    
+
     # Combined losses
     axes[1, 1].plot(epochs, mse_losses, 'r-', label='MSE', linewidth=2)
     axes[1, 1].plot(epochs, l05_losses, 'g-', label='L0.5', linewidth=2)
+    if has_mae:
+        axes[1, 1].plot(epochs, mae_losses, 'm-', label='MAE', linewidth=2)
     axes[1, 1].set_title('Combined Losses')
     axes[1, 1].set_xlabel('Epoch')
     axes[1, 1].set_ylabel('Loss')
     axes[1, 1].legend()
     axes[1, 1].grid(True, alpha=0.3)
     axes[1, 1].set_yscale('log')
+
+    # MAE loss (dedicated subplot)
+    if has_mae:
+        axes[2, 0].plot(epochs, mae_losses, 'm-', linewidth=2)
+        axes[2, 0].set_title('MAE Loss')
+        axes[2, 0].set_xlabel('Epoch')
+        axes[2, 0].set_ylabel('MAE')
+        axes[2, 0].grid(True, alpha=0.3)
+        axes[2, 0].set_yscale('log')
+
+        axes[2, 1].plot(epochs, mse_losses, 'r-', label='MSE', linewidth=2)
+        axes[2, 1].plot(epochs, mae_losses, 'm-', label='MAE', linewidth=2)
+        axes[2, 1].set_title('MSE vs MAE')
+        axes[2, 1].set_xlabel('Epoch')
+        axes[2, 1].set_ylabel('Loss')
+        axes[2, 1].legend()
+        axes[2, 1].grid(True, alpha=0.3)
+        axes[2, 1].set_yscale('log')
     
     plt.tight_layout()
     
