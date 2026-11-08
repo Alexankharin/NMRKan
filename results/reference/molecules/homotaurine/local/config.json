@@ -1,0 +1,105 @@
+{
+  "molecule": "homotaurine",
+  "reference_parameters_hz": [
+    -12.743923,
+    -13.969277,
+    -14.109177,
+    3.093406,
+    2.34439
+  ],
+  "domain": "local",
+  "bounds_hz": [
+    [
+      -13.043923000000001,
+      -12.443923
+    ],
+    [
+      -14.269277,
+      -13.669277
+    ],
+    [
+      -14.409177000000001,
+      -13.809177
+    ],
+    [
+      2.4747248,
+      3.7120871999999996
+    ],
+    [
+      1.8755120000000003,
+      2.8132680000000003
+    ]
+  ],
+  "samples": 100000,
+  "split_counts": [
+    80000,
+    10000,
+    10000
+  ],
+  "data_seed": 42,
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "epochs": 1000,
+  "batch_size": 4096,
+  "architecture": [
+    4,
+    16,
+    4
+  ],
+  "activation_library": [
+    "x",
+    "x^2",
+    "0"
+  ],
+  "learning_rate": 0.001,
+  "optimizer": "Adam",
+  "fit_loss": "MAE on train-standardized normalized eigenvalues",
+  "regularization": 0.1,
+  "softmax_fraction": 0.9,
+  "selection": "minimum validation RMSE in unstandardized dimensionless eigenvalues, sparsemax phase only",
+  "input_names": [
+    "xA",
+    "xX",
+    "u",
+    "v"
+  ],
+  "conditioning": [
+    [
+      0.08745602364832507,
+      -0.010230921625920814,
+      0.22149311779745012,
+      0.16775117112490304
+    ],
+    [
+      0.016780969740559523,
+      0.017661341128149956,
+      0.0257554595661054,
+      0.01948743230125192
+    ],
+    [
+      -1.9328149983359246,
+      -0.11792567792030663,
+      0.024222035219327982,
+      0.18096884508172364
+    ],
+    [
+      0.02979458357219216,
+      0.012805119885640733,
+      0.015050963528030443,
+      0.015338846294054511
+    ]
+  ],
+  "target_source": "numpy.linalg.eigvalsh of physical 4x4 Hamiltonian, ascending, then shift/scale",
+  "python": "3.14.4",
+  "torch": "2.14.1+cpu",
+  "numpy": "2.3.5",
+  "device": "CPU",
+  "threads": 1,
+  "model_sha256": "34a4cc337f0ddcd9f7618c9c78ef6fef97d07a408977fe20f59f49da6d387035",
+  "dataset_sha256": "8fe42c21dc0a4c7daeb432373011c02eb81aead30b11b04c7023ae4567770135"
+}

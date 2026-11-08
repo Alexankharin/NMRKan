@@ -1,0 +1,50 @@
+HW10070
+Interpretable activation-selection neural networks for symbolic
+regression of parameter-dependent Hamiltonian eigenvalues
+by Alexander Yu. Kharin and Kirill F. Sheberstov
+
+Dear Dr. Sheberstov,
+
+Thank you for submitting your manuscript to PRX Intelligence. We
+appreciate your interest and the opportunity to consider your work.
+
+We have identified issues with your manuscript that should be addressed.
+
+PRX Intelligence is a highly-selective, fully open-access journal that
+aims to publish exceptional work on artificial intelligence and machine
+learning that substantially advances the physical sciences and related
+fields. We consistently apply rigorous standards when deciding which
+papers proceed to review.
+
+While I greatly appreciate the idea and your Ansatz, I am afraid that
+your current ms does not meet the academic standards required to publish
+in our journal. In particular, I would like to ask you to (a) exemplify
+the usefulness of your approach through inclusion of NMR predictions for
+some real materials or molecules, and to (b) strengthen the discussion
+of your results by providing more context from the literature (currently
+you only reference 12 publications, which is not enough) and by
+comparing to the state of the art models published in the literature.
+If you appropriately address these concerns, our editorial team will
+evaluate your paper and decide on the next step. You may resubmit using
+the Submission server at https://authors.aps.org/Submissions/. We only
+need the PDF file of the manuscript, not the TeX or Word source file or
+figure files.
+
+Yours sincerely,
+
+Anatole von Lilienfeld
+Chief Editor
+PRX Intelligence
+Email: prxintelligence@aps.org
+https://journals.aps.org/prxintelligence
+
+NEWS FROM THE PHYSICAL REVIEW JOURNALS
+
+PRX Intelligence is a highly-selective, fully open-access journal
+that aims to publish exceptional work on artificial intelligence and
+machine learning that substantially advances the physical sciences
+and related fields.
+https://go.aps.org/4pFrs50
+
+Updated AI policy for APS journals
+https://go.aps.org/use-ai-tools

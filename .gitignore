@@ -80,3 +80,11 @@ Desktop.ini
 outputs/*
 experiment_results/*
 notebooks/experiment_results/*
+
+# Reproducible local products; curated artifacts live in results/reference.
+/outputs/
+/data/cache/
+/.agents/
+/.aws/
+/.codex/
+.ruff_cache/

@@ -26,6 +26,8 @@ def test_dimensional_analysis_with_optimization():
     # Test 2: Dimensionless output dimension
     formula2 = sp.parse_expr("2*x_1 + 3*x_3")  # Both dimensionless, should be OK
     result2 = analyze_nmr_formula(formula2, expected_output_dim=Dimension())
+    assert result2['fixed_consistent']
+    assert result2['fixed_formula'] == formula2
     print(f"Test 2 (dimensionless output): {result2['original_consistent']} - {result2['original_message']}")
     
     # Test 3: Mixed dimensions (should be fixed)
@@ -68,11 +70,9 @@ def test_dimensional_analysis_with_optimization():
     else:
         print(f"Optimization failed: {opt_result['message']}")
     
-    return opt_result["optimization_success"]
+    assert opt_result["optimization_success"]
+    assert opt_result["optimized_mse"] < opt_result["original_mse"]
 
 if __name__ == "__main__":
-    success = test_dimensional_analysis_with_optimization()
-    if success:
-        print("\n✅ All tests passed! Integration is working correctly.")
-    else:
-        print("\n❌ Some tests failed. Check the implementation.")
+    test_dimensional_analysis_with_optimization()
+    print("\n✅ All tests passed! Integration is working correctly.")

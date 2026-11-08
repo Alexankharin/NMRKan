@@ -1,0 +1,21 @@
+{
+  "samples": 20000,
+  "epochs": 400,
+  "architecture": [
+    2,
+    16,
+    4
+  ],
+  "data_seed": 42,
+  "split_seed": 42,
+  "model_seed": 42,
+  "learning_rate": 0.001,
+  "batch_size": 4096,
+  "regularization": 0.1,
+  "softmax_fraction": 0.9,
+  "loss": "mae",
+  "problem": "three_site",
+  "sampling": "uniform_ratios",
+  "checkpoint": "final_epoch",
+  "grid_resolution": 200
+}

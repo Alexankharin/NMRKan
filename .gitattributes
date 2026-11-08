@@ -1,0 +1,15 @@
+# Binary research products must not be interpreted as text patches.
+*.pdf binary
+*.png binary
+*.npz binary
+*.npy binary
+*.pt binary
+*.zip binary
+*.pptx binary
+*.xls binary
+
+# Preserve original bytes, including CSV line endings, across platforms.
+data/raw/** -text -whitespace
+results/reference/molecules/** -text -whitespace
+archive/** -text -whitespace
+paper/** -text -whitespace

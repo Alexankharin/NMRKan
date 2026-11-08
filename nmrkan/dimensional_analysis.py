@@ -271,8 +271,9 @@ def fix_sum_dimensions(
             except ValueError:
                 key = (("<unknown>", id(term)),)
             groups.setdefault(key, []).append(term)
-        # Keep the largest (most terms) group; drop the rest
-        best_terms = groups.get((('Hz', 1.0),), [])
+        # Prefer the historical frequency group when present. Dimensionless
+        # or other homogeneous sums have no Hz group and must remain valid.
+        best_terms = groups.get((('Hz', 1.0),), max(groups.values(), key=len))
         return sp.Add(*best_terms) if len(best_terms) > 1 else best_terms[0]
 
     return expr.replace(lambda z: z.is_Add, _fix)

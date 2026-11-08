@@ -1,0 +1,97 @@
+{
+  "domain": "local",
+  "bounds_hz": [
+    [
+      -14.058727000000001,
+      -13.458727
+    ],
+    [
+      -13.708159,
+      -13.108158999999999
+    ],
+    [
+      -14.421958,
+      -13.821957999999999
+    ],
+    [
+      4.215336,
+      6.323004
+    ],
+    [
+      5.2777736,
+      7.9166604
+    ]
+  ],
+  "samples": 100000,
+  "split_counts": [
+    80000,
+    10000,
+    10000
+  ],
+  "data_seed": 42,
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "epochs": 1000,
+  "batch_size": 4096,
+  "architecture": [
+    4,
+    16,
+    4
+  ],
+  "activation_library": [
+    "x",
+    "x^2",
+    "0"
+  ],
+  "learning_rate": 0.001,
+  "optimizer": "Adam",
+  "fit_loss": "MAE on train-standardized normalized eigenvalues",
+  "regularization": 0.1,
+  "softmax_fraction": 0.9,
+  "selection": "minimum validation RMSE in unstandardized dimensionless eigenvalues, sparsemax phase only",
+  "input_names": [
+    "xA",
+    "xX",
+    "u",
+    "v"
+  ],
+  "conditioning": [
+    [
+      -0.02644982855710015,
+      -0.053477627637554113,
+      0.3930763793975849,
+      0.4918219543279273
+    ],
+    [
+      0.018506646185206626,
+      0.018802040821784938,
+      0.04572987611666632,
+      0.05716267064633
+    ],
+    [
+      -2.128961232803405,
+      -0.3123074379335711,
+      -0.033331196050073564,
+      0.314744954397749
+    ],
+    [
+      0.03412901762446851,
+      0.025475412013053072,
+      0.01722302800092712,
+      0.02949842974939849
+    ]
+  ],
+  "target_source": "numpy.linalg.eigvalsh of physical 4x4 Hamiltonian, ascending, then shift/scale",
+  "python": "3.14.4",
+  "torch": "2.14.1+cpu",
+  "numpy": "2.3.5",
+  "device": "CPU",
+  "threads": 1,
+  "model_sha256": "34a4cc337f0ddcd9f7618c9c78ef6fef97d07a408977fe20f59f49da6d387035",
+  "dataset_sha256": "e32af57cfe857d8b3f094ed1fec32fb93bb06ef245fc5cdba2f54bacc3c62937"
+}

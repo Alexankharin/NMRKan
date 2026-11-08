@@ -1,0 +1,53 @@
+% Draft insertion: generated from completed training artifacts, not hypothetical results.
+\subsection{A molecular application: DSS}
+We extended the activation-selection network to a three-methylene chain with
+three distinct geminal couplings. For DSS, the coupling vector in Hz was
+$(-13.758727,-13.408159,-14.121958,5.269170,6.597217)$, where the last two
+entries are full nearest-neighbour coupling differences. The four-state
+secular parity block retains type-II mixing. With $s=-J_M>0$ and
+$E_{\rm ref}=(-3J_A+J_M-3J_X)/4$, its four dimensionless inputs are
+$(x_A,x_X,u,v)=((J_A-J_M)/s,(J_X-J_M)/s,d/s,e/s)$, and
+$E_i=E_{\rm ref}+s\lambda_i$. Numerical targets were ordered as
+$\lambda_0\le\lambda_1\le\lambda_2\le\lambda_3$.
+
+The molecular application used a (4,16,4) ASN with the activation library
+$\{0,x,x^2\}$. We independently varied each geminal coupling by $\pm0.3$ Hz
+and each coupling difference by $\pm20\%$ around the DSS reference. These
+ranges define a numerical approximation domain, not experimental confidence
+intervals. Of 100000 samples, 80000 were used for training, 10000 for
+validation, and 10000 for testing. Training-set affine input and output
+standardization was applied and algebraically undone during extraction.
+Adam training used 1000 epochs, batch size 4096, learning rate $10^{-3}$,
+and MAE on standardized targets. Softmax with a $0.1L_{0.5}$ penalty was
+used for 900 epochs, followed by 100 epochs of sparsemax without the penalty.
+Five initialization seeds were evaluated; checkpoint and representative-seed
+selection used validation eigenvalue RMSE only.
+
+An independent exact cubic construction supplies the analytical reference.
+Let the positive normal-mode energies satisfy $\omega_1\le\omega_2\le\omega_3$.
+The three principal frequencies are
+$f_{12}=\omega_3-\omega_2$, $f_{23}=\omega_2-\omega_1$, and
+$f_{13}=f_{12}+f_{23}$. Learned frequencies were formed from the corresponding
+fixed eigenvalue differences, without sorting the network outputs afterward.
+
+The selected ASN achieved a held-out frequency RMSE of 0.00299867 Hz and a maximum line error of 0.0443649 Hz. The quadratic and quartic least-squares baselines gave frequency RMSEs of 0.00278564 and 7.70047e-05 Hz, respectively. At the DSS reference, the exact frequencies were 3.708572, 4.666649, 8.375221 Hz, while the learned frequencies were 3.708487, 4.666514, 8.375001 Hz. The selected model had 0 ordering violations on the 10000-point local test set. Three-decimal coefficient rounding gave a local frequency RMSE of 0.00794475 Hz.
+
+On the section $d=5.269170t$, $e=6.597217t$, with the DSS geminals fixed,
+substitution into the trained four-input network gives
+\[\widehat f_{12}(t)=- 0.345905233 t^{2} + 4.228476871 t - 0.174084556\quad\mathrm{Hz}.\]
+\[\widehat f_{23}(t)=0.197857469 t^{2} + 4.24262703 t + 0.226029917\quad\mathrm{Hz}.\]
+\[\widehat f_{13}(t)=- 0.148047765 t^{2} + 8.471103901 t + 0.051945361\quad\mathrm{Hz}.\]
+These expressions were extracted by composing the trained layers; no
+additional one-dimensional fit was performed. They approximate the
+finite-domain dependence and are not perturbative Taylor coefficients.
+The spectral comparison uses common illustrative preparation/readout
+amplitudes and a 0.1 Hz Lorentzian linewidth, replacing only the line centers
+with learned predictions. It therefore tests frequency prediction rather
+than a learned model of experimental intensities.
+
+The polynomial least-squares baseline must be retained in interpreting
+these results: compact learned formulas do not establish an intrinsic
+accuracy advantage over an appropriate fixed basis. A separate broader
+parameter-domain run and decoupled-boundary checks are reported in the
+supplementary comparison. No claim of uniform accuracy or guaranteed
+ordering outside the demonstrated molecular domain is made.

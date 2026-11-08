@@ -1,0 +1,10 @@
+test_optional_q_correction_and_model_errors (test_homotaurine_asn.HomotaurinePhysicsTests.test_optional_q_correction_and_model_errors) ... ok
+test_reference_section_and_cubic_coefficients (test_homotaurine_asn.HomotaurinePhysicsTests.test_reference_section_and_cubic_coefficients) ... ok
+test_both_trained_domains_and_extracted_formulas (test_homotaurine_asn.HomotaurineTrainedArtifactTests.test_both_trained_domains_and_extracted_formulas) ... ok
+test_molecule_reference_splits_and_domains (test_homotaurine_asn.HomotaurineTrainedArtifactTests.test_molecule_reference_splits_and_domains) ... ok
+test_section_is_substitution_into_actual_four_input_model (test_homotaurine_asn.HomotaurineTrainedArtifactTests.test_section_is_substitution_into_actual_four_input_model) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.888s
+
+OK

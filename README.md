@@ -1,232 +1,86 @@
-# NMRKan - NMR Symbolic Regression Framework
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Alexankharin/NMRKan)
+# NMRKan
 
-A unified framework for NMR frequency prediction using symbolic regression with Kolmogorov-Arnold Networks (KANs). This repository simulates NMR frequencies by solving eigenvalues of specific matrices and uses symbolic regression to recover interpretable formulas from the data.
+Code and reproducibility materials for **Interpretable Activation-Selection Neural Networks for Symbolic Regression of Parameter-Dependent Hamiltonian Eigenvalues**, Alexander Yu. Kharin and Kirill F. Sheberstov, manuscript v24 (25 August 2026).
 
-## Overview
-NMRKan provides a comprehensive toolkit for:
-- Generating synthetic NMR frequency data from quantum mechanical simulations
-- Training neural-symbolic models (KANs) to fit the data
-- Extracting interpretable symbolic formulas from trained models
-- Running systematic experiments with different data generation approaches
-- Comparing regular and dimensionless formulations
+The model is an **activation-selection network (ASN)**: each input to a layer selects from analytical functions, followed by a linear transformation. The Python class retains its historical name, `KharKAN`. The paper uses the library `{0, x, x²}` to approximate dimensionless spin-chain eigenvalues.
 
-The ultimate goal is to recover or approximate perturbation theory results from simulated data using symbolic regression, bridging the gap between black-box neural models and analytical theory.
+**Start with [the result-by-result reproduction guide](docs/reproducing_the_paper.md)** or open the [numbered notebooks](notebooks/README.md). The [reviewer response map](docs/reviewer_response.md) explains the DSS and homotaurine extension and the remaining scientific work.
 
-## New Simplified Structure (2025)
+## Install
 
-After refactoring, the repository now has a cleaner, more organized structure with fewer entry points:
-
-### 📁 Repository Organization
-```
-├── main.py                          # 🚀 MAIN ENTRY POINT - Unified CLI
-├── experiments/
-│   └── run_experiments.py          # Consolidated experiment runner
-├── data_generation/                 # All data generation code
-│   ├── __init__.py
-│   ├── eigenvalues_4CH2.py         # 4CH2 system calculations  
-│   ├── nmr_datagen.py              # General NMR data generation
-│   └── datasets.py                 # Dataset creation utilities
-├── nmrkan/                         # Core models and analysis
-```
-
-### 🎯 New Features
-
-#### Selective Output Training (`output_numbers`)
-The framework now supports training models on specific frequency outputs only:
-
-```python
-from experiments.run_experiments import UnifiedExperimentConfig
-
-# Configure experiment to train on f2 and f0 frequencies only (skip f1)
-config = UnifiedExperimentConfig()
-config.output_numbers = (0, 2)  # Indices: 0=f2, 1=f1, 2=f0
-
-# Neural network architecture automatically adjusts:
-# Original: (2, 4, 3) -> Adjusted: (2, 4, 2)
-# Training data is automatically filtered to selected outputs
-```
-
-**Benefits:**
-- Focus on specific frequency relationships of interest
-- Reduce model complexity for targeted analysis
-- Compare performance across different output combinations
-- Logs display selected outputs and architecture adjustments
-│   ├── models.py                   # KAN model implementations
-│   ├── dimensional_analysis.py     # Physics-aware analysis
-│   └── sympy_torch.py             # SymPy integration
-├── data/                           # Generated datasets
-├── experiment_results/             # Experiment outputs
-├── notebooks/                      # Analysis notebooks
-├── tests/                          # Unit tests
-└── legacy/                         # Old scripts (for reference)
-    ├── run_many_experiments.py
-    ├── run_many_experiments_dimensionless.py
-    ├── run_symbolic_regressor.py
-    ├── run_grid_search.py
-    └── genetic_KAN.py
-```
-
-### 🎯 Simple Usage
-
-The new unified interface makes everything accessible through a single command:
+Use Python 3.10 or newer, from this checkout:
 
 ```bash
-# Run all experiments (regular + dimensionless)
-python main.py experiment
-
-# Run only regular experiments  
-python main.py experiment --mode regular
-
-# Run only dimensionless experiments
-python main.py experiment --mode dimensionless
-
-# Run symbolic regression
-python main.py symbolic
-
-# Run grid search optimization
-python main.py grid-search
-
-# Run genetic algorithm optimization
-python main.py genetic
-
-# Show repository status
-python main.py status
-
-# List available configuration files
-python main.py list-configs
-
-# Get help
-python main.py --help
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+# CPU is sufficient for every supported workflow.
+python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+python -m pip install -e '.[reproduce]'
 ```
 
-## Quick Start
+The editable installation makes imports work from notebooks without changing `sys.path`. `requirements.txt` contains the core dependencies; the `reproduce` extra adds notebooks, tests, and report rendering. Recorded molecular training environments are in each saved `config.json`; a newer environment can validate the artifacts without reproducing neural optimization bit for bit.
 
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Reproduce results
 
-2. **Run a quick experiment:**
-   ```bash
-   python main.py experiment --mode working
-   ```
+Run these commands from the repository root after installation:
 
-3. **Check results:**
-   ```bash
-   python main.py status
-   ```
+```bash
+# Exact eigenvalues, perturbation theory, published rounded formulas, OLS baselines,
+# and figures. Neither command trains a neural network.
+python -m experiments.paper --config configs/paper/three_site.json
+python -m experiments.paper --config configs/paper/four_site_verification.json
 
-## Key Features
+# Rebuild the real-molecule reports using the supplied trained models.
+python -m experiments.molecules --from-reference
 
-### 🔬 **Multiple Data Generation Approaches**
-- **Regular**: Physical units with dimensional analysis
-- **Dimensionless**: Scale-invariant formulations
-- **4CH2 System**: Specialized 4-spin system calculations
+# Validate physics, reference checkpoints, formulas, and a short training run.
+python -m pytest
 
-### 🧠 **Advanced Neural Architecture**
-- Kolmogorov-Arnold Networks (KANs) for symbolic regression
-- Automatic symbolic formula extraction
-- Physics-aware dimensional analysis
+# Explore the explanations and calculations interactively.
+jupyter lab notebooks
+```
 
-### 📊 **Comprehensive Experiments**
-- Systematic parameter sweeps
-- Multiple architecture comparisons  
-- Automatic report generation
-- CSV and JSON result exports
+New files go to `outputs/`, which is ignored by Git. Existing run directories are protected: use `--output outputs/paper/another_run` for a repeated paper calculation, or set `NMRKAN_MOLECULE_OUTPUT=outputs/molecules_another_run` for molecular reports. Reference artifacts under `results/reference/` are retained separately.
 
-### 🎛️ **Flexible Configuration**
-- Command-line interface for all operations
-- Configurable experiment parameters
-- Multiple optimization algorithms
+For fresh ASN training:
 
-## Migration from Old Structure
+```bash
+# Short workflow check; these metrics are not paper results.
+python -m experiments.paper --config configs/paper/three_site.json --train --quick
 
-If you were using the old scripts directly:
+# Full manuscript training protocols; expect substantially longer runs.
+python -m experiments.paper --config configs/paper/three_site.json --train
+python -m experiments.paper --config configs/paper/four_site.json --train
+```
 
-| Old Command                                    | New Command                                      |
-| ---------------------------------------------- | ------------------------------------------------ |
-| `python run_many_experiments.py`               | `python main.py experiment --mode regular`       |
-| `python run_many_experiments_dimensionless.py` | `python main.py experiment --mode dimensionless` |
-| `python run_symbolic_regressor.py`             | `python main.py symbolic`                        |
-| `python run_grid_search.py`                    | `python main.py grid-search`                     |
-| `python genetic_KAN.py`                        | `python main.py genetic`                         |
+**Reproducibility finding:** the stated four-site uniform-ratio OLS protocol does not reproduce the manuscript’s quoted error. The [guide records both sampling protocols and the measured discrepancy](docs/reproducing_the_paper.md#numerical-discrepancy-requiring-manuscript-review).
 
-## Requirements
-- Python 3.9+
-- PyTorch
-- NumPy, SciPy
-- SymPy
-- Matplotlib
-- See `requirements.txt` for complete list
+The original three-site and four-site neural checkpoints and architecture-search table were not supplied. Fresh runs save their own seeds, splits, metrics, checkpoints, and extracted formulas; they are not represented as the historical runs. Published rounded equations can be evaluated directly. The molecular extension includes all supplied datasets and twenty saved checkpoints.
 
-## Scientific Background
+## Repository layout
 
-### Why Symbolic Regression?
-Symbolic regression provides interpretable, human-readable formulas that describe relationships in data. This is especially valuable in scientific domains where understanding the underlying physics is as important as predictive accuracy.
+| Folder | Contents |
+|---|---|
+| [`paper/`](paper/README.md) | Manuscript, editorial comments, and molecular Hamiltonian note |
+| [`docs/`](docs/README.md) | Reproduction guide, reviewer response, conventions, and contribution rules |
+| [`notebooks/`](notebooks/README.md) | Numbered, executable explanations of the paper and molecular extension |
+| [`experiments/`](experiments/README.md) | Paper CLI, molecular training/report CLIs, and earlier exploratory interface |
+| [`configs/`](configs/README.md) | Named manuscript protocols; older YAML settings under `exploratory/` |
+| [`nmrkan/`](nmrkan/README.md) | ASN model, physics, training, symbolic extraction, and utilities |
+| [`data_generation/`](data_generation/README.md) | Synthetic spin-chain data and original interpolation routines |
+| [`data/`](data/README.md) | Historical input tables and Mathematica source, under `raw/` |
+| [`results/reference/`](results/reference/README.md) | Preserved molecular results, checkpoints, reports, and checksums |
+| [`tests/`](tests/README.md) | Physics, trained-artifact, paper-protocol, and dimensional-analysis checks |
+| [`archive/`](archive/README.md) | Earlier notebooks, scripts, development notes, logs, and relocation record |
+| `outputs/` | Locally generated runs; created by the commands above |
 
-### NMR Frequency Prediction
-The framework models NMR transition frequencies by:
-1. Generating quantum mechanical Hamiltonians
-2. Computing eigenvalues and transition frequencies
-3. Training neural networks to learn the frequency patterns
-4. Extracting symbolic expressions from the trained networks
-5. Validating results against known perturbation theory
+## Scientific conventions
 
-This approach helps bridge the gap between computational quantum mechanics and analytical theory, potentially discovering new approximations or confirming existing ones.
+The paper orders dimensionless eigenvalues `E/J` from highest to lowest. Physical `J < 0`, so physical energies have the reverse order. Molecular experiments instead use the positive scale `s = -JMM` and an energy offset, and sort their dimensionless eigenvalues in ascending order. These conventions are documented in [the reproduction guide](docs/reproducing_the_paper.md#energy-and-frequency-conventions).
 
-## Contributing
+The molecular spectra are model predictions based on supplied fitted coupling rows. Illustrative transition amplitudes depend on the chosen state preparation and observable; they are not newly measured spectra. OLS is a required baseline, and the existing comparisons do not establish an ASN accuracy advantage over a suitable fixed basis.
 
-The repository now has a much cleaner structure. When contributing:
-- Use the unified `main.py` interface for testing
-- Add new data generation methods to `data_generation/`
-- Core model improvements go in `nmrkan/`
-- All experiments use the consolidated runner in `experiments/`
+## Contributing and citation
 
-## Citation
-
-If you use this code in your research, please cite our work on symbolic regression for quantum systems.
-2. Run the symbolic regressor:
-   ```bash
-   python run_symbolic_regressor.py
-   ```
-   This generates synthetic data, trains the model, and extracts symbolic expressions. Results are saved as CSV and pickle files in the project directory.
-3. Optionally try the grid search or GA demo:
-   ```bash
-   python run_grid_search.py
-   python genetic_KAN.py
-   ```
-4. Explore and visualize results using the notebooks in the `notebooks/` directory, especially `Single_run_end_to_end_test.ipynb` for a full workflow example.
-
-## Data
-- All raw and processed data is stored in the `data/` directory. This includes synthetic datasets and results from previous runs.
-- Notebooks and scripts expect data to be in this location.
-
-## Outputs
-- Figures and result files (e.g., plots, CSVs) are saved in the `outputs/` directory.
-
-## Project Purpose
-The project simulates NMR frequency data, then uses symbolic regression to extract analytical formulas, providing insight into perturbation theory from simulated results. The approach is general and can be adapted to other physical systems where symbolic regression is useful.
-
-## Citation
-If you use this code or ideas in your research, please cite appropriately. (Add citation information here if available.)
-
-## Authors
-- [Alexankhar]
-
-## License
-
-
-## Troubleshooting
-- If you encounter missing package errors, ensure you have installed all dependencies from `requirements.txt`.
-- For CUDA/GPU issues, set `--device cpu` when running the script if you do not have a compatible GPU.
-- For questions or issues, please open an issue on the repository or contact the author.
-
-## Contributing & Extending
-Contributions are welcome! You can extend the project by:
-- Adding new datasets or physical systems
-- Improving model architectures or training routines
-- Enhancing symbolic post-processing or interpretability
-- Creating new analysis notebooks
-
-Feel free to open issues or pull requests with suggestions or improvements.
+See [contribution and maintenance rules](docs/contributing.md). Cite the manuscript by the title and authors above; no DOI or published journal citation is supplied. The repository does not currently contain a license grant.

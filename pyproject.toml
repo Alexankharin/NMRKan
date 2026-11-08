@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nmrkan"
+version = "0.2.0"
+description = "Activation-selection networks for spin-chain Hamiltonian eigenvalues"
+requires-python = ">=3.10"
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+reproduce = ["pytest>=7", "nbformat>=5", "nbclient>=0.8", "ipykernel>=6", "jupyterlab>=4", "markdown>=3.4", "latex2mathml>=3.75"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.packages.find]
+include = ["nmrkan*", "data_generation*", "experiments*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

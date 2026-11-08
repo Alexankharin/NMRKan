@@ -1,0 +1,279 @@
+{
+  "three_site": {
+    "config": {
+      "samples": 100000,
+      "epochs": 1000,
+      "architecture": [
+        2,
+        16,
+        4
+      ],
+      "data_seed": 42,
+      "split_seed": 42,
+      "model_seed": 42,
+      "learning_rate": 0.001,
+      "batch_size": 4096,
+      "regularization": 0.1,
+      "softmax_fraction": 0.9,
+      "loss": "mae",
+      "problem": "three_site",
+      "sampling": "uniform_ratios",
+      "checkpoint": "final_epoch",
+      "grid_resolution": 200,
+      "python": "3.14.4",
+      "numpy": "2.5.4",
+      "torch": "2.15.0+cpu",
+      "trained": false,
+      "units": "dimensionless E/J; descending branch order",
+      "runner_sha256": "f745bdca2813cf377f5b6e70b8661759e0e8dbeb20397c90c630e0b98e6f5f83"
+    },
+    "metrics": {
+      "ols_validation": {
+        "rmse": 0.016094578187837882,
+        "max_abs_error": 0.1105626175217822,
+        "r2_per_branch": [
+          0.9994559550830298,
+          0.9914648846744253,
+          0.9588929829617915,
+          0.998158691457583
+        ]
+      },
+      "ols_full_sample_fit": {
+        "rmse": 0.016131138880650726,
+        "max_abs_error": 0.1109580463906581,
+        "r2_per_branch": [
+          0.999451019398484,
+          0.9914033528202278,
+          0.9585409931636782,
+          0.9981414783173378
+        ]
+      },
+      "published_rounded_validation": {
+        "rmse": 0.018422808782620013,
+        "max_abs_error": 0.15737188783491085,
+        "r2_per_branch": [
+          0.9992691782852323,
+          0.988127837984519,
+          0.9455690715663363,
+          0.9978854553507093
+        ]
+      },
+      "radial_validation": {
+        "rmse": 0.014020448496467145,
+        "max_abs_error": 0.11850600713549775,
+        "r2_per_branch": [
+          0.9997176104561944,
+          0.9923190116494032,
+          0.9607896155331157,
+          0.999723893588046
+        ]
+      },
+      "radial_local_grid": {
+        "rmse": 0.0065202747974868885,
+        "max_abs_error": 0.01596445386689882,
+        "r2_per_branch": [
+          -20.935836407572623,
+          0.9809017816168885,
+          -19.979717634042462,
+          0.9733068146177759
+        ]
+      },
+      "ols_local_grid": {
+        "rmse": 0.017188530322773232,
+        "max_abs_error": 0.03319022781379499,
+        "r2_per_branch": [
+          -1.0514911216397742,
+          0.7107080708668005,
+          -150.69414410732952,
+          0.18493300071936447
+        ]
+      },
+      "perturbation_local_grid": {
+        "rmse": 4.2826008096523146e-05,
+        "max_abs_error": 0.0002637712905788625,
+        "r2_per_branch": [
+          0.9999970904868813,
+          0.9999953281628386,
+          0.999993113989108,
+          0.99999579126143
+        ]
+      },
+      "published_rounded_grid": {
+        "rmse": 0.019035231211256717,
+        "max_abs_error": 0.16278643762690503,
+        "r2_per_branch": [
+          0.9992349434946823,
+          0.9876375817142591,
+          0.9426668448866065,
+          0.9977447585757849
+        ]
+      },
+      "published_rounded_uniform": {
+        "rmse": 0.014321896894370254,
+        "max_abs_error": 0.02463635200000014,
+        "r2_per_branch": [
+          0.9995882115893809,
+          0.9939056013894925,
+          null,
+          0.9995223510157507
+        ]
+      },
+      "perturbation_uniform": {
+        "rmse": 0.0504454505601201,
+        "max_abs_error": 0.20493820293617215,
+        "r2_per_branch": [
+          0.9877641587157477,
+          0.9508552907706239,
+          null,
+          0.9735695900692658
+        ]
+      }
+    }
+  },
+  "four_site_primary": {
+    "config": {
+      "samples": 10000,
+      "epochs": 5000,
+      "architecture": [
+        1,
+        10,
+        8
+      ],
+      "data_seed": 42,
+      "split_seed": 42,
+      "model_seed": 42,
+      "learning_rate": 0.001,
+      "batch_size": 8000,
+      "regularization": 0.1,
+      "softmax_fraction": 0.9,
+      "loss": "mse",
+      "problem": "four_site",
+      "sampling": "interpolated_physical",
+      "checkpoint": "final_epoch",
+      "grid_resolution": 200,
+      "python": "3.14.4",
+      "numpy": "2.5.4",
+      "torch": "2.15.0+cpu",
+      "trained": false,
+      "units": "dimensionless E/J; descending branch order",
+      "runner_sha256": "e4534b7d9f2498b0f7db2cb25a0d50db16c5d258db73074a20f1a96a89ee1d1a"
+    },
+    "metrics": {
+      "ols_validation": {
+        "rmse": 0.006834179337061968,
+        "max_abs_error": 0.16831338130580997,
+        "r2_per_branch": [
+          0.999744798281192,
+          0.9998048149849428,
+          0.9935211938578913,
+          0.9957927555690654,
+          0.9957927544748549,
+          0.9935211883322502,
+          0.9998048150848021,
+          0.9997447982305941
+        ]
+      },
+      "ols_full_sample_fit": {
+        "rmse": 0.007086034773713006,
+        "max_abs_error": 0.18120070949399697,
+        "r2_per_branch": [
+          0.9997256145863632,
+          0.9997912596245648,
+          0.992923936648727,
+          0.9955349839886943,
+          0.9955349837727412,
+          0.9929239376526675,
+          0.9997912598801186,
+          0.9997256146402004
+        ]
+      },
+      "published_rounded_validation": {
+        "rmse": 0.007023766016581586,
+        "max_abs_error": 0.1621761832380213,
+        "r2_per_branch": [
+          0.9997433515900839,
+          0.999797790405798,
+          0.9933652818792724,
+          0.9956431483108195,
+          0.9957485881176917,
+          0.9933845653747129,
+          0.9997836465057552,
+          0.9996886558431781
+        ]
+      }
+    }
+  },
+  "four_site_verification": {
+    "config": {
+      "samples": 10000,
+      "epochs": 5000,
+      "architecture": [
+        1,
+        10,
+        8
+      ],
+      "data_seed": 42,
+      "split_seed": 42,
+      "model_seed": 42,
+      "learning_rate": 0.001,
+      "batch_size": 8000,
+      "regularization": 0.1,
+      "softmax_fraction": 0.9,
+      "loss": "mse",
+      "problem": "four_site",
+      "sampling": "uniform_ratios",
+      "checkpoint": "final_epoch",
+      "grid_resolution": 200,
+      "python": "3.14.4",
+      "numpy": "2.5.4",
+      "torch": "2.15.0+cpu",
+      "trained": false,
+      "units": "dimensionless E/J; descending branch order",
+      "runner_sha256": "e4534b7d9f2498b0f7db2cb25a0d50db16c5d258db73074a20f1a96a89ee1d1a"
+    },
+    "metrics": {
+      "ols_validation": {
+        "rmse": 0.018227172368100664,
+        "max_abs_error": 0.07430888854528016,
+        "r2_per_branch": [
+          0.9998321274732364,
+          0.9998979285356311,
+          0.9922334743199346,
+          0.9665205420601882,
+          0.9665205420601884,
+          0.9922334743199346,
+          0.9998979285356311,
+          0.9998321274732364
+        ]
+      },
+      "ols_full_sample_fit": {
+        "rmse": 0.01808804742628644,
+        "max_abs_error": 0.07421684806868822,
+        "r2_per_branch": [
+          0.9998337095662407,
+          0.9998986764679975,
+          0.9922241246793351,
+          0.9671641625788561,
+          0.9671641625788563,
+          0.9922241246793352,
+          0.9998986764679975,
+          0.9998337095662407
+        ]
+      },
+      "published_rounded_validation": {
+        "rmse": 0.041392219675583965,
+        "max_abs_error": 0.25099977822073116,
+        "r2_per_branch": [
+          0.9986344842828234,
+          0.9992635361747917,
+          0.9669715887237684,
+          0.833391283423858,
+          0.8170164686080816,
+          0.9680180805760863,
+          0.9985013455824505,
+          0.9993381752238736
+        ]
+      }
+    }
+  }
+}

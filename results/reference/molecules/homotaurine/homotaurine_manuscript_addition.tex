@@ -1,0 +1,53 @@
+% Generated from completed homotaurine training and independent analytical reference.
+\subsection{A second molecular application: homotaurine}
+The same normalization and four-state secular model were applied to the
+supplied illustrative homotaurine vector
+$(J_A,J_M,J_X,d,e)=(-12.743923,-13.969277,-14.109177,3.093406,2.344390)$ Hz.
+The temperature label of this historical fit is unresolved (289/298 K);
+these calculations are not presented as a new experimental refit.
+The normalized inputs are $(x_A,x_X,u,v)=((J_A-J_M)/s,(J_X-J_M)/s,d/s,e/s)$,
+where $s=-J_M>0$ and $E_i=(-3J_A+J_M-3J_X)/4+s\lambda_i$.
+Three unequal geminals and type-II mixing are retained.
+
+As in the DSS experiment, a (4,16,4) ASN with $\{0,x,x^2\}$ activations
+was trained on 100000 numerically diagonalized Hamiltonians, with disjoint
+80000/10000/10000 training/validation/test splits and five initialization seeds.
+Each geminal varied independently by $\pm0.3$ Hz and each coupling difference
+by $\pm20\%$ about homotaurine. Training used Adam ($10^{-3}$), MAE,
+batch size 4096, 900 epochs of softmax with $0.1L_{0.5}$ and 100 epochs of
+sparsemax without the penalty. Input/output standardization used only training
+statistics and was undone algebraically in the extracted expressions.
+Validation eigenvalue RMSE alone selected the checkpoint and representative seed.
+Eigenvalue order was preserved in the target labels; predictions were not sorted afterward.
+
+The selected local ASN (seed 45) achieved frequency RMSE 0.002135162 Hz and maximum line error 0.02108312 Hz on 10000 held-out samples, with 0 ordering violations. Quadratic and quartic least-squares RMSEs on the same data were 0.002049504 and 5.946765e-05 Hz. At the supplied homotaurine reference, the analytical frequencies were 1.967923, 2.185440, 4.153363 Hz and the ASN frequencies were 1.968174, 2.185389, 4.153563 Hz. Three-decimal coefficient rounding gave a local frequency RMSE of 0.01304336 Hz.
+
+With geminals fixed and $d=3.093406t$, $e=2.344390t$, the analytical
+frequencies follow from the ordered roots of $z^3-C_1z^2+C_2z-C_3=0$, where
+\[C_1=2.852388810881+0.077202373264t^2,\]
+\[C_2=2.701400997954+0.073465038627t^2+0.001381140469t^4,\quad C_3=0.849012187073.\]
+Writing $\omega_i=s\sqrt{z_i}$ gives $f_{12}=\omega_3-\omega_2$,
+$f_{23}=\omega_2-\omega_1$, and $f_{13}=f_{12}+f_{23}$.
+Substitution into the trained four-input ASN, without an additional section fit, gives
+\[\widehat f_{12}=- 0.062329221 t^{2} + 1.904871944 t + 0.12563094\quad\mathrm{Hz}.\]
+\[\widehat f_{23}=0.281058571 t^{2} + 1.251177692 t + 0.653152603\quad\mathrm{Hz}.\]
+\[\widehat f_{13}=0.21872935 t^{2} + 3.156049636 t + 0.778783543\quad\mathrm{Hz}.\]
+These are finite-domain learned approximations for $0.8\le t\le1.2$,
+not exact perturbative Taylor coefficients. Spectral overlays use common
+illustrative local-singlet amplitudes and 0.1 Hz Lorentzian FWHM, changing only
+the line centers between exact and learned predictions.
+
+Dropping type-II mixing shifts a principal line by 0.053710 Hz; replacing
+geminals by their mean shifts a line by 0.278275 Hz. The second-order effective
+three-state Hamiltonian has a maximum line error of 0.000287194 Hz at this point.
+The fitted end-to-end difference $q=0.027306$ Hz changes a line by up to
+0.018095 Hz and produces matched-parity separations up to 0.036090 Hz.
+It should be included in precision comparisons with measured spectra; it is
+omitted explicitly in both the analytical and learned four-input benchmark.
+Full parity-resolved calculations and approximation errors accompany the comparison.
+
+These results demonstrate explicit learned molecular approximations in a
+specified domain. Polynomial and effective-Hamiltonian baselines are retained;
+no intrinsic accuracy advantage over an appropriate fixed basis is claimed.
+The broad-box run, rounded-coefficient errors, seed variation and decoupled-boundary
+ordering checks are reported in the supplementary material.

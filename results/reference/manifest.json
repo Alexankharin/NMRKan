@@ -1,0 +1,893 @@
+{
+  "description": "Supplied molecular artifacts, preserved without scientific edits.",
+  "files": [
+    {
+      "path": "results/reference/molecules/analytical/dss_cross_section.csv",
+      "original_path": "ANSWER/analysis_output/dss_cross_section.csv",
+      "sha256": "6c9632ddd2d30e6cf3cd1ad1dee6b192bc64266c435c1cec4a315238f567f6dd",
+      "bytes": 222725
+    },
+    {
+      "path": "results/reference/molecules/analytical/dss_cross_section.pdf",
+      "original_path": "ANSWER/analysis_output/dss_cross_section.pdf",
+      "sha256": "cdb2d5d54bc1861ef326e4879ebad12ae603721f7ec15bfaeefa33a981d03070",
+      "bytes": 32648
+    },
+    {
+      "path": "results/reference/molecules/analytical/dss_cross_section.png",
+      "original_path": "ANSWER/analysis_output/dss_cross_section.png",
+      "sha256": "ab41603b4fc7be942f74a16726d86b3368a8fef799235fdf02af82b7a4aa77b1",
+      "bytes": 271782
+    },
+    {
+      "path": "results/reference/molecules/analytical/dss_cross_section.svg",
+      "original_path": "ANSWER/analysis_output/dss_cross_section.svg",
+      "sha256": "fc45e06ca8ad076baeeaa54f17055912f908d73bb3fd15e549dfcc11afeed4cc",
+      "bytes": 106488
+    },
+    {
+      "path": "results/reference/molecules/analytical/dss_eigenvalue_surface.csv",
+      "original_path": "ANSWER/analysis_output/dss_eigenvalue_surface.csv",
+      "sha256": "a6f111f372e8ed6613415cbc7390c913498a155e8175a5ec0465af9b84dec37e",
+      "bytes": 578796
+    },
+    {
+      "path": "results/reference/molecules/analytical/dss_eigenvalue_surfaces.pdf",
+      "original_path": "ANSWER/analysis_output/dss_eigenvalue_surfaces.pdf",
+      "sha256": "855cd2f8da587a65217bf398de6554d503c54a28ffcaad13d921f7f90e4b0a32",
+      "bytes": 235138
+    },
+    {
+      "path": "results/reference/molecules/analytical/dss_eigenvalue_surfaces.png",
+      "original_path": "ANSWER/analysis_output/dss_eigenvalue_surfaces.png",
+      "sha256": "33cac355758b0ae9ec5e9bf2bbf77091c2e5a2981379dc4b416496e9684f8bd6",
+      "bytes": 684130
+    },
+    {
+      "path": "results/reference/molecules/analytical/dss_eigenvalue_surfaces.svg",
+      "original_path": "ANSWER/analysis_output/dss_eigenvalue_surfaces.svg",
+      "sha256": "a63a30aaa205a4e9dca77243fc84afb84e96b57310f25d8d5ec873bde43d727a",
+      "bytes": 387196
+    },
+    {
+      "path": "results/reference/molecules/analytical/dss_illustrative_spectrum.csv",
+      "original_path": "ANSWER/analysis_output/dss_illustrative_spectrum.csv",
+      "sha256": "666425788128ef5213bf512a7584406e09d3a261a4567840199f394178c79ef6",
+      "bytes": 632349
+    },
+    {
+      "path": "results/reference/molecules/analytical/dss_observability.pdf",
+      "original_path": "ANSWER/analysis_output/dss_observability.pdf",
+      "sha256": "e156a288b4255aa01246e16abdcbf5ce5669f0e1c47224374280d923deca31b4",
+      "bytes": 21628
+    },
+    {
+      "path": "results/reference/molecules/analytical/dss_observability.png",
+      "original_path": "ANSWER/analysis_output/dss_observability.png",
+      "sha256": "3cf9432dcdde09cffeb0a06f53586c38344bc004d8aaf8243a9e04247383bb31",
+      "bytes": 120967
+    },
+    {
+      "path": "results/reference/molecules/analytical/dss_observability.svg",
+      "original_path": "ANSWER/analysis_output/dss_observability.svg",
+      "sha256": "2d15c59a0753e2cb2dfe7f45649e462c6e053cdaa28b48cd108443cf36e2e955",
+      "bytes": 68441
+    },
+    {
+      "path": "results/reference/molecules/analytical/homotaurine_cross_section.csv",
+      "original_path": "ANSWER/analysis_output/homotaurine_cross_section.csv",
+      "sha256": "4e82b8418bfadc60c4f1d0112853125820cfb5e1eb8d3d29ccae9b22eb6ad3d0",
+      "bytes": 224404
+    },
+    {
+      "path": "results/reference/molecules/analytical/illustrative_transition_amplitudes.csv",
+      "original_path": "ANSWER/analysis_output/illustrative_transition_amplitudes.csv",
+      "sha256": "597cff8b27e40d614cf171ee455d12b808f1c2f36ba2ecefcdb27d382bbc1973",
+      "bytes": 10084
+    },
+    {
+      "path": "results/reference/molecules/analytical/model_comparison.csv",
+      "original_path": "ANSWER/analysis_output/model_comparison.csv",
+      "sha256": "f3f8a1cce275afd5459baa2f4ea9d0a6f32fe123794caf383a9fb17162c79649",
+      "bytes": 1368
+    },
+    {
+      "path": "results/reference/molecules/analytical/results.json",
+      "original_path": "ANSWER/analysis_output/results.json",
+      "sha256": "073baa2647f94bbd37283039de9862952aef2156177dbd5c821078b0166c9c6f",
+      "bytes": 4339
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/comparison.json",
+      "original_path": "ANSWER/asn_comparison/broad/comparison.json",
+      "sha256": "641d2b805adc93cce668e101dd9d39bf2c0b48945c2b8549e6b1982e9cb65106",
+      "bytes": 30813
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/config.json",
+      "original_path": "ANSWER/asn_comparison/broad/config.json",
+      "sha256": "4f918cc8e708e025337590ac1fc60ec908f03094624334651e73bdd452072e93",
+      "bytes": 1747
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/cross_section_comparison.csv",
+      "original_path": "ANSWER/asn_comparison/broad/cross_section_comparison.csv",
+      "sha256": "53cdec2fbec33da0c0674da397fd54db459dde5b13163916a6e18d4b8ef8e28f",
+      "bytes": 235775
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/dataset.npz",
+      "original_path": "ANSWER/asn_comparison/broad/dataset.npz",
+      "sha256": "648cd6d1f8f0ddb7cad9144bad00de5d55affad61e9042d32a96efe5f91ee974",
+      "bytes": 11691954
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/heldout_predictions.npz",
+      "original_path": "ANSWER/asn_comparison/broad/heldout_predictions.npz",
+      "sha256": "3d68e115ffca9834d631d50b90c97272cfd9a5fa569e0e7c93cd63cf8abd4145",
+      "bytes": 645125
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/history_seed_42.csv",
+      "original_path": "ANSWER/asn_comparison/broad/history_seed_42.csv",
+      "sha256": "79383316dffaf03f6239a8657501c84cdbe60ac844f00e2b6981aa5db44474c8",
+      "bytes": 5326
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/history_seed_43.csv",
+      "original_path": "ANSWER/asn_comparison/broad/history_seed_43.csv",
+      "sha256": "89b41ce78f1204d58b184d4902a7fb05affd84899f42d46638fc5065eb14605b",
+      "bytes": 5319
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/history_seed_44.csv",
+      "original_path": "ANSWER/asn_comparison/broad/history_seed_44.csv",
+      "sha256": "d34b7e704f2fc487e3e66639e100e3675374b6ba1b0bc0aef45632f10a0babd8",
+      "bytes": 5313
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/history_seed_45.csv",
+      "original_path": "ANSWER/asn_comparison/broad/history_seed_45.csv",
+      "sha256": "0e51a01663962270c6aef1b8659f49c756fd5fb1a1fbceca6f80ac7519ed4c31",
+      "bytes": 5344
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/history_seed_46.csv",
+      "original_path": "ANSWER/asn_comparison/broad/history_seed_46.csv",
+      "sha256": "2ce8f75e6640c57a0cbf267d85728e3e8f357361bae68b047c93c4a50253efee",
+      "bytes": 5331
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/learned_formulas.json",
+      "original_path": "ANSWER/asn_comparison/broad/learned_formulas.json",
+      "sha256": "dace46b94d0dc2a2fe486c9f4bd2f1a0d3b03d906ccb0a0205226e68461b2590",
+      "bytes": 4759
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/learned_formulas.tex",
+      "original_path": "ANSWER/asn_comparison/broad/learned_formulas.tex",
+      "sha256": "ba91b94a19bc26264e9590a31aadf2df06e7d245f95d8f29d75adfef4087b598",
+      "bytes": 1541
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/ols_degree_2.npz",
+      "original_path": "ANSWER/asn_comparison/broad/ols_degree_2.npz",
+      "sha256": "74bb32bdc11b8917c130e88e3afbec521a87ded528de27ffbb90940f415e94e2",
+      "bytes": 2054
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/ols_degree_4.npz",
+      "original_path": "ANSWER/asn_comparison/broad/ols_degree_4.npz",
+      "sha256": "762e1afbe385bdb9790bd30e985ee211f7865ae519881c9a766a782f31fe80df",
+      "bytes": 5574
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/paper_rounded_formulas.tex",
+      "original_path": "ANSWER/asn_comparison/broad/paper_rounded_formulas.tex",
+      "sha256": "78e1113f7645cb26248da1daa50cf6ecb568a2eb8ba68956822ee054169bff5d",
+      "bytes": 852
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/postprocessing.json",
+      "original_path": "ANSWER/asn_comparison/broad/postprocessing.json",
+      "sha256": "591205c5bfaafc02c4a84cfa3fab65dbe5e5c9f602b9ad7cc2c68ceb99d33ba9",
+      "bytes": 36756
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/seed_42.pt",
+      "original_path": "ANSWER/asn_comparison/broad/seed_42.pt",
+      "sha256": "df94242609fe96ffd8b36411f1b9146101fc9434ff3a7eda632a931eb8cd4e71",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/seed_43.pt",
+      "original_path": "ANSWER/asn_comparison/broad/seed_43.pt",
+      "sha256": "221eaffb3106cc837e85c199ddfe0c60d137d43b534dcb0d4f7c5b77a73c0c90",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/seed_44.pt",
+      "original_path": "ANSWER/asn_comparison/broad/seed_44.pt",
+      "sha256": "78c57a9746be921e002a4c5b6358faac21d51c50c064098af1e405c843a96b7e",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/seed_45.pt",
+      "original_path": "ANSWER/asn_comparison/broad/seed_45.pt",
+      "sha256": "7e71d9810ee928d6a6402abbe281e48d491b2b62bf3de8ce49c6ab140994eaab",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/seed_46.pt",
+      "original_path": "ANSWER/asn_comparison/broad/seed_46.pt",
+      "sha256": "061dfcdced7a96688f14189157df2c0e7d446c18cea31919e343cc199e2b43e7",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/dss/broad/training_summaries.json",
+      "original_path": "ANSWER/asn_comparison/broad/training_summaries.json",
+      "sha256": "c39bbecddcc5da9879688f35abb3a413144cc0607686934f54c15c5d165c61ee",
+      "bytes": 17261
+    },
+    {
+      "path": "results/reference/molecules/dss/dss_asn_domain_comparison.pdf",
+      "original_path": "ANSWER/asn_comparison/dss_asn_domain_comparison.pdf",
+      "sha256": "a82a4c0cb745c49523ee165fda37b139f73db7c139c9b20b361ebaa247431451",
+      "bytes": 22920
+    },
+    {
+      "path": "results/reference/molecules/dss/dss_asn_domain_comparison.png",
+      "original_path": "ANSWER/asn_comparison/dss_asn_domain_comparison.png",
+      "sha256": "5b1f779d5ed2e7c0e2065a98bf357f5376a0b81b4fddd0922a455db5cd80b310",
+      "bytes": 134115
+    },
+    {
+      "path": "results/reference/molecules/dss/dss_asn_domain_comparison.svg",
+      "original_path": "ANSWER/asn_comparison/dss_asn_domain_comparison.svg",
+      "sha256": "56d1617f5866abf6b8e37c35f90e07a523ceea97eb6e069543e26ce145cfd72b",
+      "bytes": 82172
+    },
+    {
+      "path": "results/reference/molecules/dss/dss_asn_training.pdf",
+      "original_path": "ANSWER/asn_comparison/dss_asn_training.pdf",
+      "sha256": "59c0185c3b306635bfa0f04c106004eae00d44d1fece7b01901df1fc2ca78c2f",
+      "bytes": 25248
+    },
+    {
+      "path": "results/reference/molecules/dss/dss_asn_training.png",
+      "original_path": "ANSWER/asn_comparison/dss_asn_training.png",
+      "sha256": "49b2f8265ec8cf5222291b740fda9a8922582340bdd9b3f35475d79337346ecb",
+      "bytes": 132465
+    },
+    {
+      "path": "results/reference/molecules/dss/dss_asn_training.svg",
+      "original_path": "ANSWER/asn_comparison/dss_asn_training.svg",
+      "sha256": "fe0196894ecd5087bc0d896d2f6075451cd23ebef5eb7d1863777c20b431a335",
+      "bytes": 82225
+    },
+    {
+      "path": "results/reference/molecules/dss/dss_asn_vs_analytical.pdf",
+      "original_path": "ANSWER/asn_comparison/dss_asn_vs_analytical.pdf",
+      "sha256": "0aba25063aff5ee54abc8e8930687f2389cd297387d6f13cc92d7960b308624b",
+      "bytes": 33381
+    },
+    {
+      "path": "results/reference/molecules/dss/dss_asn_vs_analytical.png",
+      "original_path": "ANSWER/asn_comparison/dss_asn_vs_analytical.png",
+      "sha256": "1e1cbead54375635a0dd9a953427ad72cf83a4c1fbc19ec0f690cb661d0faab3",
+      "bytes": 310639
+    },
+    {
+      "path": "results/reference/molecules/dss/dss_asn_vs_analytical.svg",
+      "original_path": "ANSWER/asn_comparison/dss_asn_vs_analytical.svg",
+      "sha256": "7397287588096a2589178550ac7861ef173693038e5c7861d32376cd02b1a780",
+      "bytes": 124607
+    },
+    {
+      "path": "results/reference/molecules/dss/dss_manuscript_addition.tex",
+      "original_path": "ANSWER/asn_comparison/dss_manuscript_addition.tex",
+      "sha256": "5fca361fd37bec12cdcece10321fd6f12f0bf1441bf1fd9c341cafed232953d7",
+      "bytes": 3832
+    },
+    {
+      "path": "results/reference/molecules/dss/local/comparison.json",
+      "original_path": "ANSWER/asn_comparison/local/comparison.json",
+      "sha256": "46fd012220026ec8d9944f16455d10408b24a3587d7b8edcf6f222fa927b432b",
+      "bytes": 31017
+    },
+    {
+      "path": "results/reference/molecules/dss/local/config.json",
+      "original_path": "ANSWER/asn_comparison/local/config.json",
+      "sha256": "2a4fa9c177066c406950ca5e8d349baa6b0568c679153a8b4b1a8174bcba34fa",
+      "bytes": 1822
+    },
+    {
+      "path": "results/reference/molecules/dss/local/cross_section_comparison.csv",
+      "original_path": "ANSWER/asn_comparison/local/cross_section_comparison.csv",
+      "sha256": "886bb8b248bf75835ba3d49ffdb91d87703eb7445e86d7933f030ff3b26ce49d",
+      "bytes": 236125
+    },
+    {
+      "path": "results/reference/molecules/dss/local/dataset.npz",
+      "original_path": "ANSWER/asn_comparison/local/dataset.npz",
+      "sha256": "e32af57cfe857d8b3f094ed1fec32fb93bb06ef245fc5cdba2f54bacc3c62937",
+      "bytes": 11555393
+    },
+    {
+      "path": "results/reference/molecules/dss/local/heldout_predictions.npz",
+      "original_path": "ANSWER/asn_comparison/local/heldout_predictions.npz",
+      "sha256": "efe94647ad01d215cd1b44fd25e90f5c0f103419c470ef6726c74dd402b1f5f0",
+      "bytes": 638675
+    },
+    {
+      "path": "results/reference/molecules/dss/local/history_seed_42.csv",
+      "original_path": "ANSWER/asn_comparison/local/history_seed_42.csv",
+      "sha256": "f3d092367e75c2c96c946b5912a5001cb9b28a831b2943265c417d2f7542d97a",
+      "bytes": 5579
+    },
+    {
+      "path": "results/reference/molecules/dss/local/history_seed_43.csv",
+      "original_path": "ANSWER/asn_comparison/local/history_seed_43.csv",
+      "sha256": "a9581f1ab8748822c006ee18701d0000b54ed058c07030c2f00215ea99e02f5a",
+      "bytes": 5607
+    },
+    {
+      "path": "results/reference/molecules/dss/local/history_seed_44.csv",
+      "original_path": "ANSWER/asn_comparison/local/history_seed_44.csv",
+      "sha256": "562e78a5c24756d0b149d57a3935ed15a67e36ba865f4f2517ca35efe66d9479",
+      "bytes": 5610
+    },
+    {
+      "path": "results/reference/molecules/dss/local/history_seed_45.csv",
+      "original_path": "ANSWER/asn_comparison/local/history_seed_45.csv",
+      "sha256": "161a00280abb8ca869a45e45473b3070a0649d8bbc31ae755e3790bc08f3c240",
+      "bytes": 5612
+    },
+    {
+      "path": "results/reference/molecules/dss/local/history_seed_46.csv",
+      "original_path": "ANSWER/asn_comparison/local/history_seed_46.csv",
+      "sha256": "bddde67230448a656820fc5fbb86a8e0da7c3624d810963316c0f820e3321fb8",
+      "bytes": 5605
+    },
+    {
+      "path": "results/reference/molecules/dss/local/learned_formulas.json",
+      "original_path": "ANSWER/asn_comparison/local/learned_formulas.json",
+      "sha256": "120381d5db3313bbdc072e1f1e082d5c04da484ee9036fbd790b3f8bf87318c8",
+      "bytes": 4768
+    },
+    {
+      "path": "results/reference/molecules/dss/local/learned_formulas.tex",
+      "original_path": "ANSWER/asn_comparison/local/learned_formulas.tex",
+      "sha256": "4bb6595a079c736df3a47227d424b3bcbb2bfc83dac00619828abbd69f382f9c",
+      "bytes": 1552
+    },
+    {
+      "path": "results/reference/molecules/dss/local/ols_degree_2.npz",
+      "original_path": "ANSWER/asn_comparison/local/ols_degree_2.npz",
+      "sha256": "e0e5f0b2090de15073a93821aeca989439f87017e57cf42c6764a8ff409109ef",
+      "bytes": 2054
+    },
+    {
+      "path": "results/reference/molecules/dss/local/ols_degree_4.npz",
+      "original_path": "ANSWER/asn_comparison/local/ols_degree_4.npz",
+      "sha256": "27638e35d441a0b7c6d6499a22f73821edaf7894c2488382a811ebf526c96625",
+      "bytes": 5574
+    },
+    {
+      "path": "results/reference/molecules/dss/local/paper_rounded_formulas.tex",
+      "original_path": "ANSWER/asn_comparison/local/paper_rounded_formulas.tex",
+      "sha256": "4aad091e33602e0bbfac0e8b68bda31b09ae5f0aa58d7b77b5fff09477d25a8e",
+      "bytes": 883
+    },
+    {
+      "path": "results/reference/molecules/dss/local/postprocessing.json",
+      "original_path": "ANSWER/asn_comparison/local/postprocessing.json",
+      "sha256": "d1f496cbe66e2934a2501311ab0ba3047fddac8c32ce4111d4412139a111c80b",
+      "bytes": 37089
+    },
+    {
+      "path": "results/reference/molecules/dss/local/seed_42.pt",
+      "original_path": "ANSWER/asn_comparison/local/seed_42.pt",
+      "sha256": "73cd0a64f9cbdd5a98bb132df2bc0e0b3d4312cf96c7ed39c8a83722987f79f6",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/dss/local/seed_43.pt",
+      "original_path": "ANSWER/asn_comparison/local/seed_43.pt",
+      "sha256": "1174a04bb61b9faac44000d4a7a3c4cfc2e98fe8bc1b5e9ba9829397f87ddbfb",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/dss/local/seed_44.pt",
+      "original_path": "ANSWER/asn_comparison/local/seed_44.pt",
+      "sha256": "4912d52e7f294a3f58aca6a8d7968d41b131f4432ff9bd3239961c740e94e5f9",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/dss/local/seed_45.pt",
+      "original_path": "ANSWER/asn_comparison/local/seed_45.pt",
+      "sha256": "acc11cdbfd06b8ad4dd89f46498768d728927762ea22ee5f193c65695c62b4ef",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/dss/local/seed_46.pt",
+      "original_path": "ANSWER/asn_comparison/local/seed_46.pt",
+      "sha256": "e42d8b36f1666643865472b6c29b61d0dca3642a0edbe81de327b4bf6c72f6b2",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/dss/local/training_summaries.json",
+      "original_path": "ANSWER/asn_comparison/local/training_summaries.json",
+      "sha256": "b7f686c52f9d573c35e2ed0047544dde4013ede326c991ff3b5819b26d8eb81d",
+      "bytes": 17306
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/analytical_results.json",
+      "original_path": "ANSWER/homotaurine_asn_comparison/analytical_results.json",
+      "sha256": "9ce4009ec6af354b752ca679cbacc91cfed1491925c0f13834761aac06bb2836",
+      "bytes": 2950
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/comparison.json",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/comparison.json",
+      "sha256": "5eebb37dfb618c00b8d2d713f17a59d050a8fa218ff3fea1915828eb73708fa8",
+      "bytes": 30970
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/config.json",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/config.json",
+      "sha256": "69cd47c7759773d89a363fd2d205c9bf5d69a1f11226f17a98866a6452a35e16",
+      "bytes": 1886
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/cross_section_comparison.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/cross_section_comparison.csv",
+      "sha256": "39a5a4b9258bed0a16990c5c64b7408c57911f2e763f948a6a3d4ac1f17d6556",
+      "bytes": 237204
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/dataset.npz",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/dataset.npz",
+      "sha256": "648cd6d1f8f0ddb7cad9144bad00de5d55affad61e9042d32a96efe5f91ee974",
+      "bytes": 11691954
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/heldout_predictions.npz",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/heldout_predictions.npz",
+      "sha256": "3d68e115ffca9834d631d50b90c97272cfd9a5fa569e0e7c93cd63cf8abd4145",
+      "bytes": 645125
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/history_seed_42.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/history_seed_42.csv",
+      "sha256": "79383316dffaf03f6239a8657501c84cdbe60ac844f00e2b6981aa5db44474c8",
+      "bytes": 5326
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/history_seed_43.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/history_seed_43.csv",
+      "sha256": "89b41ce78f1204d58b184d4902a7fb05affd84899f42d46638fc5065eb14605b",
+      "bytes": 5319
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/history_seed_44.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/history_seed_44.csv",
+      "sha256": "d34b7e704f2fc487e3e66639e100e3675374b6ba1b0bc0aef45632f10a0babd8",
+      "bytes": 5313
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/history_seed_45.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/history_seed_45.csv",
+      "sha256": "0e51a01663962270c6aef1b8659f49c756fd5fb1a1fbceca6f80ac7519ed4c31",
+      "bytes": 5344
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/history_seed_46.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/history_seed_46.csv",
+      "sha256": "2ce8f75e6640c57a0cbf267d85728e3e8f357361bae68b047c93c4a50253efee",
+      "bytes": 5331
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/learned_formulas.json",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/learned_formulas.json",
+      "sha256": "4a11d74713501fd1e16fbc8b7b27ff7633a55e7857ff799e8a8a76cea05ecca2",
+      "bytes": 4762
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/learned_formulas.tex",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/learned_formulas.tex",
+      "sha256": "ebcf2179a384f2b8885d11f65d1e32bd31abcc10d88c0b68594a41bcdbcfbb57",
+      "bytes": 1541
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/ols_degree_2.npz",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/ols_degree_2.npz",
+      "sha256": "74bb32bdc11b8917c130e88e3afbec521a87ded528de27ffbb90940f415e94e2",
+      "bytes": 2054
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/ols_degree_4.npz",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/ols_degree_4.npz",
+      "sha256": "762e1afbe385bdb9790bd30e985ee211f7865ae519881c9a766a782f31fe80df",
+      "bytes": 5574
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/paper_rounded_formulas.tex",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/paper_rounded_formulas.tex",
+      "sha256": "78e1113f7645cb26248da1daa50cf6ecb568a2eb8ba68956822ee054169bff5d",
+      "bytes": 852
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/postprocessing.json",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/postprocessing.json",
+      "sha256": "21d29afba50386fdedeee45f6bc6aa6caae8f4dbb3da49a9ef7ccf7b3dd19a43",
+      "bytes": 36922
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/seed_42.pt",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/seed_42.pt",
+      "sha256": "bd1eea7ca1cb53c6ed2e1a79ffe0081e4832e81f290705a0a55181c894afffb3",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/seed_43.pt",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/seed_43.pt",
+      "sha256": "de4529878a6b7d2ff3be901a6c635cb00cde48112792f172b29727e6e861f573",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/seed_44.pt",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/seed_44.pt",
+      "sha256": "b0de65fd9a004394eaa89c747f80709a479066443786de7e6103140427ed30da",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/seed_45.pt",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/seed_45.pt",
+      "sha256": "9ab05317dce8504d7f6adb618cd8267d398819fc23fd936f707a89cd2bacddfa",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/seed_46.pt",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/seed_46.pt",
+      "sha256": "946a06cc9bd900da338c7cc5f512be0f143e340ca2a4c9f7535ede407baba693",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/broad/training_summaries.json",
+      "original_path": "ANSWER/homotaurine_asn_comparison/broad/training_summaries.json",
+      "sha256": "e233f15014ddc9e0647a30b5d64c26f9949cae10c08cc5e49807c89ae291bffc",
+      "bytes": 17260
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_asn_domain_comparison.pdf",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_asn_domain_comparison.pdf",
+      "sha256": "31593973d692ead8d29a5c65d0022124d7213e78e983a965d10e4a69e820248e",
+      "bytes": 21476
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_asn_domain_comparison.png",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_asn_domain_comparison.png",
+      "sha256": "c1ce58208f8b0d56a6a81297497e2e4d82c3f765690125929e3773059e1bcc89",
+      "bytes": 124294
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_asn_domain_comparison.svg",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_asn_domain_comparison.svg",
+      "sha256": "5f50f43f7a3fd858d376c867933d339c0a8bf693be318a757154f7754187fbea",
+      "bytes": 76075
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_asn_training.pdf",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_asn_training.pdf",
+      "sha256": "93ad00b5bb95a11a1a29ae34224d2e199d136c89c0092ba272fba4f235977ecc",
+      "bytes": 25267
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_asn_training.png",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_asn_training.png",
+      "sha256": "2400c5cc2731579af8c30371393edd7a3c83cc5e29874fe8345de4a379737ed3",
+      "bytes": 127786
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_asn_training.svg",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_asn_training.svg",
+      "sha256": "6bc34a1577a8e90d113ae13e67458e6f97253b7a3b872f46d2e86374777307d5",
+      "bytes": 82621
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_asn_vs_analytical.pdf",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_asn_vs_analytical.pdf",
+      "sha256": "943afab3662a350c85cc494f0904b75a2abf99bf4ff1eefb1bd6c0940200d7fc",
+      "bytes": 34232
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_asn_vs_analytical.png",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_asn_vs_analytical.png",
+      "sha256": "7695629960232b236d6c3f16cd5de33a84fb652140e7287d7a2a1ccecd390876",
+      "bytes": 309605
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_asn_vs_analytical.svg",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_asn_vs_analytical.svg",
+      "sha256": "0f43529eb50a540a7ab1310afe3152d85485453c0f4dded728ad5f0bd4dc05bf",
+      "bytes": 129892
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_cross_section.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_cross_section.csv",
+      "sha256": "4e82b8418bfadc60c4f1d0112853125820cfb5e1eb8d3d29ccae9b22eb6ad3d0",
+      "bytes": 224404
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_cross_section.pdf",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_cross_section.pdf",
+      "sha256": "e21a87fd7cbd4f771381c0ad41607660050787b6017940fe951d5f3c232bda99",
+      "bytes": 32564
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_cross_section.png",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_cross_section.png",
+      "sha256": "1c0bf0e2f400114240d7ea6a7debfc4772128e14962c20b60c99189e49ef66d8",
+      "bytes": 256024
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_cross_section.svg",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_cross_section.svg",
+      "sha256": "7f0649fa3347f4ceb7a43a47e546ba1d95a435c6972ae9d211493c9ec8bef6b9",
+      "bytes": 105590
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_eigenvalue_surface.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_eigenvalue_surface.csv",
+      "sha256": "fd17b38970ca30582c967273b50851e0118eee17b6770dbd1c99695c14252caa",
+      "bytes": 575578
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_eigenvalue_surfaces.pdf",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_eigenvalue_surfaces.pdf",
+      "sha256": "29480ed0495664dbbf880a2ab01c7ddbb84ff4b4fd9d0902f23eee268b44fead",
+      "bytes": 242074
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_eigenvalue_surfaces.png",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_eigenvalue_surfaces.png",
+      "sha256": "d64a5cc05e94c21f193183ca4e91a1f0208006beb54c6be3278e7ade8e6527a7",
+      "bytes": 705636
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_eigenvalue_surfaces.svg",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_eigenvalue_surfaces.svg",
+      "sha256": "ad27f7f6dbff73f9fc7e8bd67320f90ff270cddd8f0c664f0e6421484a74e550",
+      "bytes": 400896
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_illustrative_spectrum.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_illustrative_spectrum.csv",
+      "sha256": "a90067ce313507f0cc363d29225e5dd7af98e6c799f1d3ab94b98bf2da62c26b",
+      "bytes": 1753797
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_manuscript_addition.tex",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_manuscript_addition.tex",
+      "sha256": "43ae6a03383f559ada36986ca6307f61821cd83c6580e8b87b04c697c7924ec5",
+      "bytes": 3950
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_observability.pdf",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_observability.pdf",
+      "sha256": "1397d7b0865b407a48023caf7c7c3f33ce911cd9fe0ee5df83fecdd8e4ab1d0a",
+      "bytes": 21823
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_observability.png",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_observability.png",
+      "sha256": "be6f38f0a8f7d321a29f0e7c2b82d01eecb6ead5b956cee8de3baff260b6860d",
+      "bytes": 122028
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/homotaurine_observability.svg",
+      "original_path": "ANSWER/homotaurine_asn_comparison/homotaurine_observability.svg",
+      "sha256": "ae995a813c74a3b3fc7ccfc2f8200b013bd7d01367706d3f760943bb706391e8",
+      "bytes": 69376
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/illustrative_transition_amplitudes.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/illustrative_transition_amplitudes.csv",
+      "sha256": "552b7b40574eef0291e16804c4aafd00c4d1fb400586f81f899de62ad463216b",
+      "bytes": 1485
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/comparison.json",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/comparison.json",
+      "sha256": "17eee624da6a90712dee256f72b851027f752f95e8028cce007206e75fe0e543",
+      "bytes": 31216
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/config.json",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/config.json",
+      "sha256": "0fb2aa068c7a4b8bf7c015c808b0c8903e2a5634f966a62434528f8aeb837000",
+      "bytes": 1989
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/cross_section_comparison.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/cross_section_comparison.csv",
+      "sha256": "1897869aa9447f7c957f82f083a94c77597f7d7b40f528d26414883f1eca85f3",
+      "bytes": 237427
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/dataset.npz",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/dataset.npz",
+      "sha256": "8fe42c21dc0a4c7daeb432373011c02eb81aead30b11b04c7023ae4567770135",
+      "bytes": 11562658
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/heldout_predictions.npz",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/heldout_predictions.npz",
+      "sha256": "3fa19e0605a34e1d474f20655d4a7c3b3227f5fb1750c847b77cefee399846d4",
+      "bytes": 638729
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/history_seed_42.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/history_seed_42.csv",
+      "sha256": "1dcc42819aa043ae934721cdb011b83363eeb36fc8290fef69588caa8a76aea7",
+      "bytes": 5525
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/history_seed_43.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/history_seed_43.csv",
+      "sha256": "368a9fb0c3b17c8d20acf94a3f5468e5f1b573d630bcdfdbc63e4234b7332d7a",
+      "bytes": 5531
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/history_seed_44.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/history_seed_44.csv",
+      "sha256": "d28c70b152c126062941b7af6c8c4a1ed80efabcc097166e847d54f2e65886fb",
+      "bytes": 5538
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/history_seed_45.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/history_seed_45.csv",
+      "sha256": "069805cb5907c0b36917e3af8a9849e1077bdc3540979d37dc0486113a54a8e6",
+      "bytes": 5538
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/history_seed_46.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/history_seed_46.csv",
+      "sha256": "c85f89d8ee3a92e8bb2742d526a1a7cd1f133aca6257ad6d4767f3e11713052a",
+      "bytes": 5532
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/learned_formulas.json",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/learned_formulas.json",
+      "sha256": "44452cf383202c392beb133cc123425cbd47febea668d26c7b13e13442e4e44c",
+      "bytes": 4755
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/learned_formulas.tex",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/learned_formulas.tex",
+      "sha256": "c6e834ebbc6c4c1174063794930ed23e2ccb2b6c15fd0d199a02cc000cc5f13d",
+      "bytes": 1550
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/ols_degree_2.npz",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/ols_degree_2.npz",
+      "sha256": "88c51cee0f843619c34992d1d188aa93048a7b9b2e18326a97eef4a3584b3011",
+      "bytes": 2054
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/ols_degree_4.npz",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/ols_degree_4.npz",
+      "sha256": "a656febf895fda4efe61619dce565b854e10b8e53a9cdbb26b64c42fd9697aab",
+      "bytes": 5574
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/paper_rounded_formulas.tex",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/paper_rounded_formulas.tex",
+      "sha256": "a09c4e09d8899271de9579657aadd991463ac843a93ad1c1f501ce6ce4a4e124",
+      "bytes": 853
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/postprocessing.json",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/postprocessing.json",
+      "sha256": "5c38036ce1bfc74c89942cd8d1d7e152240ee4ebb6bf77a9fd131f06f69c9ff8",
+      "bytes": 37248
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/seed_42.pt",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/seed_42.pt",
+      "sha256": "432a1b00fc6290ca674af6b13f89fa715d9c85773eb7e226d556e0e9877014bb",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/seed_43.pt",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/seed_43.pt",
+      "sha256": "b91600f599b076885491f800605ac5504eb38e50b739a192ae61585e2c21ad64",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/seed_44.pt",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/seed_44.pt",
+      "sha256": "c6b627bad06ba991096e83b8a94fd7473eabc970534ba291f9854b5ca188d1a2",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/seed_45.pt",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/seed_45.pt",
+      "sha256": "f5288d389c54657b3da29918701c07d84504ddcc8bdd8cb1cada3185e67f1014",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/seed_46.pt",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/seed_46.pt",
+      "sha256": "789b3663ce68e01e4a5b031e5a2211069d98a6e78f65ee4e5968c82c75a2aad7",
+      "bytes": 4117
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/local/training_summaries.json",
+      "original_path": "ANSWER/homotaurine_asn_comparison/local/training_summaries.json",
+      "sha256": "efc207622069175394eb61491cd0fdcbb3617a91ab81819ddf6d83d911de8909",
+      "bytes": 17352
+    },
+    {
+      "path": "results/reference/molecules/homotaurine/model_comparison.csv",
+      "original_path": "ANSWER/homotaurine_asn_comparison/model_comparison.csv",
+      "sha256": "5a2b0c83524c6c521782de2f9f38f858b679e462668312eb6b980c86fcc11301",
+      "bytes": 647
+    },
+    {
+      "path": "results/reference/molecules/reports/dss_analysis.html",
+      "original_path": "ANSWER/dss_analysis.html",
+      "sha256": "0fc7d95c23f3675fd05f0ae209995b6502f51bf4bcd5ac04a7dc95886aaaa7f7",
+      "bytes": 1511727
+    },
+    {
+      "path": "results/reference/molecules/reports/dss_analysis.ipynb",
+      "original_path": "ANSWER/dss_analysis.ipynb",
+      "sha256": "d6158097806f3cfd1bb6d413caeffdfd2fdfb09cbdeaea7990f79da05780c180",
+      "bytes": 1469640
+    },
+    {
+      "path": "results/reference/molecules/reports/dss_analysis.pdf",
+      "original_path": "ANSWER/dss_analysis.pdf",
+      "sha256": "d037193418b84998a24fc8d907eda7232c2be8677ebd0c08da1581a39eefd205",
+      "bytes": 1605285
+    },
+    {
+      "path": "results/reference/molecules/reports/dss_asn_comparison.html",
+      "original_path": "ANSWER/dss_asn_comparison.html",
+      "sha256": "d31cbeccd47fffb8dcf319673a15f819092d5b3682b5665fc6b912b6b258bd73",
+      "bytes": 808295
+    },
+    {
+      "path": "results/reference/molecules/reports/dss_asn_comparison.ipynb",
+      "original_path": "ANSWER/dss_asn_comparison.ipynb",
+      "sha256": "daf843c0c8f855bd8bd1643f1a0d0e44bb1941c4018ea7b8a514b49d61ff17ce",
+      "bytes": 791945
+    },
+    {
+      "path": "results/reference/molecules/reports/dss_asn_comparison.pdf",
+      "original_path": "ANSWER/dss_asn_comparison.pdf",
+      "sha256": "ef1cbf6a58440e0ad56861f8ff5e8e4a028edd7181ffd5ba53977750b60f60e6",
+      "bytes": 805212
+    },
+    {
+      "path": "results/reference/molecules/reports/homotaurine_asn_comparison.html",
+      "original_path": "ANSWER/homotaurine_asn_comparison.html",
+      "sha256": "5663cae5cdacf6b8b2147e3da45864ada5755c817094667bc9ff9079ed8e851f",
+      "bytes": 2252330
+    },
+    {
+      "path": "results/reference/molecules/reports/homotaurine_asn_comparison.ipynb",
+      "original_path": "ANSWER/homotaurine_asn_comparison.ipynb",
+      "sha256": "2f0b702ac25c86cb1f26202816621d01628916dc27f608e3e9b18903ac40fcb3",
+      "bytes": 2221185
+    },
+    {
+      "path": "results/reference/molecules/reports/homotaurine_asn_comparison.pdf",
+      "original_path": "ANSWER/homotaurine_asn_comparison.pdf",
+      "sha256": "a377332b7a6b2c9255d59cba355a5d6da207a4dedcc6676212d0a7cf5165586d",
+      "bytes": 1907794
+    }
+  ]
+}

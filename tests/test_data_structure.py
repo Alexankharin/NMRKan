@@ -48,7 +48,8 @@ def test_data_structure():
     print(f"y_np shape: {y_np.shape}")
     
     print("✅ Data structure test passed!")
-    return True
+    assert x_np.shape == (n_samples, n_inputs)
+    assert y_np.shape == (n_samples,)
 
 if __name__ == "__main__":
     test_data_structure()
