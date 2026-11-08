@@ -4,15 +4,16 @@ import json
 
 import numpy as np
 import pytest
+import torch
 
 from experiments.paper import (
     ROOT,
-    exact_three,
     exact_four,
-    perturbation_three,
+    exact_three,
     grid_three,
     make_dataset,
     metrics,
+    perturbation_three,
     published_predictions,
     run,
 )
@@ -78,12 +79,14 @@ def test_four_site_against_full_spin_basis():
 def test_saved_split_and_smoke_training(tmp_path, name):
     config = json.loads((ROOT / f"configs/paper/{name}.json").read_text())
     config.update(samples=128, epochs=10)
-    x, y, tr, va = make_dataset(config)
+    _, _, tr, va = make_dataset(config)
     assert set(tr).isdisjoint(va)
     np.testing.assert_array_equal(np.sort(np.r_[tr, va]), np.arange(128))
     result = run(config, tmp_path, train=True)
     assert np.isfinite(result["fresh_asn"]["validation_neural"]["rmse"])
     assert result["fresh_asn"]["extraction_max_abs_difference"] < 1e-9
     assert (tmp_path / "model.pt").is_file()
+    checkpoint = torch.load(tmp_path / "model.pt", weights_only=True)
+    assert checkpoint["config"]["torch"] == str(torch.__version__)
     figure = "fig04_surfaces.pdf" if name == "three_site" else "fig05_branches.pdf"
     assert (tmp_path / figure).is_file()

@@ -10,7 +10,8 @@ Run these as modules from the installed checkout:
 | `experiments.molecules.analytical_report` | Build the analytical DSS report after analytical outputs exist |
 | `experiments.molecules.dss_report` | Evaluate DSS saved models, generate plots, HTML/notebook and TeX insertion |
 | `experiments.molecules.homotaurine_report` | The corresponding homotaurine analysis/report |
-| `experiments.check_notebooks` | Execute the five supported notebooks |
+| `experiments.reproduction` | Retrain all four full protocols or reload the completed runs and compare manuscript metrics |
+| `experiments.check_notebooks` | Execute the five supported notebooks and, with `--molecular-reports`, the three rebuilt report notebooks |
 | `experiments.verify_artifacts` | Verify preserved reference checksums |
 | `experiments.exploratory.train` | Earlier generic configurable trainer; not the paper protocol |
 

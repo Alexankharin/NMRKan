@@ -1,0 +1,533 @@
+{
+  "runs": {
+    "three_site": {
+      "config": {
+        "samples": 100000,
+        "epochs": 1000,
+        "architecture": [
+          2,
+          16,
+          4
+        ],
+        "data_seed": 42,
+        "split_seed": 42,
+        "model_seed": 42,
+        "learning_rate": 0.001,
+        "batch_size": 4096,
+        "regularization": 0.1,
+        "softmax_fraction": 0.9,
+        "loss": "mae",
+        "problem": "three_site",
+        "sampling": "uniform_ratios",
+        "checkpoint": "final_epoch",
+        "grid_resolution": 200,
+        "python": "3.14.4",
+        "numpy": "2.5.4",
+        "torch": "2.15.0+cpu",
+        "trained": true,
+        "units": "dimensionless E/J; descending branch order",
+        "runner_sha256": "f745bdca2813cf377f5b6e70b8661759e0e8dbeb20397c90c630e0b98e6f5f83"
+      },
+      "all_samples_neural": {
+        "rmse": 0.017759573624732343,
+        "max_abs_error": 0.1506497414588961,
+        "r2_per_branch": [
+          0.9994342506119053,
+          0.9888892014400869,
+          0.949722413561174,
+          0.9979568199771133
+        ]
+      },
+      "validation_neural": {
+        "rmse": 0.017835496166569997,
+        "max_abs_error": 0.14919127549657873,
+        "r2_per_branch": [
+          0.9994389148159994,
+          0.9887712514967365,
+          0.9494129049936657,
+          0.9979747131792527
+        ]
+      },
+      "validation_processed": {
+        "rmse": 0.0179471031512957,
+        "max_abs_error": 0.1504953760946568,
+        "r2_per_branch": [
+          0.9992691782852323,
+          0.988810039705857,
+          0.9493430786690149,
+          0.9978854553507093
+        ]
+      },
+      "validation_ols": {
+        "rmse": 0.016094578187837882,
+        "max_abs_error": 0.1105626175217822,
+        "r2_per_branch": [
+          0.9994559550830298,
+          0.9914648846744253,
+          0.9588929829617915,
+          0.998158691457583
+        ]
+      },
+      "formula_reload_max_abs_error": 6.994405055138486e-15,
+      "support_sizes": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      ],
+      "raw_degrees": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "source_files_sha256": {
+        "config.json": "ac8ef8b02fd8a2f9f3591273ff61e09551c17b9b98d21964a96764a616b6e3c5",
+        "model.pt": "0f0637a9c1a65337b29fa5ed2aa3988ee9b620a9d70e4881ba1c8928532de08b",
+        "dataset.npz": "86abdb8e318e0514556d34e8d6212b2f8b441e1308aa880ecf319ccb8ab606cb",
+        "learned_formulas.json": "0a735a46bd250acb906ba3ff7a296ff0f42479591b263a3d03a30673e45c73b9",
+        "history.csv": "1fb7575ef2141e92c7469025155ad85cd7d5c15600d8d136285fd8c181d5968c"
+      },
+      "grid_neural": {
+        "rmse": 0.018434650716721773,
+        "max_abs_error": 0.15465855544718154,
+        "r2_per_branch": [
+          0.9994127631093793,
+          0.9882897705783046,
+          0.9467601365117673,
+          0.9978347285850384
+        ]
+      },
+      "grid_processed": {
+        "rmse": 0.01855121486890449,
+        "max_abs_error": 0.15578643762690492,
+        "r2_per_branch": [
+          0.9992349434946823,
+          0.9883328391315929,
+          0.9466212869063403,
+          0.9977447585757849
+        ]
+      }
+    },
+    "three_site_verification": {
+      "config": {
+        "samples": 20000,
+        "epochs": 400,
+        "architecture": [
+          2,
+          16,
+          4
+        ],
+        "data_seed": 42,
+        "split_seed": 42,
+        "model_seed": 42,
+        "learning_rate": 0.001,
+        "batch_size": 4096,
+        "regularization": 0.1,
+        "softmax_fraction": 0.9,
+        "loss": "mae",
+        "problem": "three_site",
+        "sampling": "uniform_ratios",
+        "checkpoint": "final_epoch",
+        "grid_resolution": 200,
+        "python": "3.14.4",
+        "numpy": "2.5.4",
+        "torch": "2.15.0+cpu",
+        "trained": true,
+        "units": "dimensionless E/J; descending branch order",
+        "runner_sha256": "f745bdca2813cf377f5b6e70b8661759e0e8dbeb20397c90c630e0b98e6f5f83"
+      },
+      "all_samples_neural": {
+        "rmse": 0.017972874377572546,
+        "max_abs_error": 0.15059052612228485,
+        "r2_per_branch": [
+          0.9992984085498888,
+          0.988878692024883,
+          0.9500420081319889,
+          0.9976739796600856
+        ]
+      },
+      "validation_neural": {
+        "rmse": 0.01779837906733242,
+        "max_abs_error": 0.14105136650355643,
+        "r2_per_branch": [
+          0.9992958850592907,
+          0.9889106675124472,
+          0.9505260215896998,
+          0.997798142072882
+        ]
+      },
+      "validation_processed": {
+        "rmse": 0.017804314314014094,
+        "max_abs_error": 0.14400783926476413,
+        "r2_per_branch": [
+          0.9993370750743353,
+          0.9891444672630278,
+          0.9496065872543433,
+          0.997785005430488
+        ]
+      },
+      "validation_ols": {
+        "rmse": 0.016175879132702374,
+        "max_abs_error": 0.103567486022617,
+        "r2_per_branch": [
+          0.9994342555328933,
+          0.9912150856348951,
+          0.9583203725329986,
+          0.998124731720352
+        ]
+      },
+      "formula_reload_max_abs_error": 5.551115123125783e-15,
+      "support_sizes": [
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      ],
+      "raw_degrees": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "source_files_sha256": {
+        "config.json": "f6b566adfd348ca63e7c762ec67a515309c052e69be6da70d509dd7d559c8459",
+        "model.pt": "c32a305cc8d8e919f16cad3a2898648ca6d645bfd564c4825efeeaee8317ddbd",
+        "dataset.npz": "c655ae582da2e5bd8782eb0200b838f6e614104b7641e329fe25041af6fa45dc",
+        "learned_formulas.json": "dd3127e89fc4f6340de999672c6081592929ab10a86f13ee8cbbc6559809adcf",
+        "history.csv": "0ff458662e555625833654c8826eb92657dc4d056aac86bb9776f2e2bcf46d76"
+      },
+      "grid_neural": {
+        "rmse": 0.01844593232844592,
+        "max_abs_error": 0.15341695916949138,
+        "r2_per_branch": [
+          0.9992910144016836,
+          0.9886448155217679,
+          0.9478165439377558,
+          0.9976383188489396
+        ]
+      },
+      "grid_processed": {
+        "rmse": 0.018447630921700844,
+        "max_abs_error": 0.15478643762690503,
+        "r2_per_branch": [
+          0.9993465557144572,
+          0.9888777263599554,
+          0.9469033040309804,
+          0.9976223764249179
+        ]
+      }
+    },
+    "four_site": {
+      "config": {
+        "samples": 10000,
+        "epochs": 5000,
+        "architecture": [
+          1,
+          10,
+          8
+        ],
+        "data_seed": 42,
+        "split_seed": 42,
+        "model_seed": 42,
+        "learning_rate": 0.001,
+        "batch_size": 8000,
+        "regularization": 0.1,
+        "softmax_fraction": 0.9,
+        "loss": "mse",
+        "problem": "four_site",
+        "sampling": "interpolated_physical",
+        "checkpoint": "final_epoch",
+        "grid_resolution": 200,
+        "python": "3.14.4",
+        "numpy": "2.5.4",
+        "torch": "2.15.0+cpu",
+        "trained": true,
+        "units": "dimensionless E/J; descending branch order",
+        "runner_sha256": "f745bdca2813cf377f5b6e70b8661759e0e8dbeb20397c90c630e0b98e6f5f83"
+      },
+      "all_samples_neural": {
+        "rmse": 0.007086798431199582,
+        "max_abs_error": 0.180326888623612,
+        "r2_per_branch": [
+          0.999725592263545,
+          0.9997912499701008,
+          0.9929209224447818,
+          0.9955339864459631,
+          0.9955345294008794,
+          0.9929215668203593,
+          0.9997908480272516,
+          0.9997255539009062
+        ]
+      },
+      "validation_neural": {
+        "rmse": 0.006833804593817963,
+        "max_abs_error": 0.1690261874938459,
+        "r2_per_branch": [
+          0.9997447761989275,
+          0.9998048149204841,
+          0.9935210740494667,
+          0.9957927227502995,
+          0.9957966090132537,
+          0.9935244879729692,
+          0.9998043050035071,
+          0.9997446791655761
+        ]
+      },
+      "validation_processed": {
+        "rmse": 0.0068554412975106605,
+        "max_abs_error": 0.1672394680566266,
+        "r2_per_branch": [
+          0.9997436452330896,
+          0.9997915821765281,
+          0.9935370520101359,
+          0.9957900957827782,
+          0.9957569246243173,
+          0.993537046591132,
+          0.9997943280901795,
+          0.9997426719106204
+        ]
+      },
+      "validation_ols": {
+        "rmse": 0.006834179337061968,
+        "max_abs_error": 0.16831338130580997,
+        "r2_per_branch": [
+          0.999744798281192,
+          0.9998048149849428,
+          0.9935211938578913,
+          0.9957927555690654,
+          0.9957927544748549,
+          0.9935211883322502,
+          0.9998048150848021,
+          0.9997447982305941
+        ]
+      },
+      "formula_reload_max_abs_error": 7.105427357601002e-15,
+      "support_sizes": [
+        [
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      ],
+      "raw_degrees": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "source_files_sha256": {
+        "config.json": "c0655d0aba84686b010aa10375c248682ee71664181be11b4d5954bbd3361808",
+        "model.pt": "7869b2d72679c4cb326a33428a24e643e514c6f32850bccc751ac45cfe12b404",
+        "dataset.npz": "c31d772ad958db18ebe4d43a561512d1c495085f4eadc7dc7362dea7cd5a1679",
+        "learned_formulas.json": "0c16506effefd751ec8a6846dad68bd35c5c1f9c6ca0b508bd006b0f93ec7746",
+        "history.csv": "d66a1a26a484795b40a3c19c56264b99c6c9c5c8e880f9a832d27b114588c84a"
+      }
+    },
+    "four_site_verification": {
+      "config": {
+        "samples": 10000,
+        "epochs": 5000,
+        "architecture": [
+          1,
+          10,
+          8
+        ],
+        "data_seed": 42,
+        "split_seed": 42,
+        "model_seed": 42,
+        "learning_rate": 0.001,
+        "batch_size": 8000,
+        "regularization": 0.1,
+        "softmax_fraction": 0.9,
+        "loss": "mse",
+        "problem": "four_site",
+        "sampling": "uniform_ratios",
+        "checkpoint": "final_epoch",
+        "grid_resolution": 200,
+        "python": "3.14.4",
+        "numpy": "2.5.4",
+        "torch": "2.15.0+cpu",
+        "trained": true,
+        "units": "dimensionless E/J; descending branch order",
+        "runner_sha256": "f745bdca2813cf377f5b6e70b8661759e0e8dbeb20397c90c630e0b98e6f5f83"
+      },
+      "all_samples_neural": {
+        "rmse": 0.01983031923062984,
+        "max_abs_error": 0.0894016984450714,
+        "r2_per_branch": [
+          0.9997075584869277,
+          0.9998986735926924,
+          0.9922235839045849,
+          0.9671625779113755,
+          0.9670551420463863,
+          0.9921826684209523,
+          0.999890054656802,
+          0.9995250828758535
+        ]
+      },
+      "validation_neural": {
+        "rmse": 0.0199164077049462,
+        "max_abs_error": 0.08920973493104922,
+        "r2_per_branch": [
+          0.9997108613603705,
+          0.9998979325930131,
+          0.9922321578416242,
+          0.96651694941158,
+          0.9663500846590852,
+          0.9922168276017649,
+          0.9998901049961004,
+          0.9995331094665256
+        ]
+      },
+      "validation_processed": {
+        "rmse": 0.019994056472141912,
+        "max_abs_error": 0.08879851013510676,
+        "r2_per_branch": [
+          0.9997031079069585,
+          0.9998725900681892,
+          0.9921289416093554,
+          0.9664681945506889,
+          0.9663325034118072,
+          0.9921918250623943,
+          0.9998889550265567,
+          0.9995292892858045
+        ]
+      },
+      "validation_ols": {
+        "rmse": 0.018227172368100664,
+        "max_abs_error": 0.07430888854528016,
+        "r2_per_branch": [
+          0.9998321274732364,
+          0.9998979285356311,
+          0.9922334743199346,
+          0.9665205420601882,
+          0.9665205420601884,
+          0.9922334743199346,
+          0.9998979285356311,
+          0.9998321274732364
+        ]
+      },
+      "formula_reload_max_abs_error": 1.4210854715202004e-14,
+      "support_sizes": [
+        [
+          1
+        ],
+        [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      ],
+      "raw_degrees": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "source_files_sha256": {
+        "config.json": "798108d19179f348cc5b31362ab1438464b4006b3fe50e6ba4491155cd5e13e2",
+        "model.pt": "9885ead1369dab42b2040ee882d5170660188e5776c531e2f2e5c0e4f7c40252",
+        "dataset.npz": "56459ce5e613b4561e6ea7fb3e4646e9911d8c468d57205e930541954868d3a7",
+        "learned_formulas.json": "f78ddbc93cbe899b40c9da9bfff2a5378f4791ea3f6ca1b8b7b771b627634ea5",
+        "history.csv": "44b6762f4aac72cf3e0dc0ba3b135fee3b393a5d3e7aa9320229047fcc842b07"
+      }
+    }
+  },
+  "comparison": [
+    {
+      "metric": "Three-site ASN, complete sample",
+      "run": "three_site",
+      "reported_rmse": 0.0179,
+      "rerun_rmse": 0.017759573624732343,
+      "relative_difference_percent": -0.7845048897634377,
+      "matches_displayed_precision": false
+    },
+    {
+      "metric": "Four-site primary ASN, validation",
+      "run": "four_site",
+      "reported_rmse": 0.0079,
+      "rerun_rmse": 0.006833804593817963,
+      "relative_difference_percent": -13.496144382051101,
+      "matches_displayed_precision": false
+    },
+    {
+      "metric": "Four-site verification ASN, validation",
+      "run": "four_site_verification",
+      "reported_rmse": 0.00753,
+      "rerun_rmse": 0.0199164077049462,
+      "relative_difference_percent": 164.49412622770515,
+      "matches_displayed_precision": false
+    },
+    {
+      "metric": "Four-site verification OLS, validation",
+      "run": "four_site_verification",
+      "reported_rmse": 0.00702,
+      "rerun_rmse": 0.018227172368100664,
+      "relative_difference_percent": 159.64633002992397,
+      "matches_displayed_precision": false
+    }
+  ],
+  "interpretation": "Fresh CPU runs with recorded seed 42. Original CUDA model initialization seeds/checkpoints were not supplied. The uniform-ratio verification does not reproduce the stated manuscript accuracy; do not change sampling or select seeds to force a numerical match."
+}

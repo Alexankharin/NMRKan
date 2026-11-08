@@ -1,0 +1,28 @@
+{
+  "python": "3.14.4",
+  "system": "Linux",
+  "machine": "x86_64",
+  "packages": {
+    "numpy": "2.5.4",
+    "scipy": "1.18.1",
+    "sympy": "1.14.0",
+    "pandas": "3.1.1",
+    "torch": "2.15.0+cpu",
+    "matplotlib": "3.11.2",
+    "sparsemax": "0.1.9",
+    "pytest": "9.2.0",
+    "nbclient": "0.11.0",
+    "nbformat": "5.11.1",
+    "ipykernel": "7.4.0",
+    "matplotlib-inline": "0.2.2",
+    "markdown": "3.11.3",
+    "latex2mathml": "3.81.1"
+  },
+  "paper_training": {
+    "device": "cpu",
+    "dtype": "float64",
+    "torch_threads": 1,
+    "OPENBLAS_NUM_THREADS": "1",
+    "starting_commit": "80e97f10dfa21bbffa6acb5933465b4e89ab7c47"
+  }
+}

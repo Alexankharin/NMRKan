@@ -36,8 +36,12 @@ Full configurations and metrics are in [paper_baselines.json](../results/validat
 
 These results expose a manuscript/protocol discrepancy; they are not substituted into the manuscript PDF. The original independent verification implementation/data are needed to identify its cause. The three-site rounded expressions and local perturbative calculation agree with the reported values at the displayed precision.
 
-## Limits
+## Subsequent full rerun
 
-Full 1000/5000-epoch neural training and the original architecture search were not rerun. The original main-paper neural checkpoints/search table were absent; new short training checks establish that the workflow and symbolic extraction execute, not that historical fitted coefficients have been recovered. Molecular tests validate the supplied twenty checkpoints rather than retraining their four five-seed experiments.
+The later [full rerun](../results/reproduced/2026-11-08/README.md) completes all four paper neural protocols and reruns the maintained notebooks. Its comparison and exact artifacts are separate from this initial cleanup validation record. A checkpoint serialization fix now stores the PyTorch version as a plain string, so newly saved checkpoints reload with `weights_only=True`.
+
+## Limits of the initial cleanup validation
+
+At the initial cleanup checkpoint, full 1000/5000-epoch neural training and the original architecture search had not been rerun. Full neural runs are now available at the link above; the original architecture-search artifacts remain absent. The original main-paper neural checkpoints/search table were absent; new short training checks establish that the workflow and symbolic extraction execute, not that historical fitted coefficients have been recovered. Molecular tests validate the supplied twenty checkpoints rather than retraining their four five-seed experiments.
 
 The added GitHub Actions workflow runs artifact verification, the test suite, all active notebooks, and molecular report rebuilding. This record reports local execution; remote CI results depend on the subsequent GitHub run. Archived exploratory notebooks are preserved for provenance and are excluded from active notebook validation.

@@ -1,0 +1,96 @@
+{
+  "command": "python -m experiments.check_notebooks --in-place --output outputs/paper_rerun_20261108/executed_notebooks --paper-runs results/reproduced/2026-11-08/paper --molecular-reports outputs/paper_rerun_20261108/molecules",
+  "kernel": "python3",
+  "fresh_kernel_per_notebook": true,
+  "notebooks": [
+    {
+      "source": "notebooks/00_model_and_hamiltonians.ipynb",
+      "source_sha256": "4a462d9a6a041ad6ca1c704c29768221e1479859a4de6ba9a73ba87ed63ca6dc",
+      "executed_copy": "notebooks/00_model_and_hamiltonians.ipynb",
+      "executed_sha256": "4a462d9a6a041ad6ca1c704c29768221e1479859a4de6ba9a73ba87ed63ca6dc",
+      "code_cells": 3,
+      "executed_code_cells": 3,
+      "error_count": 0,
+      "inline_output_figures": 0,
+      "embedded_report_images": 0
+    },
+    {
+      "source": "notebooks/01_three_site_paper.ipynb",
+      "source_sha256": "abd877efedadbd52ea10dcbe0b1f322d937afe11f9276ba1edb4bfae0d2e851f",
+      "executed_copy": "notebooks/01_three_site_paper.ipynb",
+      "executed_sha256": "79a61a6e03b26258f31e4377ae3c1ed5b6636af75ae22062763c8d2b4eb6fccf",
+      "code_cells": 6,
+      "executed_code_cells": 6,
+      "error_count": 0,
+      "inline_output_figures": 3,
+      "embedded_report_images": 0
+    },
+    {
+      "source": "notebooks/02_four_site_paper.ipynb",
+      "source_sha256": "fd4a3cd3dca976f1f8b405ae6f0f218e787bb8381681068a85194324e6e2a171",
+      "executed_copy": "notebooks/02_four_site_paper.ipynb",
+      "executed_sha256": "fd4a3cd3dca976f1f8b405ae6f0f218e787bb8381681068a85194324e6e2a171",
+      "code_cells": 4,
+      "executed_code_cells": 4,
+      "error_count": 0,
+      "inline_output_figures": 3,
+      "embedded_report_images": 0
+    },
+    {
+      "source": "notebooks/03_real_molecules.ipynb",
+      "source_sha256": "df1d80f1a4420b0913b78775e8e3690dd39f4ffa3015866dc4d1c332705000d7",
+      "executed_copy": "notebooks/03_real_molecules.ipynb",
+      "executed_sha256": "055ab34f09a27e1c74c025e6d6e6f9b3af1a6023c609f0a3f616ac73fa6e6951",
+      "code_cells": 5,
+      "executed_code_cells": 5,
+      "error_count": 0,
+      "inline_output_figures": 1,
+      "embedded_report_images": 0
+    },
+    {
+      "source": "notebooks/04_training_walkthrough.ipynb",
+      "source_sha256": "2b9206e6b06d913e53b2c515cd9bcc5bb06c6c61f07cb0bcc4d6beb541c73211",
+      "executed_copy": "notebooks/04_training_walkthrough.ipynb",
+      "executed_sha256": "2b9206e6b06d913e53b2c515cd9bcc5bb06c6c61f07cb0bcc4d6beb541c73211",
+      "code_cells": 3,
+      "executed_code_cells": 3,
+      "error_count": 0,
+      "inline_output_figures": 1,
+      "embedded_report_images": 0
+    },
+    {
+      "source": "outputs/paper_rerun_20261108/molecules/dss_analysis.ipynb",
+      "source_sha256": "d0a91b17bcf8e01ca7dbe5e95f15409fc27868f25152c4a51938e7404db89be7",
+      "executed_copy": "molecular_reports/dss_analysis.ipynb",
+      "executed_sha256": "eba253991f141e754e19e0c8b6f4f0a515102fd403945ffd9c7b851b6c29b8ab",
+      "code_cells": 2,
+      "executed_code_cells": 2,
+      "error_count": 0,
+      "inline_output_figures": 0,
+      "embedded_report_images": 3
+    },
+    {
+      "source": "outputs/paper_rerun_20261108/molecules/dss_asn_comparison.ipynb",
+      "source_sha256": "075856b46e2f2f44ea11d0d1c79204f14a27d678dba839b92bad90737efce573",
+      "executed_copy": "molecular_reports/dss_asn_comparison.ipynb",
+      "executed_sha256": "dda89b47073cb50df674f99bb58fd1ef499a4106bc439a54592bbb8de542c14d",
+      "code_cells": 1,
+      "executed_code_cells": 1,
+      "error_count": 0,
+      "inline_output_figures": 0,
+      "embedded_report_images": 3
+    },
+    {
+      "source": "outputs/paper_rerun_20261108/molecules/homotaurine_asn_comparison.ipynb",
+      "source_sha256": "1fa9c38aedcd8ee75a2f00779374542d22713a995259484ad214fcf79c6ebcbd",
+      "executed_copy": "molecular_reports/homotaurine_asn_comparison.ipynb",
+      "executed_sha256": "f1d37377bed7d1b6962ecf502ce48ee2c1695a524e10350606f311ece46d543a",
+      "code_cells": 1,
+      "executed_code_cells": 1,
+      "error_count": 0,
+      "inline_output_figures": 0,
+      "embedded_report_images": 6
+    }
+  ],
+  "main_notebooks_include_outputs": true
+}

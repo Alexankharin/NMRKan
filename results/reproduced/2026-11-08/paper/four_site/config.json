@@ -1,0 +1,27 @@
+{
+  "samples": 10000,
+  "epochs": 5000,
+  "architecture": [
+    1,
+    10,
+    8
+  ],
+  "data_seed": 42,
+  "split_seed": 42,
+  "model_seed": 42,
+  "learning_rate": 0.001,
+  "batch_size": 8000,
+  "regularization": 0.1,
+  "softmax_fraction": 0.9,
+  "loss": "mse",
+  "problem": "four_site",
+  "sampling": "interpolated_physical",
+  "checkpoint": "final_epoch",
+  "grid_resolution": 200,
+  "python": "3.14.4",
+  "numpy": "2.5.4",
+  "torch": "2.15.0+cpu",
+  "trained": true,
+  "units": "dimensionless E/J; descending branch order",
+  "runner_sha256": "f745bdca2813cf377f5b6e70b8661759e0e8dbeb20397c90c630e0b98e6f5f83"
+}

@@ -7,3 +7,5 @@ Each paper experiment needs a named configuration, deterministic sampling and sp
 Treat `results/reference/` and `data/raw/` as preserved inputs. New reference results should be deliberately promoted from a checked run with provenance and updated checksums. Do not overwrite historical artifacts or move generated checkpoints beside source modules. Old investigations belong in `archive/` with their limitations identified.
 
 Run `python -m pytest` and `python -m experiments.check_notebooks` before committing changes to active workflows. Long training is separate from CI; a short training test verifies execution and extraction, not publication accuracy. Do not describe the archived exploratory scripts as supported paper reproduction commands.
+
+Commit the numbered notebooks with their completed execution counts, printed results, tables, and inline plots. Refresh them with `python -m experiments.check_notebooks --in-place`; do not strip their outputs. The dated snapshot under `results/reproduced/` records the corresponding training artifacts and provenance.

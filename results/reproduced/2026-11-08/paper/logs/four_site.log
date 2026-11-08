@@ -1,0 +1,167 @@
+Computing high-resolution eigenvalue surfaces (200x200)...
+Surface computation complete. Ready for fast interpolation.
+Generating 10000 samples with efficient surface interpolation...
+Dataset generation complete. Shape: input (10000, 1), output (10000, 8)
+Epoch 1/5000: validation RMSE 1.50914
+Epoch 101/5000: validation RMSE 1.15924
+Epoch 201/5000: validation RMSE 0.784654
+Epoch 301/5000: validation RMSE 0.441749
+Epoch 401/5000: validation RMSE 0.227845
+Epoch 501/5000: validation RMSE 0.138184
+Epoch 601/5000: validation RMSE 0.117387
+Epoch 701/5000: validation RMSE 0.112143
+Epoch 801/5000: validation RMSE 0.108628
+Epoch 901/5000: validation RMSE 0.104942
+Epoch 1001/5000: validation RMSE 0.100675
+Epoch 1101/5000: validation RMSE 0.0958531
+Epoch 1201/5000: validation RMSE 0.0906855
+Epoch 1301/5000: validation RMSE 0.0853807
+Epoch 1401/5000: validation RMSE 0.0800955
+Epoch 1501/5000: validation RMSE 0.0749358
+Epoch 1601/5000: validation RMSE 0.0699703
+Epoch 1701/5000: validation RMSE 0.065247
+Epoch 1801/5000: validation RMSE 0.0608042
+Epoch 1901/5000: validation RMSE 0.0566808
+Epoch 2001/5000: validation RMSE 0.0529186
+Epoch 2101/5000: validation RMSE 0.0495297
+Epoch 2201/5000: validation RMSE 0.0463811
+Epoch 2301/5000: validation RMSE 0.043182
+Epoch 2401/5000: validation RMSE 0.0397623
+Epoch 2501/5000: validation RMSE 0.0361596
+Epoch 2601/5000: validation RMSE 0.0324889
+Epoch 2701/5000: validation RMSE 0.0288728
+Epoch 2801/5000: validation RMSE 0.0254207
+Epoch 2901/5000: validation RMSE 0.0222221
+Epoch 3001/5000: validation RMSE 0.0193419
+Epoch 3101/5000: validation RMSE 0.0168183
+Epoch 3201/5000: validation RMSE 0.0146641
+Epoch 3301/5000: validation RMSE 0.012871
+Epoch 3401/5000: validation RMSE 0.0114153
+Epoch 3501/5000: validation RMSE 0.0102636
+Epoch 3601/5000: validation RMSE 0.00937642
+Epoch 3701/5000: validation RMSE 0.00871125
+Epoch 3801/5000: validation RMSE 0.00822523
+Epoch 3901/5000: validation RMSE 0.00787797
+Epoch 4001/5000: validation RMSE 0.00763393
+Epoch 4101/5000: validation RMSE 0.00746381
+Epoch 4201/5000: validation RMSE 0.00734493
+Epoch 4301/5000: validation RMSE 0.00726057
+Epoch 4401/5000: validation RMSE 0.00719907
+Epoch 4501/5000: validation RMSE 0.00742121
+Epoch 4601/5000: validation RMSE 0.00685705
+Epoch 4701/5000: validation RMSE 0.00683938
+Epoch 4801/5000: validation RMSE 0.00683499
+Epoch 4901/5000: validation RMSE 0.00683395
+Epoch 5000/5000: validation RMSE 0.0068338
+{
+  "ols_validation": {
+    "rmse": 0.006834179337061968,
+    "max_abs_error": 0.16831338130580997,
+    "r2_per_branch": [
+      0.999744798281192,
+      0.9998048149849428,
+      0.9935211938578913,
+      0.9957927555690654,
+      0.9957927544748549,
+      0.9935211883322502,
+      0.9998048150848021,
+      0.9997447982305941
+    ]
+  },
+  "ols_full_sample_fit": {
+    "rmse": 0.007086034773713006,
+    "max_abs_error": 0.18120070949399697,
+    "r2_per_branch": [
+      0.9997256145863632,
+      0.9997912596245648,
+      0.992923936648727,
+      0.9955349839886943,
+      0.9955349837727412,
+      0.9929239376526675,
+      0.9997912598801186,
+      0.9997256146402004
+    ]
+  },
+  "published_rounded_validation": {
+    "rmse": 0.007023766016581586,
+    "max_abs_error": 0.1621761832380213,
+    "r2_per_branch": [
+      0.9997433515900839,
+      0.999797790405798,
+      0.9933652818792724,
+      0.9956431483108195,
+      0.9957485881176917,
+      0.9933845653747129,
+      0.9997836465057552,
+      0.9996886558431781
+    ]
+  },
+  "fresh_asn": {
+    "raw": [
+      "0.129291432925949*x_0**2 + 0.912344993149789*x_0 - 0.0153073207907913",
+      "0.0328746335394327*x_0**2 + 0.349854930499607*x_0 - 0.00544461309696109",
+      "0.188830891170723*x_0**2 - 0.338853679160799*x_0 + 0.00118699522927964",
+      "0.285249690722338*x_0**2 - 0.77644349442687*x_0 - 0.00865208211151277",
+      "-0.285488593190611*x_0**2 + 0.776904453663723*x_0 - 1.99147929292334",
+      "-0.188878533555802*x_0**2 + 0.338950882722295*x_0 - 2.0012158172848",
+      "-0.0325381616469996*x_0**2 - 0.350509885001467*x_0 - 1.99436738478027",
+      "-0.129099030841898*x_0**2 - 0.912719458657618*x_0 - 1.98458686976533"
+    ],
+    "processed": [
+      "0.129*x_0**2 + 0.912*x_0 - 0.015",
+      "0.033*x_0**2 + 0.35*x_0 - 0.005",
+      "0.189*x_0**2 - 0.339*x_0 + 0.001",
+      "0.285*x_0**2 - 0.776*x_0 - 0.009",
+      "-0.285*x_0**2 + 0.777*x_0 - 1.991",
+      "-0.189*x_0**2 + 0.339*x_0 - 2.001",
+      "-0.033*x_0**2 - 0.351*x_0 - 1.994",
+      "-0.129*x_0**2 - 0.913*x_0 - 1.985"
+    ],
+    "validation_neural": {
+      "rmse": 0.006833804593817963,
+      "max_abs_error": 0.1690261874938459,
+      "r2_per_branch": [
+        0.9997447761989275,
+        0.9998048149204841,
+        0.9935210740494667,
+        0.9957927227502995,
+        0.9957966090132537,
+        0.9935244879729692,
+        0.9998043050035071,
+        0.9997446791655761
+      ]
+    },
+    "validation_processed": {
+      "rmse": 0.0068554412975106605,
+      "max_abs_error": 0.1672394680566266,
+      "r2_per_branch": [
+        0.9997436452330896,
+        0.9997915821765281,
+        0.9935370520101359,
+        0.9957900957827782,
+        0.9957569246243173,
+        0.993537046591132,
+        0.9997943280901795,
+        0.9997426719106204
+      ]
+    },
+    "extraction_max_abs_difference": 7.105427357601002e-15,
+    "support_sizes": [
+      [
+        1
+      ],
+      [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    ]
+  }
+}

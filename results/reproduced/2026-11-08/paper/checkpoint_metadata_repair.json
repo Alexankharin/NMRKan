@@ -1,0 +1,25 @@
+{
+  "reason": "Convert torch version metadata from TorchVersion to plain str for weights_only loading. Learned tensors and predictions unchanged.",
+  "files": [
+    {
+      "run": "three_site",
+      "original_sha256": "d21cc7f3715124ab6eceab0a7ddea7081b41c0dc0f6b7435c35d7902cbd2ccd9",
+      "repaired_sha256": "0f0637a9c1a65337b29fa5ed2aa3988ee9b620a9d70e4881ba1c8928532de08b"
+    },
+    {
+      "run": "three_site_verification",
+      "original_sha256": "48c90569253625a8b6c41b40a4dfd47498c79f83929f9a48d9cda6dab31d6bad",
+      "repaired_sha256": "c32a305cc8d8e919f16cad3a2898648ca6d645bfd564c4825efeeaee8317ddbd"
+    },
+    {
+      "run": "four_site",
+      "original_sha256": "f21953873a2d41dab15356397e1f3d0c87757fada552e0191c9623b88a3852bf",
+      "repaired_sha256": "7869b2d72679c4cb326a33428a24e643e514c6f32850bccc751ac45cfe12b404"
+    },
+    {
+      "run": "four_site_verification",
+      "original_sha256": "9a5be93b063c712cefe4ad86afb77a544914ea1610fc3e3748ed2c236768fba9",
+      "repaired_sha256": "9885ead1369dab42b2040ee882d5170660188e5776c531e2f2e5c0e4f7c40252"
+    }
+  ]
+}

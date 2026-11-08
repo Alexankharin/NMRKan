@@ -11,5 +11,6 @@
 # Preserve original bytes, including CSV line endings, across platforms.
 data/raw/** -text -whitespace
 results/reference/molecules/** -text -whitespace
+results/reproduced/** -text -whitespace
 archive/** -text -whitespace
 paper/** -text -whitespace

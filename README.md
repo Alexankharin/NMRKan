@@ -6,6 +6,8 @@ The model is an **activation-selection network (ASN)**: each input to a layer se
 
 **Start with [the result-by-result reproduction guide](docs/reproducing_the_paper.md)** or open the [numbered notebooks](notebooks/README.md). The [reviewer response map](docs/reviewer_response.md) explains the DSS and homotaurine extension and the remaining scientific work.
 
+The numbered notebooks include their executed outputs, printed metrics, tables, and plots. You can read them directly without running training first.
+
 ## Install
 
 Use Python 3.10 or newer, from this checkout:
@@ -54,6 +56,8 @@ python -m experiments.paper --config configs/paper/three_site.json --train
 python -m experiments.paper --config configs/paper/four_site.json --train
 ```
 
+The [completed full-training rerun and executed notebooks](results/reproduced/2026-11-08/README.md) are now included. It contains all four paper training protocols and comparisons against the reported metrics.
+
 **Reproducibility finding:** the stated four-site uniform-ratio OLS protocol does not reproduce the manuscript’s quoted error. The [guide records both sampling protocols and the measured discrepancy](docs/reproducing_the_paper.md#numerical-discrepancy-requiring-manuscript-review).
 
 The original three-site and four-site neural checkpoints and architecture-search table were not supplied. Fresh runs save their own seeds, splits, metrics, checkpoints, and extracted formulas; they are not represented as the historical runs. Published rounded equations can be evaluated directly. The molecular extension includes all supplied datasets and twenty saved checkpoints.
@@ -71,6 +75,7 @@ The original three-site and four-site neural checkpoints and architecture-search
 | [`data_generation/`](data_generation/README.md) | Synthetic spin-chain data and original interpolation routines |
 | [`data/`](data/README.md) | Historical input tables and Mathematica source, under `raw/` |
 | [`results/reference/`](results/reference/README.md) | Preserved molecular results, checkpoints, reports, and checksums |
+| [`results/reproduced/`](results/reproduced/README.md) | Completed fresh paper runs, executed notebooks, and manuscript comparisons |
 | [`tests/`](tests/README.md) | Physics, trained-artifact, paper-protocol, and dimensional-analysis checks |
 | [`archive/`](archive/README.md) | Earlier notebooks, scripts, development notes, logs, and relocation record |
 | `outputs/` | Locally generated runs; created by the commands above |

@@ -14,8 +14,8 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from data_generation.nmr_datagen import ham_reduced_symmetric
 from data_generation.eigenvalues_4CH2 import Ham4CH2s3Sand1S
+from data_generation.nmr_datagen import ham_reduced_symmetric
 
 ROOT = Path(__file__).resolve().parents[1]
 # Columns: 1, r1+r2, r1**2+r2**2, r1*r2. Manuscript Eq. (12).
@@ -144,6 +144,7 @@ def make_dataset(config):
 def train_asn(config, x, y, train, validation, out):
     """A fresh run of the stated protocol, not a recovered historical checkpoint."""
     import sympy as sp
+
     from nmrkan.models import KharKAN
 
     torch.manual_seed(config["model_seed"])
@@ -248,9 +249,6 @@ def train_asn(config, x, y, train, validation, out):
 
 
 def figures(problem, out, predictor=None):
-    import matplotlib
-
-    matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
     def save(fig, name):
@@ -342,7 +340,7 @@ def run(config, out, train=False):
     config.update(
         python=platform.python_version(),
         numpy=np.__version__,
-        torch=torch.__version__,
+        torch=str(torch.__version__),
         trained=train,
         units="dimensionless E/J; descending branch order",
         runner_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
